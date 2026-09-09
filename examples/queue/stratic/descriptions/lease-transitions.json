@@ -1,0 +1,56 @@
+{
+  "id": "lease-transitions",
+  "parent": {
+    "description": "job-lifecycle",
+    "passage": {
+      "quote": "The job lifecycle governs submission and worker operations."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Submission uses the next identifier, advances it, and appends an unleased job to the stored list."
+      },
+      "to": {
+        "path": "src/queue.ts",
+        "passage": {
+          "quote": "export function put(path: string, text: string) {\n  return update(path, state => {\n    const job = { id: state.nextId++, text, owner: null, until: null };\n    state.jobs.push(job);\n    return job;\n  });\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Claiming scans the list in insertion order for an unleased job or a lease whose expiry is at or before the supplied time. It records the worker and an expiry 30 seconds later."
+      },
+      "to": {
+        "path": "src/queue.ts",
+        "passage": {
+          "quote": "export function claim(path: string, worker: string, now = Date.now()) {\n  return update(path, state => {\n    const job = state.jobs.find(job => job.until === null || job.until <= now);\n    if (!job) return null;\n    job.owner = worker;\n    job.until = now + 30_000;\n    return job;\n  });\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Acknowledgement locates the job, checks its worker and strictly future expiry, and removes it from the stored list. A failed check throws before storage is written."
+      },
+      "to": {
+        "path": "src/queue.ts",
+        "passage": {
+          "quote": "export function acknowledge(path: string, id: number, worker: string, now = Date.now()) {\n  return update(path, state => {\n    const job = state.jobs.find(job => job.id === id);\n    if (!job || job.owner !== worker || job.until === null || job.until <= now) throw new Error('A live lease owned by this worker is required.');\n    state.jobs = state.jobs.filter(job => job.id !== id);\n  });\n}"
+        }
+      }
+    },
+    {
+      "kind": "depends-on",
+      "from": null,
+      "to": {
+        "description": "storage"
+      },
+      "reason": "Successful transitions must be persisted before another command reads the queue."
+    }
+  ]
+}

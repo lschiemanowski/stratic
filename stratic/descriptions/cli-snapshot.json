@@ -1,0 +1,36 @@
+{
+  "id": "cli-snapshot",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Snapshot captures selected file contents so check results can identify exactly what was examined."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request can select whole repository-relative files, including deletions; otherwise the project file list is used. The response identifies the resulting tree, base, and selected paths. Generated and historical review files are excluded from the CLI\u2019s selection of proposed edits because preparation handles the review record separately."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'snapshot': { const selected = paths(); output = { tree: snapshot(root, selected), base: head(root), paths: selected }; break; }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The tree starts from HEAD and overlays the selected working-file contents through a temporary Git index. Unselected files retain their base contents. Git objects are written, but the branch and the user\u2019s staging area are not changed. This distinguishes a captured proposal from both a commit and the current staged state."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function snapshot(root: string, paths: string[], base = head(root)): string {\n  const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));\n  const env = { GIT_INDEX_FILE: join(dir, 'index') };\n  try {\n    git(root, ['read-tree', revision(root, base)], undefined, env);\n    for (const path of paths) pathInside(root, path);\n    if (paths.length) git(root, ['add', '-A', '--', ...paths], undefined, env);\n    return git(root, ['write-tree'], undefined, env).trim();\n  } finally { rmSync(dir, { recursive: true, force: true }); }\n}"
+        }
+      }
+    }
+  ]
+}

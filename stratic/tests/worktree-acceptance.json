@@ -1,0 +1,21 @@
+{
+  "id": "worktree-acceptance",
+  "name": "Staged deletions are included and acceptance works in a linked Git worktree",
+  "description": "Staged deletions are included and acceptance works in a linked Git worktree.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Staged deletions are included and acceptance works in a linked Git worktree', t => {\n  const root = fixture(t);\n  writeFileSync(join(root, 'obsolete.txt'), 'remove me'); git(root, ['add', 'obsolete.txt']); git(root, ['commit', '-qm', 'Add obsolete file']);\n  const linked = join(root, '..', 'linked'); git(root, ['worktree', 'add', '-qb', 'linked', linked]);\n  assert.notEqual(localDirectory(root), localDirectory(linked));\n  git(linked, ['rm', 'obsolete.txt']); addRelease(linked);\n  const input = releaseReview(linked), proposal = prepare(linked, selected(linked), input);\n  assert.ok(proposal.paths.includes('obsolete.txt'));\n  const originalHead = head(root); accept(linked, proposal.id);\n  assert.equal(head(root), originalHead);\n  assert.equal(git(linked, ['status', '--porcelain']).trim(), '');\n  assert.equal(git(linked, ['ls-tree', 'HEAD', '--', 'obsolete.txt']), '');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "preparation",
+      "passage": {
+        "quote": "The selected content starts from the current Git base with the chosen working-file changes applied. Files are selected as whole files. A temporary index is used to build this tree, leaving the user\u2019s staging area intact. For example, selecting one source file and its description does not silently include an unrelated working edit in another file. Checks must have examined that selected content, including any dependencies that would affect their execution. Git operations explicitly target the selected repository instead of inheriting another repository from the caller\u2019s Git environment."
+      }
+    }
+  ]
+}

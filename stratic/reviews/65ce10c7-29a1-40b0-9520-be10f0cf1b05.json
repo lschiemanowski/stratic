@@ -1,0 +1,313 @@
+{
+  "id": "65ce10c7-29a1-40b0-9520-be10f0cf1b05",
+  "base": "5bd0e02ea3769ea71a628f5d171192c1089250cf",
+  "contentTree": "2999bfc1d33b670a53278dc954b9553874b6436e",
+  "reviewer": "Codex",
+  "summary": "Establish the first working Stratic v3 implementation and its self-description",
+  "examined": [
+    {
+      "id": "stratic",
+      "outcome": "revised",
+      "reason": "Rewrote the root as a self-contained explanation of the person/agent workflow, shared model, reading, and separate preparation/acceptance. Child links now elaborate complete explanatory paragraphs."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "revised",
+      "reason": "Expanded the explanation of responsibilities, hierarchy, identities, exact passage links, drafts, and validation. Checked the rewritten claims and migrated incoming/test anchors against unchanged model, loader, and matcher behavior. Added substantive elaborations for responsibilities previously compressed into source-linked paragraphs. The broader explanation remains readable on its own; source links now belong to the relevant detail and test associations were relocated where useful."
+    },
+    {
+      "id": "passages",
+      "outcome": "revised",
+      "reason": "Checked exact quote/context matching, ambiguity and missing-text errors, line offsets, and the repository source boundaries. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "Rewrote the page around the visible UI and reading workflow. Implemented direct opening for one connection; retained destination choice for multiple connections and problem details for unresolved anchors. Checked description/source/contextual links in Electron, plus existing navigation, history, draft, highlighting, and rendering boundaries. Added substantive elaborations for responsibilities previously compressed into source-linked paragraphs. The broader explanation remains readable on its own; source links now belong to the relevant detail and test associations were relocated where useful."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "Checked parent/sibling/child navigation, immediate selection, pinned history, and background refresh; the description explicitly allows delayed external updates. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "revised",
+      "reason": "Checked Highlight.js registration, plain-text fallback, preservation of line endings, and distinct source-passage backgrounds. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "change-display",
+      "outcome": "revised",
+      "reason": "Checked comparison-base selection, persistent paragraph highlighting, deleted-text display, and bounded comparison memory. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "changes",
+      "outcome": "revised",
+      "reason": "Explains investigation, checks, preparation, and acceptance as a coherent workflow. Checked snapshot/evidence requirements and staged-file boundaries against existing implementation; migrated child and test anchors without changing review operations. Added substantive elaborations for responsibilities previously compressed into source-linked paragraphs. The broader explanation remains readable on its own; source links now belong to the relevant detail and test associations were relocated where useful."
+    },
+    {
+      "id": "impact",
+      "outcome": "revised",
+      "reason": "Checked before/after seeds, revised-branch expansion, exact-baseline review requirements, and explicit unmapped-region explanations. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "checks",
+      "outcome": "revised",
+      "reason": "Checked independent result recording, exact-tree matching, distinct individual outcomes, and their display in the desktop. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Expanded the existing narrow responsibility with context, mechanisms, examples, and limits instead of adding an artificial extra level. Updated prose anchors and checked the explanation against unchanged implementation."
+    },
+    {
+      "id": "acceptance",
+      "outcome": "revised",
+      "reason": "Checked exact review authorization, live drift checks, hooks, unrelated staging preservation, interruption recovery, and withdrawal behavior. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Added substantive elaborations for responsibilities previously compressed into source-linked paragraphs. The broader explanation remains readable on its own; source links now belong to the relevant detail and test associations were relocated where useful."
+    },
+    {
+      "id": "agents",
+      "outcome": "revised",
+      "reason": "Recast the parent as the architecture and behavioral boundary of the CLI. It explains project/revision context, groups operations by responsibility, and links to per-command descriptions instead of a usage tutorial or whole dispatcher file."
+    },
+    {
+      "id": "project-model",
+      "outcome": "revised",
+      "reason": "Explains what the project stores, how responsibilities connect to implementation, and how intended behavior, implementation status, and review evidence differ. Both child links resolve directly to their existing description identities."
+    },
+    {
+      "id": "agent-skills",
+      "outcome": "revised",
+      "reason": "Describes agent guidance as a product responsibility and links to the existing bundled skill. Checked description-first work, bounded investigation, semantic judgment, check evidence, explicit acceptance, and manual installation against that skill and README. Incoming parent/test anchors were updated where the broader prose changed; this responsibility keeps its existing behavior. Added substantive elaborations for responsibilities previously compressed into source-linked paragraphs. The broader explanation remains readable on its own; source links now belong to the relevant detail and test associations were relocated where useful."
+    },
+    {
+      "id": "cli-help",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-version",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-source",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-impact",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-check-record",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-check-list",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-prepare",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-accept",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-discard",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-ui-current",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "revised",
+      "reason": "Recast the command description as a program responsibility: request interpretation, response or state transition, delegation, and boundaries. Removed usage walkthroughs. The existing CLI branch and implementation selectors resolve, and behavior is unchanged."
+    },
+    {
+      "id": "description-identity",
+      "outcome": "revised",
+      "reason": "Introduces Identity and hierarchy as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "relationships",
+      "outcome": "revised",
+      "reason": "Introduces Implementation status and relationships as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "project-loading",
+      "outcome": "revised",
+      "reason": "Introduces Loading projects and readable drafts as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "preparation",
+      "outcome": "revised",
+      "reason": "Introduces Preparing a change as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "commit-safeguards",
+      "outcome": "revised",
+      "reason": "Introduces Committing only the reviewed content as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "acceptance-recovery",
+      "outcome": "revised",
+      "reason": "Introduces Recovering or withdrawing acceptance as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "revised",
+      "reason": "Introduces Following description passages as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Introduces Reading test evidence and project problems as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "Introduces Rendering repository content as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    },
+    {
+      "id": "agent-workflow",
+      "outcome": "revised",
+      "reason": "Introduces Description-led changes as an explanation of this implemented responsibility before its source links. Read the claims, examples, boundaries, and mechanisms against the relocated implementing blocks. Parent selectors and related test associations resolve."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "2999bfc1d33b670a53278dc954b9553874b6436e",
+      "outcome": "pass",
+      "method": "Program-description review against implementation; CLI validate/list/show; live desktop traversal; unchanged-code and snapshot checks",
+      "environment": "Node v24.16.0; macOS arm64; running Stratic v3 desktop",
+      "evidence": "Reviewed the non-CLI hierarchy for missing explanation between responsibility and code. Added ten substantive elaborations for identity, status/relationships, loading/drafts, preparation, commit safeguards, acceptance recovery, passage navigation, reader evidence, content rendering, and agent workflow. Expanded existing narrow descriptions of selectors, impact, check evidence, navigation/refresh, source reading, and paragraph comparison with context, mechanisms, examples, and limits. Recast all sixteen CLI pages and their parent as descriptions of program responsibilities, request interpretation, output/state transitions, delegation, and boundaries rather than usage walkthroughs. Inspected claims against the unchanged implementing functions. Validation reports no issues across forty descriptions and twenty-one catalog entries. Checked parent/child counts and confirmed that broad parents now lead to explanations instead of direct source blocks. Moved relevant test associations to the detailed promises they exercise. In the running desktop, followed the Reviewed changes preparation passage directly into Preparing a change and verified its description and neighborhood. Before/after snapshots match. Git comparison with the preceding prepared content shows only description files and test associations changed; runtime and executable tests are unchanged from previously recorded passing checks and were not rerun or relabeled as current outcomes. All impact decisions and unmapped explanations are present.",
+      "tests": [],
+      "id": "4c068607-b193-4bd4-94df-a1eb5ecdc4f5",
+      "recordedAt": "2026-09-09T11:57:48.939Z"
+    }
+  ],
+  "recordedAt": "2026-09-09T11:58:03.679Z",
+  "unmapped": [
+    {
+      "path": "src/desktop/main.ts",
+      "reason": "Inspected imports and startup state selecting the project root, working revision, window, and UI server. Navigation and startup are linked as coherent blocks; these declarations support those responsibilities."
+    },
+    {
+      "path": "src/desktop/renderer.ts",
+      "reason": "Inspected the preload types, current view/source/menu state, text-node element builder, click binding helper, and error banner. They support the linked desktop rendering and navigation; the text builder preserves the stated inert-prose boundary."
+    },
+    {
+      "path": "src/desktop/source-view.ts",
+      "reason": "Inspected imports and Scheme registration. They supply the existing Highlight.js grammar set used by the linked filename selection and source renderer."
+    },
+    {
+      "path": "src/git.ts",
+      "reason": "The uncovered nonblank lines are imports for subprocess, filesystem, path, and temporary-directory operations; the Git and filesystem behavior is linked in coherent function groups."
+    },
+    {
+      "path": "src/impact.ts",
+      "reason": "The uncovered nonblank lines are imports for the linked impact algorithm; before/after analysis, expansion, and mapping diagnostics are all linked."
+    },
+    {
+      "path": "src/model.ts",
+      "reason": "Inspected Issue, Project, Range, and Connection types. They represent the described project problems, scoped files, resolved offsets, and connections; their consumers are covered by loader, matcher, and reader links."
+    },
+    {
+      "path": "src/passages.ts",
+      "reason": "Only the Passage/Range type import lies outside the linked matcher and validation blocks."
+    },
+    {
+      "path": "src/project.ts",
+      "reason": "Inspected imports and the per-Project source cache, keyed by path and tied to that Project object. It serves the described working/revision loader without redefining identity or selector behavior."
+    },
+    {
+      "path": "src/review.ts",
+      "reason": "Inspected imports, input/prepared types, nonempty and safe-ID validation, local readiness lookup, and review-history loading. These support the described checks/preparation/recovery and historical evidence; invalid historical JSON is skipped."
+    },
+    {
+      "path": "test/project.test.ts",
+      "reason": "Uncovered nonblank lines are imports used by the individually linked project/selector tests."
+    },
+    {
+      "path": "test/queue-cli.test.ts",
+      "reason": "The queue example CLI test remains executable in the existing suite. Removed its catalog entry from Stratic because it verifies the separately described example, not a Stratic product responsibility; its source is unchanged from the passing suite."
+    },
+    {
+      "path": "test/review.test.ts",
+      "reason": "Inspected imports and the hook helper, which writes executable hooks only inside disposable fixture repositories. The behavioral test bodies are individually linked."
+    },
+    {
+      "path": "test/text-changes.test.ts",
+      "reason": "Only test/assertion and comparator imports lie outside the two individually linked test bodies."
+    },
+    {
+      "path": "package.json",
+      "reason": "Existing runtime dependencies and build/test/demo commands are unchanged from the tested snapshot; instructions remain in README."
+    },
+    {
+      "path": "tsconfig.json",
+      "reason": "Existing TypeScript compiler configuration is unchanged from the checked snapshot; it supports the implementation without needing a separate product responsibility."
+    },
+    {
+      "path": "scripts/build.ts",
+      "reason": "Unchanged desktop bundling and asset copying; build/start instructions remain in README."
+    },
+    {
+      "path": "scripts/demo.ts",
+      "reason": "Unchanged disposable queue workflow entry point, documented in README. The queue example has its own description tree."
+    },
+    {
+      "path": "scripts/queue-example.ts",
+      "reason": "Unchanged disposable repository setup and early-release example edits, used by the documented example and test fixtures."
+    },
+    {
+      "path": "scripts/queue-workflow.ts",
+      "reason": "Unchanged example checks, preparation, and optional acceptance orchestration; README describes these commands and their separate repository."
+    },
+    {
+      "path": "test/helpers.ts",
+      "reason": "Unchanged disposable queue fixture helpers and cleanup; these support the existing behavioral tests rather than defining product behavior."
+    },
+    {
+      "path": "src/cli.ts",
+      "reason": "Command pages link individual dispatch branches. Inspected the shared imports, option/json-file/path parsing, pending-review exclusion, unexpected-argument checks, and JSON/error output; these implement the common invocation described on the CLI parent page. No executable changes were made."
+    },
+    {
+      "path": "src/ui-channel.ts",
+      "reason": "Command pages link requestUI and desktop navigation. Inspected the surrounding selection/request types, server creation, per-session token, request bounds, socket access, and cleanup. These provide the described active local desktop connection; the transport remains unchanged."
+    }
+  ]
+}

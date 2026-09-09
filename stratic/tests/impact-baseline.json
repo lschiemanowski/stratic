@@ -1,0 +1,21 @@
+{
+  "id": "impact-baseline",
+  "name": "Reviewed baselines support bounded impact; unreviewed baselines require initial examination",
+  "description": "Reviewed baselines support bounded impact; unreviewed baselines require initial examination.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Reviewed baselines support bounded impact; unreviewed baselines require initial examination', t => {\n  const root = fixture(t); addRelease(root);\n  const initial = impact(root, head(root), snapshot(root, selected(root)));\n  assert.equal(initial.reviewedBase, false);\n  assert.ok(initial.frontier.some(f => f.id === 'queue'));\n  const proposal = prepare(root, selected(root), releaseReview(root)); accept(root, proposal.id);\n  const code = join(root, 'src/queue.ts'); writeFileSync(code, readFileSync(code, 'utf8') + '\\n');\n  const tree = snapshot(root, selected(root));\n  const bounded = impact(root, head(root), tree);\n  assert.equal(bounded.reviewedBase, true);\n  assert.deepEqual(bounded.frontier.map(f => f.id), ['lease-transitions']);\n  const expanded = impact(root, head(root), tree, [{ id: 'lease-transitions', outcome: 'revised', reason: 'A transition guarantee changes.' }]);\n  assert.ok(expanded.frontier.some(f => f.id === 'job-lifecycle'));\n  assert.ok(expanded.frontier.some(f => f.id === 'storage'));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "impact",
+      "passage": {
+        "quote": "A revised responsibility expands the investigation to its parent, the dependencies it relies on, and descriptions that depend on it. An unchanged decision stops expansion through that responsibility and must include a concrete reason. For a baseline without a review bound to its exact content, the initial investigation covers all descriptions before bounded change investigations can be trusted."
+      }
+    }
+  ]
+}

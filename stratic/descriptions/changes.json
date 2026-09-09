@@ -1,0 +1,11 @@
+{
+  "id": "changes",
+  "parent": {
+    "description": "project-model",
+    "passage": {
+      "quote": "Reviewed changes keep that account accurate as the program evolves. The agent examines the descriptions and code affected by a proposal, records what changed and what remains valid, and supplies appropriate check results. Preparation binds this work to the selected file contents; acceptance then commits that exact proposal when the user authorizes it."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

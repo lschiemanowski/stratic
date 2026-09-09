@@ -1,0 +1,36 @@
+{
+  "id": "cli-show",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Show opens one description together with the connections and context needed to investigate it."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request identifies a description by stable identity within the selected project and revision. The identity is resolved after loading that project; a missing or ambiguous identity is an error. Renaming the Markdown file or title does not change which responsibility the request denotes."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'show': output = inspect(loadProject(root, ref), args.shift()!); break;"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The result combines the description body and metadata with its parent, outgoing connections, incoming cross-connections, associated tests, and relevant issues. Child descriptions appear as elaboration destinations. Connections include resolved ranges or reported passage problems, so consumers can distinguish an available relationship from a broken selector."
+      },
+      "to": {
+        "path": "src/project.ts",
+        "passage": {
+          "quote": "export function connections(project: Project, id: string): Connection[] {\n  const d = getDescription(project, id);\n  const result: Connection[] = (d.metadata?.links ?? []).map(l => ({ ...l, label: 'description' in l.to ? getTitle(project, l.to.description) : l.to.path }));\n  for (const child of project.descriptions.filter(c => c.metadata?.parent?.description === id)) {\n    result.push({ kind: 'elaboration', from: child.metadata!.parent!.passage, to: { description: child.id }, label: child.title });\n  }\n  for (const c of result) {\n    try { if (c.from) c.range = resolvePassage(d.body, c.from); targetContent(project, c.to); }\n    catch (e) { c.problem = (e as Error).message; }\n  }\n  return result;\n}\nfunction getTitle(project: Project, id: string) { return project.descriptions.find(d => d.id === id)?.title ?? id; }\nexport function inspect(project: Project, id: string) {\n  const description = getDescription(project, id);\n  return { description, connections: connections(project, id),\n    parent: description.metadata?.parent ? project.descriptions.find(d => d.id === description.metadata!.parent!.description) : undefined,\n    incoming: project.descriptions.flatMap(d => (d.metadata?.links ?? []).filter(l => 'description' in l.to && l.to.description === id).map(l => ({ description: d.id, title: d.title, kind: l.kind, reason: 'reason' in l ? l.reason : undefined }))),\n    tests: project.tests.filter(t => t.verifies.some(v => v.description === id)),\n    issues: project.issues.filter(i => i.description === id || i.path === description.path),\n  };\n}"
+        }
+      }
+    }
+  ]
+}

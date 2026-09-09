@@ -1,0 +1,21 @@
+{
+  "id": "bounded-diff",
+  "name": "Large fragmented descriptions have bounded comparison memory",
+  "description": "Large fragmented descriptions have bounded comparison memory.",
+  "code": [
+    {
+      "path": "test/text-changes.test.ts",
+      "passage": {
+        "quote": "test('Large fragmented descriptions have bounded comparison memory', () => {\n  const old = 'old\\n\\n'.repeat(1100), next = 'new\\n\\n'.repeat(1100);\n  assert.deepEqual(textChanges(old, next), { additions: [{ start: 0, end: next.length }], removed: [old] });\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "For unusually fragmented descriptions, the comparison falls back to marking the whole text changed rather than allocating an unbounded paragraph-comparison table. This loses fine detail but keeps the reader responsive and still indicates that the text differs."
+      }
+    }
+  ]
+}

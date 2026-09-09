@@ -1,0 +1,60 @@
+{
+  "id": "passages",
+  "parent": {
+    "description": "descriptions",
+    "passage": {
+      "quote": "Passage links connect particular claims to explanations, implementation, and tests. They store an exact quote, with surrounding text when needed to distinguish repeated occurrences. A source link therefore identifies the code that supports the claim, rather than only naming a file. A missing or ambiguous match is reported instead of silently pointing somewhere else."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "A passage selector connects a description\u2019s claim to particular text, either in another description or in source. It stores a nonempty exact quote and can include the text immediately before or after it when needed to distinguish repeated occurrences. The same matching rule is used for prose and implementation."
+      },
+      "to": {
+        "path": "src/passages.ts",
+        "passage": {
+          "quote": "export function isPassage(value: unknown): value is Passage {\n  if (!value || typeof value !== 'object') return false;\n  const p = value as Passage;\n  return typeof p.quote === 'string' && p.quote.length > 0 &&\n    (p.prefix === undefined || typeof p.prefix === 'string') &&\n    (p.suffix === undefined || typeof p.suffix === 'string');\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Matching succeeds only when exactly one occurrence satisfies the quote and any context. No match is reported as stale, and multiple matches are reported as ambiguous. Inserting lines before an unchanged passage preserves the target, while editing a word inside the quote breaks the link until its meaning and selector are checked again."
+      },
+      "to": {
+        "path": "src/passages.ts",
+        "passage": {
+          "quote": "/** Offsets refer to the exact source string (UTF-16), including Markdown syntax. */\nexport function resolvePassage(text: string, passage: Passage): Range {\n  if (!isPassage(passage)) throw new Error('A passage needs a nonempty quote.');\n  const matches: number[] = [];\n  for (let at = text.indexOf(passage.quote); at !== -1; at = text.indexOf(passage.quote, at + 1)) {\n    const end = at + passage.quote.length;\n    if ((passage.prefix === undefined || text.slice(0, at).endsWith(passage.prefix)) &&\n        (passage.suffix === undefined || text.slice(end).startsWith(passage.suffix))) matches.push(at);\n  }\n  if (matches.length === 0) throw new Error('The quoted passage no longer exists.');\n  if (matches.length > 1) throw new Error('The quoted passage is ambiguous; add surrounding context.');\n  const start = matches[0], end = start + passage.quote.length;\n  return { start, end, startLine: text.slice(0, start).split('\\n').length,\n    endLine: text.slice(0, Math.max(start, end - 1)).split('\\n').length };\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Repository reads constrain where those targets can point: paths must stay inside the project, symbolic links are rejected, and oversized resources exceed the display limit. Historical links read regular files from the selected Git state. A link cannot escape those boundaries merely because its quote is valid."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function pathInside(root: string, path: string): string {\n  if (!path || isAbsolute(path) || path.includes('\\\\') || path.includes('\\0') || path.split('/').some(p => !p || p === '..' || p === '.' || p.toLowerCase() === '.git')) {\n    throw new Error(`Invalid repository path: ${path}`);\n  }\n  const full = join(root, path);\n  let current = root;\n  for (const part of path.split('/')) {\n    current = join(current, part);\n    if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error(`Symbolic links are not read or edited: ${path}`);\n  }\n  return full;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Repository reads constrain where those targets can point: paths must stay inside the project, symbolic links are rejected, and oversized resources exceed the display limit. Historical links read regular files from the selected Git state. A link cannot escape those boundaries merely because its quote is valid."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function revision(root: string, ref: string): string {\n  if (ref === 'working') return ref;\n  return git(root, ['rev-parse', '--verify', '--end-of-options', `${ref}^{tree}`]).trim();\n}\nexport function readSource(root: string, path: string, view = 'working'): string {\n  pathInside(root, path);\n  if (view === 'working') {\n    const full = pathInside(root, path);\n    if (lstatSync(full).size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);\n    return readFileSync(full, 'utf8');\n  }\n  const tree = /^[0-9a-f]{40,64}$/.test(view) ? view : revision(root, view);\n  const entry = git(root, ['ls-tree', tree, '--', path]);\n  if (!entry.startsWith('100644 ') && !entry.startsWith('100755 ')) throw new Error(`Not a regular file at this revision: ${path}`);\n  const size = Number(git(root, ['cat-file', '-s', `${tree}:${path}`]).trim());\n  if (size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);\n  return git(root, ['show', `${tree}:${path}`]);\n}\nexport function files(root: string, view = 'working'): string[] {\n  const output = view === 'working'\n    ? git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard']) + git(root, ['ls-tree', '-r', '--name-only', '-z', 'HEAD'])\n    : git(root, ['ls-tree', '-r', '--name-only', '-z', revision(root, view)]);\n  return [...new Set(output.split('\\0').filter(Boolean))].sort();\n}"
+        }
+      }
+    }
+  ]
+}

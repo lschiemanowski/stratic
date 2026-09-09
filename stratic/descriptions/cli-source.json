@@ -1,0 +1,36 @@
+{
+  "id": "cli-source",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Source reads the implementation file that a description refers to, from working files or a chosen revision."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request supplies a repository-relative path and an optional historical revision. The response contains that path, the requested revision, and the complete decoded file text. Passage selection and syntax coloring are separate concerns; this command neither crops the file to a quote nor decorates its text."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'source': output = { path: args[0], revision: ref, content: readSource(root, args.shift()!, ref) }; break;"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Repository reads enforce path boundaries, reject symbolic links and files beyond the display limit, and select regular files for historical content. Working and historical reads share those restrictions. Missing or unsupported resources produce errors rather than successful empty content."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function readSource(root: string, path: string, view = 'working'): string {\n  pathInside(root, path);\n  if (view === 'working') {\n    const full = pathInside(root, path);\n    if (lstatSync(full).size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);\n    return readFileSync(full, 'utf8');\n  }\n  const tree = /^[0-9a-f]{40,64}$/.test(view) ? view : revision(root, view);\n  const entry = git(root, ['ls-tree', tree, '--', path]);\n  if (!entry.startsWith('100644 ') && !entry.startsWith('100755 ')) throw new Error(`Not a regular file at this revision: ${path}`);\n  const size = Number(git(root, ['cat-file', '-s', `${tree}:${path}`]).trim());\n  if (size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);\n  return git(root, ['show', `${tree}:${path}`]);\n}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "change-display",
+  "parent": {
+    "description": "desktop",
+    "passage": {
+      "quote": "Change highlighting shows how the descriptions differ from the proposal\u2019s starting point. A changed paragraph is highlighted as a whole, and removed text can be expanded. The highlights stay available as the reader moves between descriptions and can be toggled off. The revision selector lets the reader inspect earlier committed descriptions and their source."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "A changed paragraph receives a green background. Even a one-word edit highlights the whole paragraph so its meaning can be read in context. Removed paragraphs can be expanded as removed text, and descriptions removed entirely are listed from the root. Turning the highlights off does not discard the proposal or change its review state."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "      const before = current.comparison?.before[d.id];\n      const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };\n      reading.append(prose(d.body, outgoing, selected, changes.additions));\n      if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\\n\\n'))); reading.append(removed); }\n      if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Working files compare against a prepared proposal\u2019s base when one exists, or HEAD for unprepared description edits. When the viewed content matches an accepted review, the comparison can show that accepted change against its own base. Switching descriptions retains the comparison and toggle choice, so highlights do not disappear just because the reader follows a link."
+      },
+      "to": {
+        "path": "src/desktop/comparison.ts",
+        "passage": {
+          "quote": "import { git } from '../git.ts';\nimport { loadProject } from '../project.ts';\nimport type { Project, Ready, Review } from '../model.ts';\nexport interface Comparison {\n  base: string; label: string; before: Record<string, string>;\n  removed: { title: string; body: string }[];\n}\nconst bases = new Map<string, Project>();\nexport function comparison(root: string, project: Project, pending: Ready | null, history: { path: string; review: Review }[], tree: string): Comparison | null {\n  let base: string | undefined, label = 'Proposed changes';\n  const changed = git(root, ['diff', '--name-only', 'HEAD', tree, '--', 'stratic/descriptions']).trim();\n  if (project.revision === 'working' && pending) base = pending.base;\n  else if (project.revision === 'working' && changed) base = git(root, ['rev-parse', 'HEAD']).trim();\n  else {\n    for (const { path, review } of [...history].sort((a, b) => String(b.review.recordedAt).localeCompare(String(a.review.recordedAt)))) {\n      if (!/^[a-f0-9]{40,64}$/.test(review.base) || !/^[a-f0-9]{40,64}$/.test(review.contentTree)) continue;\n      if (git(root, ['diff', '--name-only', review.contentTree, tree]).trim() === path) { base = review.base; label = 'Accepted changes'; break; }\n    }\n  }\n  if (!base) return null;\n  const key = JSON.stringify([root, base]);\n  let previous = bases.get(key);\n  if (!previous) { previous = loadProject(root, base); if (bases.size >= 4) bases.delete(bases.keys().next().value!); bases.set(key, previous); }\n  const before: Record<string, string> = Object.create(null);\n  for (const d of project.descriptions) {\n    const old = previous.descriptions.find(old => old.id === d.id)?.body ?? '';\n    if (old !== d.body) before[d.id] = old;\n  }\n  return { base, label, before, removed: previous.descriptions.filter(d => !project.descriptions.some(next => next.id === d.id)).map(d => ({ title: d.title, body: d.body })) };\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The comparator preserves matching paragraphs in order and classifies the remaining occurrences as added or removed. Repeated paragraphs are treated as occurrences, so deleting one repeated paragraph is not lost merely because identical wording remains elsewhere. The view highlights prose changes; a metadata-only link or status edit is not a word change in the paragraph."
+      },
+      "to": {
+        "path": "src/desktop/text-changes.ts",
+        "passage": {
+          "quote": "// Compare paragraphs so highlighting follows the description, not its selected passage.\nexport function textChanges(before: string, after: string) {\n  const chunks = (s: string) => [...s.matchAll(/[^\\n]+(?:\\n(?!\\n)[^\\n]+)*/g)].map(m => ({ text: m[0], start: m.index!, end: m.index! + m[0].length }));\n  const a = chunks(before), b = chunks(after);\n  const additions: { start: number; end: number }[] = [], removed: string[] = [];\n  // Bound memory for unusually fragmented files; a whole-text change is still accurate.\n  if (a.length * b.length > 1_000_000) return { additions: before === after ? [] : [{ start: 0, end: after.length }], removed: before === after || !before ? [] : [before] };\n  const width = b.length + 1, lengths = new Uint32Array((a.length + 1) * width);\n  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) {\n    lengths[i * width + j] = a[i].text === b[j].text ? 1 + lengths[(i + 1) * width + j + 1] : Math.max(lengths[(i + 1) * width + j], lengths[i * width + j + 1]);\n  }\n  let i = 0, j = 0;\n  while (i < a.length || j < b.length) {\n    if (i < a.length && j < b.length && a[i].text === b[j].text) { i++; j++; }\n    else if (j < b.length && (i === a.length || lengths[i * width + j + 1] >= lengths[(i + 1) * width + j])) { additions.push({ start: b[j].start, end: b[j].end }); j++; }\n    else { removed.push(a[i].text); i++; }\n  }\n  return { additions, removed };\n}"
+        }
+      }
+    }
+  ]
+}

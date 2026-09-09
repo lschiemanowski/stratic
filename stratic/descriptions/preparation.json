@@ -1,0 +1,60 @@
+{
+  "id": "preparation",
+  "parent": {
+    "description": "changes",
+    "passage": {
+      "quote": "When the work is ready, preparation checks that affected responsibilities have been accounted for, links resolve, and the selected evidence matches the proposed content. It writes a review and pins the final snapshot, including that review. The user can then inspect one concrete proposal before deciding to commit it."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The investigation names examined descriptions as revised or unchanged with reasons, accounts for the required impact and unmapped changed regions, and leaves no unresolved blocker. Preparation loads the selected content and checks those decisions against the before and after descriptions. It also requires valid structure and links, and at least one appropriate passing result for the exact content. These checks enforce consistency of the submitted review; they do not generate its semantic judgment."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function validateReview(input: Input): void {\n  if (!input || !nonempty(input.reviewer) || !nonempty(input.summary) || !Array.isArray(input.examined) ||\n      !input.examined.every(d => nonempty(d.id) && ['revised', 'unchanged'].includes(d.outcome) && nonempty(d.reason)) ||\n      !Array.isArray(input.unresolved) || !input.unresolved.every(nonempty) || !Array.isArray(input.resultIds) || !input.resultIds.every(nonempty) ||\n      (input.unmapped !== undefined && (!Array.isArray(input.unmapped) || !input.unmapped.every(u => nonempty(u.path) && nonempty(u.reason))))) throw new Error('Review needs reviewer, summary, examined decisions with reasons, unresolved[], resultIds[], and optional unmapped explanations.');\n  if (new Set(input.examined.map(d => d.id)).size !== input.examined.length) throw new Error('Each examined description needs one final decision.');\n  if (input.unresolved.length) throw new Error('Resolve blocking issues before preparing a ready handoff.');\n}\nexport function prepare(root: string, paths: string[], input: Input): Prepared & { preparationMs: number } {\n  const start = performance.now(); validateReview(input);\n  if (existsSync(git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index.lock']).trim())) throw new Error('A Git operation is active. Finish it before preparing a review.');\n  const prior = ready(root);\n  if (prior?.commit) throw new Error('An acceptance is pending recovery; run accept before preparing another change.');\n  if (!paths.length) throw new Error('Select the proposed files explicitly.');\n  const base = head(root), id = prior?.id ?? randomUUID();\n  const reviewPath = `stratic/reviews/${safeId(id)}.json`;\n  paths = [...new Set(paths)].filter(p => p !== reviewPath);\n  if (paths.some(p => p.startsWith('stratic/reviews/'))) throw new Error('Historical reviews are retained unchanged. Select project files, not review records.');\n  if (!prior && existsSync(pathInside(root, reviewPath))) throw new Error('Review path already exists.');\n  if (prior && readFileSync(pathInside(root, reviewPath), 'utf8') !== readSource(root, reviewPath, prior.finalTree)) throw new Error('The existing review was edited. Preserve or resolve that edit before replacing it.');\n  const contentTree = snapshot(root, paths, base);\n  paths = changedPaths(root, base, contentTree);\n  if (!paths.length) throw new Error('The selected files contain no changes.');\n  const project = loadProject(root, contentTree);\n  if (project.issues.length) throw new Error(`Repair the project before readiness:\\n${project.issues.map(i => `${i.path}: ${i.message}`).join('\\n')}`);\n  const frontier = impact(root, base, contentTree, input.examined);\n  for (const item of frontier.frontier) if (!item.decision) throw new Error(`Review still needs a decision for ${item.id}: ${item.reasons.join(' ')}`);\n  const old = loadProject(root, base);\n  for (const item of input.examined) {\n    const before = old.descriptions.find(d => d.id === item.id), after = project.descriptions.find(d => d.id === item.id);\n    if (!before && !after) throw new Error(`Unknown examined description: ${item.id}`);\n    if (item.outcome === 'unchanged' && (before?.body !== after?.body || JSON.stringify(before?.metadata) !== JSON.stringify(after?.metadata))) throw new Error(`Description changed but was recorded unchanged: ${item.id}`);\n  }\n  for (const u of frontier.unmapped) if (!input.unmapped?.some(x => x.path === u.path)) throw new Error(`Explain unmapped changed regions in ${u.path} or repair their links.`);\n  const checks = input.resultIds.map(id => {\n    const r = results(root).find(r => r.id === id);\n    if (!r) throw new Error(`Missing recorded result: ${id}`);\n    if (r.tree !== contentTree) throw new Error(`Result ${id} examined different content. Record checks for this exact snapshot.`);\n    if (r.outcome !== 'pass' || r.tests.some(t => t.outcome !== 'pass')) throw new Error(`Result ${id} is not a passing check.`);\n    return r;\n  });\n  if (!checks.length) throw new Error('Record at least one appropriate check, including a manual check when automated tests do not apply.');\n  const review: Review & { unmapped: Input['unmapped'] } = {\n    id, base, contentTree, reviewer: input.reviewer, summary: input.summary, examined: input.examined,\n    unresolved: [], results: checks, recordedAt: new Date().toISOString(), unmapped: input.unmapped ?? [],\n  };\n  writeJson(pathInside(root, reviewPath), review);\n  const finalTree = snapshot(root, [...paths, reviewPath], base);\n  if (head(root) !== base || snapshot(root, paths, base) !== contentTree) throw new Error('Files or HEAD changed during preparation. Prepare again.');\n  const state: Prepared = { id, base, contentTree, finalTree, paths, reviewPath, createdAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'ready.json'), state);\n  return { ...state, preparationMs: performance.now() - start };\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The selected content starts from the current Git base with the chosen working-file changes applied. Files are selected as whole files. A temporary index is used to build this tree, leaving the user\u2019s staging area intact. For example, selecting one source file and its description does not silently include an unrelated working edit in another file. Checks must have examined that selected content, including any dependencies that would affect their execution. Git operations explicitly target the selected repository instead of inheriting another repository from the caller\u2019s Git environment."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function snapshot(root: string, paths: string[], base = head(root)): string {\n  const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));\n  const env = { GIT_INDEX_FILE: join(dir, 'index') };\n  try {\n    git(root, ['read-tree', revision(root, base)], undefined, env);\n    for (const path of paths) pathInside(root, path);\n    if (paths.length) git(root, ['add', '-A', '--', ...paths], undefined, env);\n    return git(root, ['write-tree'], undefined, env).trim();\n  } finally { rmSync(dir, { recursive: true, force: true }); }\n}\nexport function workingSnapshot(root: string): string {\n  return snapshot(root, files(root));\n}\nexport function changedPaths(root: string, base: string, tree: string): string[] {\n  return git(root, ['diff', '--name-only', '--no-renames', '-z', base, tree]).split('\\0').filter(Boolean);\n}\nexport function relativePath(root: string, path: string): string {\n  return relative(root, resolve(path)).split('\\\\').join('/');\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The selected content starts from the current Git base with the chosen working-file changes applied. Files are selected as whole files. A temporary index is used to build this tree, leaving the user\u2019s staging area intact. For example, selecting one source file and its description does not silently include an unrelated working edit in another file. Checks must have examined that selected content, including any dependencies that would affect their execution. Git operations explicitly target the selected repository instead of inheriting another repository from the caller\u2019s Git environment."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function git(root: string, args: string[], input?: string | Buffer, env: NodeJS.ProcessEnv = {}): string {\n  const inherited = { ...process.env };\n  for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE']) delete inherited[name];\n  try {\n    return execFileSync('git', ['--literal-pathspecs', '-C', root, ...args], {\n      encoding: 'utf8', input, maxBuffer: 32 * 1024 * 1024,\n      env: { ...inherited, GIT_OPTIONAL_LOCKS: '0', ...env }, stdio: ['pipe', 'pipe', 'pipe'],\n    });\n  } catch (error) {\n    throw new Error(String((error as { stderr?: Buffer }).stderr || (error as Error).message).trim());\n  }\n}\nexport function repository(path: string): string {\n  return realpathSync(git(resolve(path), ['rev-parse', '--show-toplevel']).trim());\n}\nexport function head(root: string): string { return git(root, ['rev-parse', '--verify', 'HEAD']).trim(); }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Pending readiness and independent check results are stored locally for the Git worktree. JSON records are replaced as complete files so readers do not see a half-written update. The prepared review itself is part of the proposed project content, preserving the evidence when it is committed."
+      },
+      "to": {
+        "path": "src/git.ts",
+        "passage": {
+          "quote": "export function localDirectory(root: string): string {\n  const path = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'stratic-v3']).trim();\n  mkdirSync(path, { recursive: true });\n  return path;\n}\nexport function writeJson(path: string, value: unknown): void {\n  mkdirSync(dirname(path), { recursive: true });\n  const temporary = `${path}.${process.pid}.tmp`;\n  writeFileSync(temporary, JSON.stringify(value, null, 2) + '\\n');\n  renameSync(temporary, path);\n}\nexport function readJson<T>(path: string): T { return JSON.parse(readFileSync(path, 'utf8')) as T; }"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "following-passages",
+  "parent": {
+    "description": "desktop",
+    "passage": {
+      "quote": "Underlined passages connect the explanation to more detail. A passage with one destination opens it directly: a linked description replaces the current description, while linked source appears beside it. When a passage has several destinations, the side pane lets the reader choose which one to follow."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The reader combines explicit metadata links with child descriptions anchored to the current prose. It resolves each anchor to a range in the description. When links overlap, the text is divided at their boundaries so clicking a segment offers the destinations that actually cover that segment, rather than every link in the paragraph."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "function follow(connections: Connection[]) {\n  if (connections.length === 1 && !connections[0].problem) {\n    selectedConnections = [];\n    void open(connections[0].to);\n  } else {\n    selectedConnections = connections; source = null; render();\n  }\n}\nfunction links(project: Project, id: string): Connection[] {\n  const d = project.descriptions.find(d => d.id === id)!;\n  const result: Connection[] = (d.metadata?.links ?? []).map(l => ({ ...l, label: 'description' in l.to ? project.descriptions.find(d => d.id === (l.to as any).description)?.title ?? l.to.description : l.to.path }));\n  for (const child of project.descriptions.filter(c => c.metadata?.parent?.description === id)) result.push({ kind: 'elaboration', from: child.metadata!.parent!.passage, to: { description: child.id }, label: child.title });\n  for (const l of result) if (l.from) { try { l.range = resolvePassage(d.body, l.from); } catch (e) { l.problem = (e as Error).message; } }\n  return result;\n}\nfunction prose(body: string, connections: Connection[], selected?: Range, changes: { start: number; end: number }[] = []) {\n  const container = el('div', undefined, 'prose');\n  // Render repository text exclusively through text nodes. Raw HTML and URLs are inert.\n  const chunks = [...body.matchAll(/[^\\n]+(?:\\n(?!\\n)[^\\n]+)*|\\n+/g)];\n  for (const chunk of chunks) {\n    const raw = chunk[0], at = chunk.index!;\n    if (!raw.trim()) continue;\n    const heading = /^(#{1,4}) /.exec(raw), skip = heading?.[0].length ?? 0;\n    const node = heading ? el(heading[1].length === 1 ? 'h1' : 'h2') : el('p');\n    const start = at + skip, end = at + raw.length;\n    if (changes.some(c => c.start < end && c.end > start)) node.classList.add('changed-text');\n    const relevant = connections.filter(l => l.range && l.range.start < end && l.range.end > start);\n    const cuts = [...new Set([start, end, ...relevant.flatMap(l => [Math.max(start, l.range!.start), Math.min(end, l.range!.end)]), ...(selected && selected.start < end && selected.end > start ? [Math.max(start, selected.start), Math.min(end, selected.end)] : [])])].sort((a, b) => a - b);\n    for (let i = 0; i < cuts.length - 1; i++) {\n      const a = cuts[i], b = cuts[i + 1];\n      const targets = relevant.filter(l => l.range!.start <= a && l.range!.end >= b);\n      const part = targets.length ? button(body.slice(a, b), () => follow(targets), 'passage') : el('span', body.slice(a, b));\n      if (selected && selected.start <= a && selected.end >= b) part.classList.add('selected');\n      node.append(part);\n    }\n    container.append(node);\n  }\n  return container;\n}"
+        }
+      }
+    }
+  ]
+}

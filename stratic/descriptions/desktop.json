@@ -1,0 +1,11 @@
+{
+  "id": "desktop",
+  "parent": {
+    "description": "stratic",
+    "passage": {
+      "quote": "The desktop reader is where a person explores that account of the program. They can read a description, move to a broader or more detailed explanation, inspect linked source alongside the prose, and see what a proposed change alters. The reader also shows recorded test outcomes and broken links while work is in progress."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

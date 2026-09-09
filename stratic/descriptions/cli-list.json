@@ -1,0 +1,36 @@
+{
+  "id": "cli-list",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "List gives an overview of the descriptions without loading all their prose into the response."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The command loads the selected project at the requested revision, defaulting to working content. Its JSON result contains the resolved project and revision, description identities, titles, parent identities, implementation status, and project issues. The hierarchy is represented by parent references in a flat collection."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'list': {\n      const p = loadProject(root, ref);\n      output = { project: root, revision: p.revision, descriptions: p.descriptions.map(d => ({ id: d.id, title: d.title, parent: d.metadata?.parent?.description, realization: d.metadata?.realization })), issues: p.issues }; break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The projection is built from the same loaded descriptions used elsewhere in Stratic. Readable drafts therefore remain present even when metadata is incomplete, and their issues accompany the result. List does not independently reconstruct or repair a hierarchy that the loader rejected."
+      },
+      "to": {
+        "path": "src/project.ts",
+        "passage": {
+          "quote": "export function loadProject(path: string, ref = 'working'): Project {\n  const root = repository(path), view = revision(root, ref);\n  const project: Project = { root, revision: view, descriptions: [], tests: [], issues: [] };\n  const issue = (path: string, message: string, description?: string) => project.issues.push({ path, message, description });\n  const read = (path: string) => projectSource(project, path);\n  const json = (path: string) => JSON.parse(read(path));\n  try {\n    const config = json('stratic/project.json');\n    if (!object(config) || config.formatVersion !== 1 || !Array.isArray(config.scope) || !config.scope.length || !config.scope.every(text) ||\n        (config.exclusions !== undefined && (!Array.isArray(config.exclusions) || !config.exclusions.every((e: any) => object(e) && text(e.pattern) && text(e.reason))))) {\n      throw new Error('Expected formatVersion 1, a nonempty scope array, and exclusions with reasons.');\n    }\n    project.config = { formatVersion: 1, scope: config.scope, exclusions: config.exclusions ?? [] };\n  } catch (e) { issue('stratic/project.json', (e as Error).message); }\n  const paths = files(root, view).filter(path => view !== 'working' || existsSync(join(root, path)));\n  for (const path of paths.filter(p => p.startsWith('stratic/descriptions/') && p.endsWith('.md'))) {\n    let body: string;\n    try { body = read(path); } catch (e) { issue(path, (e as Error).message); continue; }\n    const dataPath = path.slice(0, -3) + '.json';\n    const entry: Description = { id: `draft:${path}`, title: /^#\\s+(.+)$/m.exec(body)?.[1] ?? basename(path, '.md'), body, path };\n    try {\n      const value = json(dataPath);\n      if (!metadata(value)) throw new Error('Metadata needs an id, parent, realization, and well-formed links.');\n      entry.id = value.id; entry.metadata = value;\n    } catch (e) { issue(dataPath, (e as Error).message, entry.id); }\n    project.descriptions.push(entry);\n  }\n  for (const path of paths.filter(p => p.startsWith('stratic/descriptions/') && p.endsWith('.json'))) {\n    if (!paths.includes(path.slice(0, -5) + '.md')) issue(path, 'This metadata has no paired Markdown description.');\n  }\n  for (const path of paths.filter(p => p.startsWith('stratic/tests/') && p.endsWith('.json'))) {\n    try {\n      const value = json(path);\n      if (!testRecord(value)) throw new Error('A test needs an id, name, description, code locations, and verified passages.');\n      if (project.tests.some(t => t.id === value.id)) throw new Error(`Duplicate test identity: ${value.id}`);\n      project.tests.push(value);\n    } catch (e) { issue(path, (e as Error).message); }\n  }\n  const counts = new Map<string, number>();\n  for (const d of project.descriptions) counts.set(d.id, (counts.get(d.id) ?? 0) + 1);\n  for (const d of project.descriptions) {\n    if (counts.get(d.id)! > 1) {\n      const original = d.id; d.id = `draft:${d.path}`; d.metadata = undefined;\n      issue(d.path, `Duplicate description identity: ${original}`, d.id);\n    }\n  }\n  const roots = project.descriptions.filter(d => d.metadata?.parent === null);\n  if (roots.length !== 1) issue('stratic/descriptions', `Expected one root; found ${roots.length}.`);\n  for (const d of project.descriptions) {\n    const chain = new Set<string>();\n    let current: Description | undefined = d;\n    while (current?.metadata?.parent) {\n      if (chain.has(current.id)) { issue(d.path, 'The parent chain contains a cycle.', d.id); break; }\n      chain.add(current.id);\n      try { current = getDescription(project, current.metadata.parent.description); }\n      catch (e) { issue(d.path, (e as Error).message, d.id); break; }\n    }\n    if (d.metadata?.parent) {\n      try { targetContent(project, d.metadata.parent); } catch (e) { issue(d.path, `Parent passage: ${(e as Error).message}`, d.id); }\n    }\n    for (const link of d.metadata?.links ?? []) {\n      try { if (link.from) resolvePassage(d.body, link.from); targetContent(project, link.to); }\n      catch (e) { issue(d.path, (e as Error).message, d.id); }\n    }\n  }\n  for (const t of project.tests) {\n    for (const target of [...t.code, ...t.verifies]) {\n      try { targetContent(project, target); } catch (e) { issue(`test:${t.id}`, (e as Error).message); }\n    }\n  }\n  return project;\n}"
+        }
+      }
+    }
+  ]
+}

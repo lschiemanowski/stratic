@@ -1,0 +1,21 @@
+{
+  "id": "draft-reading",
+  "name": "Broken drafts, missing parents, duplicate IDs, and cycles do not hide other prose",
+  "description": "Broken drafts, missing parents, duplicate IDs, and cycles do not hide other prose.",
+  "code": [
+    {
+      "path": "test/project.test.ts",
+      "passage": {
+        "quote": "test('Broken drafts, missing parents, duplicate IDs, and cycles do not hide other prose', t => {\n  const root = fixture(t), file = join(root, 'stratic/descriptions/job-lifecycle.json');\n  writeFileSync(file, '{ invalid');\n  let project = loadProject(root);\n  assert.ok(project.issues.length);\n  assert.ok(project.descriptions.some(d => d.title === 'Job lifecycle' && d.body.includes('Claiming')));\n  assert.equal(inspect(project, 'storage').description.title, 'Persistent storage');\n  writeJson(file, { id: 'job-lifecycle', parent: { description: 'missing', passage: { quote: 'nothing' } }, realization: 'implemented', links: [] });\n  assert.match(JSON.stringify(loadProject(root).issues), /Missing description/);\n  const enginePath = join(root, 'stratic/descriptions/engine.json');\n  const engine = readJson<Metadata>(enginePath); engine.parent = { description: 'engine', passage: { quote: 'queue engine' } }; writeJson(enginePath, engine);\n  assert.match(JSON.stringify(loadProject(root).issues), /cycle/);\n  const storage = readJson<Metadata>(join(root, 'stratic/descriptions/storage.json')); storage.id = 'engine'; writeJson(join(root, 'stratic/descriptions/storage.json'), storage);\n  assert.match(JSON.stringify(loadProject(root).issues), /Duplicate description/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "project-loading",
+      "passage": {
+        "quote": "For example, while an agent repairs a JSON file, the associated Markdown can remain visible under a temporary draft identity based on its path. Duplicate stable identities likewise become visible drafts with errors, rather than allowing an incoming link to select one at random. Metadata without its Markdown partner is reported too. If the prose file itself cannot be read, the loader reports that problem instead of manufacturing a description."
+      }
+    }
+  ]
+}

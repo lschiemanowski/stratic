@@ -1,0 +1,36 @@
+{
+  "id": "cli-discard",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Discard withdraws readiness while retaining the project edits and recorded checks."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request must identify the current prepared review. An absent or different identity is rejected, preventing withdrawal of an unrelated handoff. The response identifies the discarded review and whether its generated review file was removed."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'discard': { const id = option('id'); if (!id) throw new Error('Provide --id REVIEW_ID.'); done(); output = discard(root, id); break; }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The model retains project edits and independent check results. It removes an unchanged generated review when eligible and clears the ready record. If the recorded commit is already HEAD, recovery through acceptance is required instead of treating the commit as an uncommitted proposal."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function discard(root: string, approvedId: string) {\n  const state = ready(root);\n  if (!state || state.id !== approvedId) throw new Error('Provide the exact ready review ID.');\n  if (state.commit && head(root) === state.commit) throw new Error('The commit already exists. Run accept to complete recovery.');\n  if (existsSync(git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index.lock']).trim())) throw new Error('A Git operation is active.');\n  const path = pathInside(root, state.reviewPath);\n  let removedReview = false;\n  if (existsSync(path) && readFileSync(path, 'utf8') === readSource(root, state.reviewPath, state.finalTree) && !git(root, ['ls-tree', 'HEAD', '--', state.reviewPath]).trim()) { rmSync(path); removedReview = true; }\n  rmSync(join(localDirectory(root), 'ready.json'));\n  return { discarded: state.id, removedReview, message: 'Project edits and recorded checks are retained.' };\n}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "job-lifecycle",
+  "parent": {
+    "description": "engine",
+    "passage": {
+      "quote": "It controls when workers may claim or complete jobs."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

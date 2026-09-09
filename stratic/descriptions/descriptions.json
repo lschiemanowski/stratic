@@ -1,0 +1,11 @@
+{
+  "id": "descriptions",
+  "parent": {
+    "description": "project-model",
+    "passage": {
+      "quote": "Descriptions and links organize that account around responsibilities. A description should explain its subject without requiring the reader to follow its links. Children elaborate particular passages at whatever depth is useful; implementation links identify the source that realizes a claim. Descriptions can also state behavior that is only partly implemented, with the remaining work made explicit."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

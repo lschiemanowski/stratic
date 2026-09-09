@@ -1,0 +1,24 @@
+{
+  "id": "cli-version",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Version identifies the executable and project format, which matters when several Stratic versions are installed."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The response is a JSON object containing product, version, and formatVersion. These values are constants supplied by the executable; the current implementation reports Stratic v3, version 0.1.0, and project format 1."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'version': output = { product: 'Stratic v3', version: '0.1.0', formatVersion: 1 }; break;"
+        }
+      }
+    }
+  ]
+}

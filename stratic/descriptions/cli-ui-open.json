@@ -1,0 +1,36 @@
+{
+  "id": "cli-ui-open",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "UI open directs the desktop to the description or passage being discussed."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request names a stable description identity, an optional revision, and an optional exact quote. Working content is the default revision. The response is the resulting selection rather than a screenshot or the destination\u2019s complete prose."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'ui': {\n      const action = args.shift();\n      if (action === 'current') output = await requestUI(root, { action: 'current' });\n      else if (action === 'open') {\n        const quote = option('quote'); const description = args.shift()!; done(); output = await requestUI(root, { action: 'open', description, revision: ref, ...(quote ? { passage: { quote } } : {}) });\n      } else throw new Error('Use ui current or ui open.'); break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request travels through the worktree\u2019s local session connection. Desktop navigation validates the selection, resolves the description and passage, and pins historical navigation to a commit. Invalid targets and unavailable sessions produce errors instead of selecting substitute content."
+      },
+      "to": {
+        "path": "src/desktop/main.ts",
+        "passage": {
+          "quote": "async function navigate(request: UIRequest): Promise<Selection> {\n  if (!request || !['current', 'open'].includes(request.action)) throw new Error('Use current or open.');\n  if (request.action === 'current') return selection;\n  if (typeof request.description !== 'string' || (request.revision !== undefined && typeof request.revision !== 'string') ||\n      (request.passage !== undefined && !isPassage(request.passage))) throw new Error('Invalid description selection.');\n  const requested = request.revision ?? selection.revision;\n  const pinned = requested === 'working' ? requested : git(root, ['rev-parse', '--verify', '--end-of-options', `${requested}^{commit}`]).trim();\n  let { project } = await viewData(root, pinned);\n  if (!project.descriptions.some(d => d.id === request.description)) ({ project } = await viewData(root, pinned, true));\n  getDescription(project, request.description);\n  if (request.passage) targetContent(project, { description: request.description, passage: request.passage });\n  selection = { project: root, revision: pinned, description: request.description, ...(request.passage ? { passage: request.passage } : {}) };\n  window.webContents.send('selection', selection);\n  return selection;\n}\nasync function attach(path: string) {\n  const next = repository(path); stopUI?.(); root = next;\n  const { project } = await viewData(root, 'working', true);\n  selection = { project: root, revision: 'working', description: project.descriptions.find(d => d.metadata?.parent === null)?.id ?? project.descriptions[0]?.id };\n  stopUI = await serveUI(root, navigate);\n}\nasync"
+        }
+      }
+    }
+  ]
+}

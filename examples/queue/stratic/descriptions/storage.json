@@ -1,0 +1,24 @@
+{
+  "id": "storage",
+  "parent": {
+    "description": "engine",
+    "passage": {
+      "quote": "It persists successful operations between invocations."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Persistent storage preserves the queue between short-lived commands. A successful operation writes the complete state to a temporary file and atomically replaces the queue file. An operation that throws does not write the changed state. Concurrent writers are outside this example’s scope."
+      },
+      "to": {
+        "path": "src/store.ts",
+        "passage": {
+          "quote": "import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';\nexport interface Job { id: number; text: string; owner: string | null; until: number | null }\ninterface State { nextId: number; jobs: Job[] }\n\n/** One writer at a time. A successful operation replaces the saved state atomically. */\nexport function update<T>(path: string, operation: (state: State) => T): T {\n  const state: State = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : { nextId: 1, jobs: [] };\n  const result = operation(state);\n  const temporary = `${path}.${process.pid}.tmp`;\n  writeFileSync(temporary, JSON.stringify(state));\n  renameSync(temporary, path);\n  return result;\n}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "description-identity",
+  "parent": {
+    "description": "descriptions",
+    "passage": {
+      "quote": "A project stores descriptions as Markdown with JSON metadata under stratic. A stable identity connects each description to its parent and incoming links, independently of its title or filename. The parent relationship identifies the passage being elaborated; it does not require the prose to be a list of its children."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The Markdown file has paired JSON metadata containing a stable id and a parent relation. The parent names another description by identity and selects the meaningful passage that this child elaborates. The project has one root with no parent; every other description belongs beneath a parent, and parent chains must not cycle. Branches may have different depths because some responsibilities need more explanation than others."
+      },
+      "to": {
+        "path": "src/model.ts",
+        "passage": {
+          "quote": "export interface Passage { quote: string; prefix?: string; suffix?: string }\nexport interface DescriptionTarget { description: string; passage?: Passage }\nexport interface SourceTarget { path: string; passage: Passage }\nexport type Target = DescriptionTarget | SourceTarget;\nexport type Link =\n  | { kind: 'implementation'; from: Passage | null; to: SourceTarget }\n  | { kind: 'depends-on' | 'reference'; from: Passage | null; to: DescriptionTarget; reason?: string };\nexport interface Metadata {\n  id: string;\n  parent: (DescriptionTarget & { passage: Passage }) | null;\n  realization: 'implemented' | 'partial' | 'unimplemented';\n  remaining?: string;\n  links: Link[];\n}\nexport interface Description { id: string; title: string; body: string; path: string; metadata?: Metadata }\nexport interface TestRecord { id: string; name: string; description: string; code: SourceTarget[]; verifies: DescriptionTarget[] }"
+        }
+      }
+    }
+  ]
+}

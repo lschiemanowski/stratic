@@ -1,0 +1,21 @@
+{
+  "id": "selectors",
+  "name": "Exact selectors survive inserted lines, detect overlapping ambiguity, and reject drift",
+  "description": "Exact selectors survive inserted lines, detect overlapping ambiguity, and reject drift.",
+  "code": [
+    {
+      "path": "test/project.test.ts",
+      "passage": {
+        "quote": "test('Exact selectors survive inserted lines, detect overlapping ambiguity, and reject drift', () => {\n  assert.equal(resolvePassage('new\\nalpha\\nbeta', { quote: 'beta' }).startLine, 3);\n  assert.throws(() => resolvePassage('aaa', { quote: 'aa' }), /ambiguous/);\n  assert.equal(resolvePassage('aaa', { quote: 'aa', prefix: 'a' }).start, 1);\n  assert.throws(() => resolvePassage('changed', { quote: 'previous' }), /no longer exists/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "passages",
+      "passage": {
+        "quote": "Matching succeeds only when exactly one occurrence satisfies the quote and any context. No match is reported as stale, and multiple matches are reported as ambiguous. Inserting lines before an unchanged passage preserves the target, while editing a word inside the quote breaks the link until its meaning and selector are checked again."
+      }
+    }
+  ]
+}

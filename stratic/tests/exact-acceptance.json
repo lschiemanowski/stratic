@@ -1,0 +1,21 @@
+{
+  "id": "exact-acceptance",
+  "name": "Acceptance is exact, preserves unrelated staged/unstaged edits, and does not rerun tests",
+  "description": "Acceptance is exact, preserves unrelated staged/unstaged edits, and does not rerun tests.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Acceptance is exact, preserves unrelated staged/unstaged edits, and does not rerun tests', t => {\n  const root = fixture(t);\n  writeFileSync(join(root, 'unrelated.txt'), 'base\\n'); git(root, ['add', 'unrelated.txt']); git(root, ['commit', '-qm', 'Unrelated baseline']);\n  const proposal = preparedRelease(root);\n  writeFileSync(join(root, 'unrelated.txt'), 'staged\\n'); git(root, ['add', 'unrelated.txt']);\n  writeFileSync(join(root, 'unrelated.txt'), 'unstaged\\n');\n  const count = results(root).length;\n  const done = accept(root, proposal.id);\n  assert.equal(git(root, ['rev-parse', 'HEAD^{tree}']).trim(), proposal.finalTree);\n  assert.equal(readFileSync(join(root, 'unrelated.txt'), 'utf8'), 'unstaged\\n');\n  assert.equal(git(root, ['show', ':unrelated.txt']), 'staged\\n');\n  assert.equal(git(root, ['show', 'HEAD:unrelated.txt']), 'base\\n');\n  assert.equal(results(root).length, count);\n  assert.equal(ready(root), null);\n  assert.equal(git(root, ['diff', '--name-only', '--cached']).trim(), 'unrelated.txt');\n  assert.ok(done.acceptanceMs < 5000, `Acceptance took ${done.acceptanceMs} ms`);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "commit-safeguards",
+      "passage": {
+        "quote": "The user\u2019s index is then reconciled only for paths affected by the accepted change. Unrelated staged entries and working files remain intact. For example, accepting a description and its implementation leaves a separately staged README edit available for its own later commit. File selection is whole-file; selected files cannot carry a second, unreviewed version into acceptance."
+      }
+    }
+  ]
+}

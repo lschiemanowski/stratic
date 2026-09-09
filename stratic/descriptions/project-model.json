@@ -1,0 +1,11 @@
+{
+  "id": "project-model",
+  "parent": {
+    "description": "stratic",
+    "passage": {
+      "quote": "The project model gives these descriptions a common structure. Each description explains one responsibility, children add detail where needed, and links connect meaningful passages to implementation and tests. Reviewed changes preserve the connection between the intended behavior, the investigation, and the exact content being accepted."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

@@ -1,0 +1,48 @@
+{
+  "id": "commit-safeguards",
+  "parent": {
+    "description": "acceptance",
+    "passage": {
+      "quote": "Commit hooks inspect the prepared index and may amend the commit message. Hook failure or a content change stops acceptance before the branch moves. The commit uses the pinned tree, and only its affected index entries are reconciled; unrelated staged and working edits remain intact."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Before committing, acceptance checks that HEAD is still the recorded base and that the proposed files, including the generated review, still produce the pinned final tree. It requires a checked-out branch, rejects unfinished merge or rebase operations, and checks structural validity again. The completed tests and semantic investigation are reused; they are not rerun at this point."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "function branch(root: string): string {\n  try { return git(root, ['symbolic-ref', '--quiet', 'HEAD']).trim(); }\n  catch { throw new Error('Acceptance currently requires a checked-out branch.'); }\n}\nfunction checkUnchanged(root: string, state: Prepared) {\n  if (head(root) !== state.base) throw new Error('HEAD changed after review. Prepare the change again.');\n  if (snapshot(root, [...state.paths, state.reviewPath], state.base) !== state.finalTree) throw new Error('The proposed files or review changed after review. Prepare again.');\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Commit hooks run against an index containing the prepared tree. They may inspect the proposal and amend its commit message. A failing pre-commit or message hook stops acceptance, and a hook that changes project content or the prepared tree also stops it before the branch advances. The live proposal and branch are checked again after the hooks."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "/** Commit only the prepared tree. Test callback models interruption after ref update. */\nexport function accept(root: string, approvedId: string, options: { afterCommit?: () => void } = {}) {\n  const start = performance.now(), directory = localDirectory(root), state = ready(root);\n  if (!state || state.id !== approvedId) throw new Error('Provide the exact ready review ID to authorize acceptance.');\n  const actualIndex = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index']).trim();\n  const indexLock = `${actualIndex}.lock`;\n  const ownerPath = join(directory, 'index-lock-owner.json');\n  if (existsSync(indexLock) && existsSync(ownerPath)) {\n    const owner = readJson<{ pid: number; ino: number }>(ownerPath);\n    let dead = false;\n    try { process.kill(owner.pid, 0); } catch (e) { dead = (e as NodeJS.ErrnoException).code === 'ESRCH'; }\n    if (dead && lstatSync(indexLock).ino === owner.ino) { rmSync(indexLock); rmSync(ownerPath); }\n  }\n  let inode: number;\n  const token = randomUUID();\n  try {\n    const fd = openSync(indexLock, 'wx'); inode = fstatSync(fd).ino; closeSync(fd);\n  } catch { throw new Error('Git index is locked by another operation. Retry when it completes.'); }\n  writeJson(ownerPath, { pid: process.pid, ino: inode, token });\n  try {\n    if (state.commit && head(root) === state.commit) {\n      if (branch(root) !== state.branch) throw new Error('Return to the branch where acceptance began before recovering.');\n      const entries = git(root, ['ls-files', '--stage', '-z', '--', ...changedPaths(root, state.base, state.finalTree)]);\n      if (entries !== state.indexBefore && entries !== state.indexAfter) throw new Error('Selected staged files changed after the interruption. Preserve those edits before recovering the index.');\n      reconcileIndex(root, state, indexLock, directory);\n      rmSync(join(directory, 'ready.json'));\n      return { commit: state.commit, recovered: true, acceptanceMs: performance.now() - start };\n    }\n    checkUnchanged(root, state);\n    if (git(root, ['ls-files', '--unmerged']).trim()) throw new Error('Resolve the Git merge before acceptance.');\n    for (const p of ['MERGE_HEAD', 'CHERRY_PICK_HEAD', 'REVERT_HEAD', 'rebase-merge', 'rebase-apply']) {\n      if (existsSync(git(root, ['rev-parse', '--path-format=absolute', '--git-path', p]).trim())) throw new Error('Finish the ongoing Git operation before acceptance.');\n    }\n    const issues = loadProject(root, state.finalTree).issues;\n    if (issues.length) throw new Error(`Structural validation failed: ${issues[0].message}`);\n    const currentBranch = branch(root);\n    const tempIndex = join(directory, 'accept-index');\n    const env = { GIT_INDEX_FILE: tempIndex };\n    git(root, ['read-tree', state.finalTree], undefined, env);\n    const affected = changedPaths(root, state.base, state.finalTree);\n    state.indexBefore = git(root, ['ls-files', '--stage', '-z', '--', ...affected]);\n    state.indexAfter = git(root, ['ls-files', '--stage', '-z', '--', ...affected], undefined, env);\n    const review = JSON.parse(readSource(root, state.reviewPath, state.finalTree)) as Review;\n    const messagePath = join(directory, 'commit-message');\n    writeFileSync(messagePath, review.summary + '\\n');\n    const beforeHooks = workingSnapshot(root);\n    git(root, ['hook', 'run', '--ignore-missing', 'pre-commit'], undefined, env);\n    git(root, ['hook', 'run', '--ignore-missing', 'prepare-commit-msg', '--', messagePath, 'message'], undefined, env);\n    git(root, ['hook', 'run', '--ignore-missing', 'commit-msg', '--', messagePath], undefined, env);\n    if (git(root, ['write-tree'], undefined, env).trim() !== state.finalTree || workingSnapshot(root) !== beforeHooks) throw new Error('A commit hook changed project content. Inspect the changes and prepare again.');\n    checkUnchanged(root, state);\n    if (branch(root) !== currentBranch) throw new Error('The active branch changed during acceptance.');\n    let sign = false;\n    try { sign = git(root, ['config', '--bool', 'commit.gpgsign']).trim() === 'true'; } catch { /* unset */ }\n    const commit = git(root, ['commit-tree', state.finalTree, '-p', state.base, ...(sign ? ['-S'] : []), '-F', messagePath], undefined, env).trim();\n    state.commit = commit; state.branch = currentBranch;\n    writeJson(join(directory, 'ready.json'), state);\n    git(root, ['update-ref', '-m', `stratic: ${review.summary.split('\\n')[0]}`, currentBranch, commit, state.base]);\n    options.afterCommit?.();\n    reconcileIndex(root, state, indexLock, directory);\n    rmSync(join(directory, 'ready.json'));\n    let hookWarning: string | undefined;\n    try { git(root, ['hook', 'run', '--ignore-missing', 'post-commit']); } catch (e) { hookWarning = (e as Error).message; }\n    return { commit, recovered: false, acceptanceMs: performance.now() - start, ...(hookWarning ? { hookWarning } : {}) };\n  } finally {\n    if (existsSync(indexLock) && lstatSync(indexLock).ino === inode) rmSync(indexLock);\n    if (existsSync(ownerPath) && readJson<{ token: string }>(ownerPath).token === token) rmSync(ownerPath);\n  }\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The user\u2019s index is then reconciled only for paths affected by the accepted change. Unrelated staged entries and working files remain intact. For example, accepting a description and its implementation leaves a separately staged README edit available for its own later commit. File selection is whole-file; selected files cannot carry a second, unreviewed version into acceptance."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "function reconcileIndex(root: string, state: Prepared, indexLock: string, directory: string) {\n  const actual = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index']).trim();\n  const temporary = join(directory, 'reconciled-index');\n  const env = { GIT_INDEX_FILE: temporary };\n  if (existsSync(actual)) copyFileSync(actual, temporary); else git(root, ['read-tree', state.base], undefined, env);\n  const affected = changedPaths(root, state.base, state.finalTree);\n  for (const path of affected) {\n    const entry = git(root, ['ls-tree', '-z', state.finalTree, '--', path]);\n    if (entry) {\n      const match = /^(\\d+) blob ([0-9a-f]+)\\t/.exec(entry);\n      if (!match) throw new Error(`Unsupported staged resource: ${path}`);\n      git(root, ['update-index', '--add', '--cacheinfo', match[1], match[2], path], undefined, env);\n    } else git(root, ['update-index', '--force-remove', '--', path], undefined, env);\n  }\n  copyFileSync(temporary, indexLock);\n  renameSync(indexLock, actual);\n}"
+        }
+      }
+    }
+  ]
+}

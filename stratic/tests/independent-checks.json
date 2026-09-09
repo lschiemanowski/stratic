@@ -1,0 +1,21 @@
+{
+  "id": "independent-checks",
+  "name": "Checks can be recorded before review, and individual outcomes come from execution",
+  "description": "Checks can be recorded before review, and individual outcomes come from execution.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Checks can be recorded before review, and individual outcomes come from execution', t => {\n  const root = fixture(t), check = checkQueue(root);\n  assert.equal(ready(root), null);\n  assert.equal(results(root).length, 1);\n  assert.equal(check.tests.length, 2);\n  assert.ok(check.evidence.includes('# fail 0'));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "checks",
+      "passage": {
+        "quote": "A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes."
+      }
+    }
+  ]
+}

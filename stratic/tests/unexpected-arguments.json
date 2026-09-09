@@ -1,0 +1,21 @@
+{
+  "id": "unexpected-arguments",
+  "name": "Unexpected CLI arguments cannot commit a ready proposal",
+  "description": "Unexpected CLI arguments cannot commit a ready proposal.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Unexpected CLI arguments cannot commit a ready proposal', t => {\n  const root = fixture(t), proposal = preparedRelease(root), base = head(root);\n  assert.throws(() => execFileSync(process.execPath, [join(process.cwd(), 'src/cli.ts'), '--project', root, 'accept', '--id', proposal.id, '--unexpected'], { stdio: 'pipe' }));\n  assert.equal(head(root), base);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-accept",
+      "passage": {
+        "quote": "The CLI rejects unexpected arguments before acceptance acts. Completed evidence is reused rather than rerunning tests or investigation. Content drift, hook failure, or a conflicting recovery state prevents normal completion and remains visible as an error. Acceptance has no push operation."
+      }
+    }
+  ]
+}

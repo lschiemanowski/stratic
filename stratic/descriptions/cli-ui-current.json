@@ -1,0 +1,36 @@
+{
+  "id": "cli-ui-current",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "UI current reports which description and passage the person is reading."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The response contains the project, revision, optional description identity, and optional passage. It does not contain arbitrary window contents or recursively include the selected description\u2019s prose. Reading that prose remains the responsibility of show."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'ui': {\n      const action = args.shift();\n      if (action === 'current') output = await requestUI(root, { action: 'current' });\n      else if (action === 'open') {\n        const quote = option('quote'); const description = args.shift()!; done(); output = await requestUI(root, { action: 'open', description, revision: ref, ...(quote ? { passage: { quote } } : {}) });\n      } else throw new Error('Use ui current or ui open.'); break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request uses the selected worktree\u2019s saved socket information and session token to contact an active desktop. A missing session, connection failure, or timeout is reported as an error. The command does not create a desktop session as a side effect of reading focus."
+      },
+      "to": {
+        "path": "src/ui-channel.ts",
+        "passage": {
+          "quote": "export async function requestUI(root: string, request: UIRequest): Promise<Selection> {\n  const info = readJson<{ socketPath: string; token: string }>(join(localDirectory(root), 'ui.json'));\n  return new Promise((resolve, reject) => {\n    const socket = createConnection(info.socketPath);\n    socket.setTimeout(3000, () => { socket.destroy(); reject(new Error('Desktop did not respond. Open this project in Stratic.')); });\n    let data = '';\n    socket.on('connect', () => socket.write(JSON.stringify({ token: info.token, request }) + '\\n'));\n    socket.on('error', reject);\n    let handled = false;\n    socket.on('data', async chunk => {\n      if (handled) return; data += chunk.toString(); if (data.length > 65536) { socket.destroy(); reject(new Error('UI response too large.')); } });\n    socket.on('end', () => {\n      try { const response = JSON.parse(data); if (!response.ok) throw new Error(response.error); resolve(response.value); }\n      catch (e) { reject(e); }\n    });\n  });\n}"
+        }
+      }
+    }
+  ]
+}

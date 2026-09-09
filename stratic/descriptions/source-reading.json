@@ -1,0 +1,56 @@
+{
+  "id": "source-reading",
+  "parent": {
+    "description": "desktop",
+    "passage": {
+      "quote": "Linked source is read-only and opens at the passage that implements the selected claim. Line numbers, syntax colors, and a background on the linked lines help the reader relate the explanation to the actual code. The surrounding source stays visible, so a link can be understood in context."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Line numbers and a background on the linked lines show where the selected claim points. The rest of the file stays visible so callers, surrounding conditions, and neighboring operations can be read in context. A missing or ambiguous quote is reported as a link problem; a working edit does not silently move the selected target to a different occurrence."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "async function open(target: Target) {\n  const ticket = ++sequence;\n  try {\n    if ('description' in target) {\n      tab = 'description'; source = null; selectedConnections = [];\n      await window.stratic.navigate({ action: 'open', description: target.description, revision: current.selection.revision, passage: target.passage });\n    } else {\n      const body = await window.stratic.source(target.path);\n      if (ticket !== sequence) return;\n      source = { path: target.path, body, passage: target.passage, range: resolvePassage(body, target.passage) }; render();\n    }\n  } catch (e) { error(e); }\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Highlight.js supplies syntax colors for registered languages chosen by filename. Unknown languages and files over 200,000 characters use plain text, avoiding unreliable language guessing and expensive highlighting of large input. This is a coloring limit, separate from the repository\u2019s larger file-read limit. Cached token spans are reused only when both the path and source text still match."
+      },
+      "to": {
+        "path": "src/desktop/source-view.ts",
+        "passage": {
+          "quote": "const extensions: Record<string, string> = {\n  ts: 'typescript', tsx: 'typescript', mts: 'typescript', cts: 'typescript',\n  js: 'javascript', jsx: 'javascript', mjs: 'javascript', cjs: 'javascript',\n  json: 'json', css: 'css', html: 'xml', htm: 'xml', xml: 'xml', svg: 'xml',\n  py: 'python', pyw: 'python', rb: 'ruby', rs: 'rust', go: 'go', java: 'java',\n  c: 'c', h: 'c', cc: 'cpp', cpp: 'cpp', cxx: 'cpp', hpp: 'cpp', cs: 'csharp',\n  sh: 'bash', bash: 'bash', zsh: 'bash', sql: 'sql', yaml: 'yaml', yml: 'yaml',\n  md: 'markdown', markdown: 'markdown', ini: 'ini', toml: 'ini', php: 'php',\n  swift: 'swift', kt: 'kotlin', kts: 'kotlin', sc: 'scala', scala: 'scala',\n  scm: 'scheme', ss: 'scheme', rkt: 'scheme', diff: 'diff', patch: 'diff',\n};\nlet cached: { path: string; body: string; lines: HTMLElement[] } | undefined;\nfunction lines(path: string, body: string): HTMLElement[] {\n  if (cached?.path === path && cached.body === body) return cached.lines;\n  const filename = path.split('/').pop()!.toLowerCase();\n  const language = filename === 'makefile' ? 'makefile' : filename === 'dockerfile' ? 'dockerfile' : extensions[filename.split('.').pop()!];\n  const result: HTMLElement[] = [document.createElement('code')];\n  const append = (text: string, classes: string[]) => {\n    text.split('\\n').forEach((part, i) => {\n      if (i) result.push(document.createElement('code'));\n      if (!part) return;\n      const node = classes.length ? document.createElement('span') : document.createTextNode(part);\n      if (node instanceof HTMLElement) { node.className = classes.join(' '); node.textContent = part; }\n      result[result.length - 1].append(node);\n    });\n  };\n  if (language && hljs.getLanguage(language) && body.length <= 200_000) {\n    // Parse only library-generated markup, then retain text and token classes.\n    // No repository-provided element, URL, or event attribute enters the live DOM.\n    const template = document.createElement('template');\n    template.innerHTML = hljs.highlight(body, { language, ignoreIllegals: true }).value.replace(/\\r/g, '&#13;');\n    const visit = (node: Node, classes: string[]) => {\n      if (node.nodeType === Node.TEXT_NODE) append(node.textContent ?? '', classes);\n      else {\n        const tokenClasses = node instanceof HTMLSpanElement ? Array.from(node.classList).filter(c => /^[a-zA-Z_][\\w-]*$/.test(c)) : [];\n        for (const child of Array.from(node.childNodes)) visit(child, [...classes, ...tokenClasses]);\n      }\n    };\n    visit(template.content, []);\n  } else append(body, []);\n  cached = { path, body, lines: result }; return result;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The renderer combines syntax colors with passage backgrounds without altering the source text. Tokens that span lines are split for display while original line endings and blank lines are preserved. Source strings that resemble HTML are inserted as text, not executable markup."
+      },
+      "to": {
+        "path": "src/desktop/source-view.ts",
+        "passage": {
+          "quote": "export function sourceView(path: string, body: string, range?: Range): HTMLPreElement {\n  const pre = document.createElement('pre'); pre.className = 'hljs source-code';\n  for (const [index, code] of lines(path, body).entries()) {\n    const row = document.createElement('div'); row.className = 'code-line';\n    if (range && index + 1 >= range.startLine && index + 1 <= range.endLine) row.classList.add('highlighted');\n    const number = document.createElement('span'); number.className = 'line-number'; number.textContent = String(index + 1); number.setAttribute('aria-hidden', 'true');\n    row.append(number, code.cloneNode(true)); pre.append(row);\n  }\n  return pre;\n}"
+        }
+      }
+    },
+    {
+      "kind": "depends-on",
+      "from": null,
+      "to": {
+        "description": "passages"
+      },
+      "reason": "Source backgrounds must identify the same exact passage as the project links."
+    }
+  ]
+}

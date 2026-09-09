@@ -1,0 +1,36 @@
+{
+  "id": "cli-check-record",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Check record stores an observed result, its evidence, and the content it applies to."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request supplies a JSON record naming the examined tree, method, environment, evidence, overall outcome, and an explicit list of individual test outcomes. Pass, fail, and inconclusive are recordable outcomes. An empty individual list represents a check for which no cataloged test outcomes were established."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'check': {\n      const action = args.shift();\n      if (action === 'record') { const input = jsonFile('file'); done(); output = recordCheck(root, input); }\n      else if (action === 'list') output = results(root);\n      else throw new Error('Use check record or check list.'); break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The record is validated for its required fields, an existing Git tree, and unique individual test identities. The operation assigns a result identity and timestamp, appends it to local storage, and returns the saved record. Preparation can later select passing records for matching content."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function recordCheck(root: string, input: Omit<CheckResult, 'id' | 'recordedAt'>): CheckResult {\n  if (!input || !nonempty(input.method) || !nonempty(input.environment) || !nonempty(input.evidence) ||\n      !['pass', 'fail', 'inconclusive'].includes(input.outcome) || !Array.isArray(input.tests) ||\n      !input.tests.every(t => nonempty(t.id) && ['pass', 'fail', 'inconclusive'].includes(t.outcome))) throw new Error('A check needs method, environment, evidence, outcome, and explicit individual test outcomes (or []).');\n  if (new Set(input.tests.map(t => t.id)).size !== input.tests.length) throw new Error('A check may give each test one outcome.');\n  if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(input.tree) || git(root, ['cat-file', '-t', input.tree]).trim() !== 'tree') throw new Error('Check input must identify an existing Git tree.');\n  const result = { ...input, id: randomUUID(), recordedAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'checks.json'), [...results(root), result]);\n  return result;\n}"
+        }
+      }
+    }
+  ]
+}

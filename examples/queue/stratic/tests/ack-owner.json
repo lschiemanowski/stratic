@@ -1,0 +1,21 @@
+{
+  "id": "ack-owner",
+  "name": "Only the owner of a live lease can acknowledge a job",
+  "description": "Only the owner of a live lease can acknowledge a job.",
+  "code": [
+    {
+      "path": "tests/queue.test.ts",
+      "passage": {
+        "quote": "test('Only the owner of a live lease can acknowledge a job', t => {\n  const path = queue(t); const job = put(path, 'work');\n  claim(path, 'a', 0);\n  const before = readFileSync(path, 'utf8');\n  assert.throws(() => acknowledge(path, job.id, 'b', 1));\n  assert.throws(() => acknowledge(path, job.id, 'a', 30_000));\n  assert.throws(() => acknowledge(path, 999, 'a', 1));\n  assert.equal(readFileSync(path, 'utf8'), before);\n  acknowledge(path, job.id, 'a', 1);\n  assert.equal(claim(path, 'b', 2), null);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "job-lifecycle",
+      "passage": {
+        "quote": "Acknowledgement removes a job only when the requesting worker owns its live lease; invalid requests leave state unchanged."
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "explicit-acceptance",
+  "name": "CLI enforces explicit review identity for commit authorization",
+  "description": "CLI enforces explicit review identity for commit authorization.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('CLI enforces explicit review identity for commit authorization', t => {\n  const root = fixture(t); preparedRelease(root);\n  const cli = join(process.cwd(), 'src/cli.ts');\n  assert.throws(() => execFileSync(process.execPath, [cli, '--project', root, 'accept'], { stdio: 'pipe' }));\n  const state = JSON.parse(execFileSync(process.execPath, [cli, '--project', root, 'ready'], { encoding: 'utf8' }));\n  const result = JSON.parse(execFileSync(process.execPath, [cli, '--project', root, 'accept', '--id', state.id], { encoding: 'utf8' }));\n  assert.equal(result.commit, head(root));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-accept",
+      "passage": {
+        "quote": "The request must provide the identity of the prepared review. A missing or different identity is rejected. A successful result contains the commit identity, whether recovery was performed, and the acceptance duration; the operation requires the branch and repository state supported by the acceptance model."
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "interruption",
+  "name": "An interrupted acceptance recovers without creating another commit",
+  "description": "An interrupted acceptance recovers without creating another commit.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('An interrupted acceptance recovers without creating another commit', t => {\n  const root = fixture(t), proposal = preparedRelease(root);\n  assert.throws(() => accept(root, proposal.id, { afterCommit: () => { throw new Error('simulated interruption'); } }), /simulated interruption/);\n  const committed = head(root);\n  assert.ok(ready(root)?.commit);\n  const resumed = accept(root, proposal.id);\n  assert.equal(resumed.recovered, true); assert.equal(resumed.commit, committed);\n  assert.equal(git(root, ['status', '--porcelain']).trim(), '');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the selected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If selected entries have changed since the interruption, it stops so those newer staged edits can be preserved."
+      }
+    }
+  ]
+}

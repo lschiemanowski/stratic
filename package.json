@@ -1,0 +1,34 @@
+{
+  "name": "stratic-v3",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hierarchical program descriptions for people and coding agents",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "main": "dist/main.cjs",
+  "bin": {
+    "stratic": "src/cli.ts"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "stratic": "node src/cli.ts",
+    "build": "node scripts/build.ts",
+    "start": "npm run build && electron .",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "demo": "node scripts/demo.ts",
+    "test:desktop": "npm run build && node scripts/desktop-smoke.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "electron": "43.2.0",
+    "esbuild": "0.28.2",
+    "playwright-core": "1.62.1",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "highlight.js": "11.12.0"
+  }
+}

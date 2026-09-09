@@ -1,0 +1,21 @@
+{
+  "id": "drift-rejection",
+  "name": "Changed proposals, changed review records, and moved HEAD cannot be accepted",
+  "description": "Changed proposals, changed review records, and moved HEAD cannot be accepted.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Changed proposals, changed review records, and moved HEAD cannot be accepted', t => {\n  const root = fixture(t), proposal = preparedRelease(root), before = head(root);\n  const file = join(root, 'src/queue.ts'), content = readFileSync(file, 'utf8');\n  writeFileSync(file, content + '\\n'); assert.throws(() => accept(root, proposal.id), /changed after review/); assert.equal(head(root), before);\n  writeFileSync(file, content);\n  const reviewPath = join(root, proposal.reviewPath), review = readFileSync(reviewPath, 'utf8');\n  writeFileSync(reviewPath, review + '\\n'); assert.throws(() => accept(root, proposal.id), /changed after review/); writeFileSync(reviewPath, review);\n  git(root, ['commit', '--allow-empty', '-qm', 'Moved HEAD']); assert.throws(() => accept(root, proposal.id), /HEAD changed/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "commit-safeguards",
+      "passage": {
+        "quote": "Before committing, acceptance checks that HEAD is still the recorded base and that the proposed files, including the generated review, still produce the pinned final tree. It requires a checked-out branch, rejects unfinished merge or rebase operations, and checks structural validity again. The completed tests and semantic investigation are reused; they are not rerun at this point."
+      }
+    }
+  ]
+}

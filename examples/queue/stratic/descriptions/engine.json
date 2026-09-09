@@ -1,0 +1,11 @@
+{
+  "id": "engine",
+  "parent": {
+    "description": "queue",
+    "passage": {
+      "quote": "The queue engine keeps jobs available across invocations and manages temporary ownership."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

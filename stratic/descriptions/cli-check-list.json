@@ -1,0 +1,36 @@
+{
+  "id": "cli-check-list",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Check list retrieves those records without running the checks again."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The operation returns the local records as a JSON array, retaining their tree identities, methods, evidence, timestamps, overall outcomes, and individual results. With no saved records, the result is an empty array."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'check': {\n      const action = args.shift();\n      if (action === 'record') { const input = jsonFile('file'); done(); output = recordCheck(root, input); }\n      else if (action === 'list') output = results(root);\n      else throw new Error('Use check record or check list.'); break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Retrieval does not execute checks, discard failed outcomes, or label every record as applicable to the current files. Each record continues to describe its own tree. Preparation separately enforces content equality for selected evidence."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function results(root: string): CheckResult[] {\n  const p = join(localDirectory(root), 'checks.json');\n  return existsSync(p) ? readJson<CheckResult[]>(p) : [];\n}"
+        }
+      }
+    }
+  ]
+}

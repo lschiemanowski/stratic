@@ -1,0 +1,21 @@
+{
+  "id": "hook-failure",
+  "name": "Commit hooks run; failure or hook edits leave the proposal uncommitted",
+  "description": "Commit hooks run; failure or hook edits leave the proposal uncommitted.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Commit hooks run; failure or hook edits leave the proposal uncommitted', t => {\n  const root = fixture(t), proposal = preparedRelease(root), base = head(root);\n  hook(root, 'pre-commit', 'exit 1'); assert.throws(() => accept(root, proposal.id)); assert.equal(head(root), base);\n  hook(root, 'pre-commit', 'printf \"\\\\n\" >> src/queue.ts\\ngit add src/queue.ts');\n  assert.throws(() => accept(root, proposal.id), /hook changed/); assert.equal(head(root), base);\n  assert.ok(ready(root));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "commit-safeguards",
+      "passage": {
+        "quote": "Commit hooks run against an index containing the prepared tree. They may inspect the proposal and amend its commit message. A failing pre-commit or message hook stops acceptance, and a hook that changes project content or the prepared tree also stops it before the branch advances. The live proposal and branch are checked again after the hooks."
+      }
+    }
+  ]
+}

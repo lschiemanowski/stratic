@@ -1,0 +1,21 @@
+{
+  "id": "withdraw-readiness",
+  "name": "Withdrawing a stale handoff keeps edits and results and allows fresh preparation",
+  "description": "Withdrawing a stale handoff keeps edits and results and allows fresh preparation.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('Withdrawing a stale handoff keeps edits and results and allows fresh preparation', async t => {\n  const { discard } = await import('../src/review.ts');\n  const root = fixture(t), proposal = preparedRelease(root);\n  const source = readFileSync(join(root, 'src/queue.ts'), 'utf8');\n  const count = results(root).length;\n  discard(root, proposal.id);\n  assert.equal(ready(root), null);\n  assert.equal(readFileSync(join(root, 'src/queue.ts'), 'utf8'), source);\n  assert.equal(results(root).length, count);\n  const next = prepare(root, selected(root), releaseReview(root));\n  assert.notEqual(next.id, proposal.id);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Withdrawing an uncommitted proposal removes its ready record and, when still unchanged, its generated review. It keeps the project edits and independent check results so work can continue. If the recorded commit is already at HEAD, withdrawal requires finishing recovery through acceptance instead; it does not undo the commit."
+      }
+    }
+  ]
+}

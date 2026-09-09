@@ -1,0 +1,36 @@
+{
+  "id": "cli-impact",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Impact identifies the responsibilities that need investigation and uses recorded decisions to follow the effects of a change."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The command constructs a tree from selected working files and compares it with a supplied base, defaulting to HEAD. An optional review input contributes previously recorded examined decisions. The response contains changed paths, whether the base has an exact review, the required descriptions with reasons and available decisions, and unmapped regions."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'impact': {\n      const base = option('base', 'HEAD')!;\n      const file = option('review'); const decisions = file ? JSON.parse(readFileSync(file, 'utf8')).examined : [];\n      output = impact(root, base, snapshot(root, paths()), decisions); break;\n    }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Analysis uses both the before and after projects, so removed links still contribute their former meaning. Revised responsibilities expand toward parents and explicit dependencies; unchanged decisions stop expansion through those responsibilities. Without a reviewed baseline, all descriptions require initial examination."
+      },
+      "to": {
+        "path": "src/impact.ts",
+        "passage": {
+          "quote": "export function impact(root: string, base: string, tree: string, decisions: ReviewInput['examined'] = []) {\n  const before = loadProject(root, base), after = loadProject(root, tree);\n  const paths = changedPaths(root, base, tree);\n  const required = new Map<string, Set<string>>();\n  const add = (id: string, reason: string) => { if (!required.has(id)) required.set(id, new Set()); required.get(id)!.add(reason); };\n  let reviewedBase = false;\n  for (const path of files(root, base).filter(p => p.startsWith('stratic/reviews/') && p.endsWith('.json'))) {\n    try {\n      const review = JSON.parse(readSource(root, path, base));\n      if (typeof review.contentTree === 'string' && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.contentTree)) {\n        const difference = changedPaths(root, review.contentTree, base);\n        if (difference.length === 1 && difference[0] === path) reviewedBase = true;\n      }\n    } catch { /* No usable review binding for this baseline. */ }\n  }\n  if (!reviewedBase) for (const p of [before, after]) for (const d of p.descriptions) {\n    add(d.id, 'The baseline has no review for this exact content; establish its accuracy before relying on bounded impact.');\n  }\n  const mappings = new Map<string, { project: Project; owner: string; passage: any }[]>();\n  for (const p of [before, after]) {\n    for (const d of p.descriptions) {\n      if (paths.includes(d.path) || paths.includes(d.path.replace(/\\.md$/, '.json'))) add(d.id, 'Description or metadata changed.');\n      for (const l of d.metadata?.links ?? []) if ('path' in l.to) {\n        const list = mappings.get(l.to.path) ?? []; list.push({ project: p, owner: d.id, passage: l.to.passage }); mappings.set(l.to.path, list);\n        if (paths.includes(l.to.path)) add(d.id, `Linked resource changed: ${l.to.path}`);\n      }\n    }\n    for (const t of p.tests) {\n      const changed = JSON.stringify(before.tests.find(x => x.id === t.id)) !== JSON.stringify(after.tests.find(x => x.id === t.id));\n      for (const v of t.verifies) {\n        if (changed || t.code.some(c => paths.includes(c.path))) add(v.description, `Test changed: ${t.name}`);\n        for (const c of t.code) {\n          const list = mappings.get(c.path) ?? []; list.push({ project: p, owner: v.description, passage: c.passage }); mappings.set(c.path, list);\n        }\n      }\n    }\n  }\n  if (paths.includes('stratic/project.json')) {\n    for (const p of [before, after]) for (const d of p.descriptions.filter(d => d.metadata?.parent === null)) add(d.id, 'Managed project scope changed.');\n  }\n  // Only a recorded semantic change expands this branch. An unchanged abstraction stops it.\n  const expanded = new Set<string>();\n  let progress = true;\n  while (progress) {\n    progress = false;\n    for (const [id] of required) {\n      if (expanded.has(id) || decisions.find(d => d.id === id)?.outcome !== 'revised') continue;\n      expanded.add(id); progress = true;\n      for (const p of [before, after]) {\n        const parent = p.descriptions.find(d => d.id === id)?.metadata?.parent;\n        if (parent) add(parent.description, `Child responsibility changed: ${id}`);\n        for (const link of p.descriptions.find(d => d.id === id)?.metadata?.links ?? []) {\n          if (link.kind === 'depends-on') add(link.to.description, `A changed responsibility relies on this promise: ${id}`);\n        }\n        for (const d of p.descriptions) if (d.metadata?.links.some(l => l.kind === 'depends-on' && l.to.description === id)) add(d.id, `Relies on changed responsibility: ${id}`);\n      }\n    }\n  }\n  const unmapped: { path: string; reason: string }[] = [];\n  for (const path of paths.filter(p => inScope(before, p) || inScope(after, p))) {\n    const map = mappings.get(path) ?? [];\n    const diff = git(root, ['diff', '--no-ext-diff', '--no-textconv', '--unified=0', '--no-renames', base, tree, '--', path]);\n    const hunks = [...diff.matchAll(/^@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@/gm)];\n    let covered = map.length > 0 && hunks.length > 0;\n    for (const h of hunks) {\n      for (const [p, start, count] of [[before, Number(h[1]), Number(h[2] ?? 1)], [after, Number(h[3]), Number(h[4] ?? 1)]] as const) {\n        if (!count) continue;\n        const ranges = map.filter(m => m.project === p).flatMap(m => {\n          try { return [resolvePassage(readSource(root, path, p.revision), m.passage)]; } catch { return []; }\n        });\n        for (let line = start; line < start + count; line++) if (!ranges.some(r => r.startLine <= line && r.endLine >= line)) covered = false;\n      }\n    }\n    if (!covered) unmapped.push({ path, reason: map.length ? 'Some changed regions are outside resolved links; inspect and explain them.' : 'No description or test links to this changed resource.' });\n  }\n  return { paths, reviewedBase, frontier: [...required].map(([id, reasons]) => ({ id, reasons: [...reasons], decision: decisions.find(d => d.id === id) })), unmapped };\n}"
+        }
+      }
+    }
+  ]
+}

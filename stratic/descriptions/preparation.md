@@ -1,0 +1,13 @@
+# Preparing a change
+
+Preparation makes a proposed change concrete enough for another person to inspect and authorize. Its inputs are selected project files, the agent’s investigation decisions, and recorded check results. Its output is a pinned proposal with one review record; the work is still uncommitted.
+
+The investigation names examined descriptions as revised or unchanged with reasons, accounts for the required impact and unmapped changed regions, and leaves no unresolved blocker. Preparation loads the selected content and checks those decisions against the before and after descriptions. It also requires valid structure and links, and at least one appropriate passing result for the exact content. These checks enforce consistency of the submitted review; they do not generate its semantic judgment.
+
+The selected content starts from the current Git base with the chosen working-file changes applied. Files are selected as whole files. A temporary index is used to build this tree, leaving the user’s staging area intact. For example, selecting one source file and its description does not silently include an unrelated working edit in another file. Checks must have examined that selected content, including any dependencies that would affect their execution. Git operations explicitly target the selected repository instead of inheriting another repository from the caller’s Git environment.
+
+There are two content identities: the tree the checks examined, and the final tree that also contains the new review. The review copies the selected results and records the investigation. The local ready record pins both trees, the base, paths, and review identity. Separating them avoids asking tests to predict the review file that will later contain their own results.
+
+Pending readiness and independent check results are stored locally for the Git worktree. JSON records are replaced as complete files so readers do not see a half-written update. The prepared review itself is part of the proposed project content, preserving the evidence when it is committed.
+
+If more edits are needed, preparation can replace an unchanged generated review under the pending identity. The new proposal still needs matching evidence and complete decisions. The user should inspect the final proposal before authorizing acceptance; preparation never turns an old pass into evidence about new content merely because the change seems small.

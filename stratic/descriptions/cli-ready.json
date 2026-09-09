@@ -1,0 +1,36 @@
+{
+  "id": "cli-ready",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Ready retrieves that prepared proposal and its identity without accepting it."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The response is the locally stored prepared record or null when no record exists. A record identifies the review, base, selected tree, final tree, paths, and generated review file. An interrupted acceptance can leave additional commit and index information needed for recovery."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'ready': output = ready(root); break;"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "This is a read of saved state, not a fresh validation of the worktree. Later edits can make the proposal stale while its ready record remains present. Live comparison with the base and proposed files belongs to acceptance, so the presence of a ready record alone does not establish that committing would succeed."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function ready(root: string): Prepared | null {\n  const p = join(localDirectory(root), 'ready.json');\n  return existsSync(p) ? readJson<Prepared>(p) : null;\n}"
+        }
+      }
+    }
+  ]
+}

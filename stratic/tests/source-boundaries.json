@@ -1,0 +1,21 @@
+{
+  "id": "source-boundaries",
+  "name": "Repository reads cannot escape through paths or symbolic links",
+  "description": "Repository reads cannot escape through paths or symbolic links.",
+  "code": [
+    {
+      "path": "test/project.test.ts",
+      "passage": {
+        "quote": "test('Repository reads cannot escape through paths or symbolic links', t => {\n  const root = fixture(t);\n  assert.throws(() => readSource(root, '../secret'), /Invalid repository path/);\n  assert.throws(() => readSource(root, '.git/config'), /Invalid repository path/);\n  symlinkSync('/etc/passwd', join(root, 'src/outside'));\n  assert.throws(() => readSource(root, 'src/outside'), /Symbolic links/);\n  assert.throws(() => snapshot(root, ['src/outside']), /Symbolic links/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "passages",
+      "passage": {
+        "quote": "Repository reads constrain where those targets can point: paths must stay inside the project, symbolic links are rejected, and oversized resources exceed the display limit. Historical links read regular files from the selected Git state. A link cannot escape those boundaries merely because its quote is valid."
+      }
+    }
+  ]
+}

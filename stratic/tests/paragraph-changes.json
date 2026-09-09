@@ -1,0 +1,21 @@
+{
+  "id": "paragraph-changes",
+  "name": "Description changes distinguish insertion, replacement, deletion, and repeated paragraphs",
+  "description": "Description changes distinguish insertion, replacement, deletion, and repeated paragraphs.",
+  "code": [
+    {
+      "path": "test/text-changes.test.ts",
+      "passage": {
+        "quote": "test('Description changes distinguish insertion, replacement, deletion, and repeated paragraphs', () => {\n  const old = '# Title\\n\\nKeep.\\n\\nReplace.\\n\\nRepeat.\\n\\nRepeat.\\n';\n  const next = '# Title\\n\\nKeep.\\n\\nNew.\\n\\nRepeat.\\n';\n  const change = textChanges(old, next);\n  assert.deepEqual(change.additions.map(r => next.slice(r.start, r.end)), ['New.']);\n  assert.deepEqual(change.removed, ['Replace.', 'Repeat.']);\n  assert.deepEqual(textChanges(old, old), { additions: [], removed: [] });\n  assert.deepEqual(textChanges(old, '').removed, ['# Title', 'Keep.', 'Replace.', 'Repeat.', 'Repeat.']);\n  assert.equal(textChanges('', next).additions.length, 4);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "The comparator preserves matching paragraphs in order and classifies the remaining occurrences as added or removed. Repeated paragraphs are treated as occurrences, so deleting one repeated paragraph is not lost merely because identical wording remains elsewhere. The view highlights prose changes; a metadata-only link or status edit is not a word change in the paragraph."
+      }
+    }
+  ]
+}

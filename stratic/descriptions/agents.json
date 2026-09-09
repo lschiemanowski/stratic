@@ -1,0 +1,11 @@
+{
+  "id": "agents",
+  "parent": {
+    "description": "stratic",
+    "passage": {
+      "quote": "The command-line interface lets agents, scripts, and people read the same project and prepare changes for acceptance. It exposes descriptions, source, link validation, impact analysis, and recorded checks, and can direct the desktop to a description being discussed."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

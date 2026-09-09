@@ -1,0 +1,36 @@
+{
+  "id": "cli-prepare",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Prepare combines the investigation and matching check results into a concrete proposal for the user to inspect."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The request supplies a review file and either selected paths or explicit selection of the entire eligible change. The review contains examined decisions with reasons, a summary and reviewer, unresolved blockers, result identities, and explanations of unmapped regions. Missing selection and unexpected command arguments are rejected before preparation proceeds."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'prepare': { const input = jsonFile('review'); if (!args.includes('--paths') && !args.includes('--all')) throw new Error('Select --paths FILE ... or explicitly use --all.'); const all = args.indexOf('--all'); if (all >= 0) args.splice(all, 1); const selected = paths(); done(); output = prepare(root, selected, input); break; }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The preparation model validates the selected project, accounts for the required investigation, and selects matching passing evidence. It writes a review into the proposed content and a local ready record containing the base, content tree, final tree, paths, and identity. The CLI returns that record together with the preparation duration."
+      },
+      "to": {
+        "path": "src/review.ts",
+        "passage": {
+          "quote": "export function validateReview(input: Input): void {\n  if (!input || !nonempty(input.reviewer) || !nonempty(input.summary) || !Array.isArray(input.examined) ||\n      !input.examined.every(d => nonempty(d.id) && ['revised', 'unchanged'].includes(d.outcome) && nonempty(d.reason)) ||\n      !Array.isArray(input.unresolved) || !input.unresolved.every(nonempty) || !Array.isArray(input.resultIds) || !input.resultIds.every(nonempty) ||\n      (input.unmapped !== undefined && (!Array.isArray(input.unmapped) || !input.unmapped.every(u => nonempty(u.path) && nonempty(u.reason))))) throw new Error('Review needs reviewer, summary, examined decisions with reasons, unresolved[], resultIds[], and optional unmapped explanations.');\n  if (new Set(input.examined.map(d => d.id)).size !== input.examined.length) throw new Error('Each examined description needs one final decision.');\n  if (input.unresolved.length) throw new Error('Resolve blocking issues before preparing a ready handoff.');\n}\nexport function prepare(root: string, paths: string[], input: Input): Prepared & { preparationMs: number } {\n  const start = performance.now(); validateReview(input);\n  if (existsSync(git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index.lock']).trim())) throw new Error('A Git operation is active. Finish it before preparing a review.');\n  const prior = ready(root);\n  if (prior?.commit) throw new Error('An acceptance is pending recovery; run accept before preparing another change.');\n  if (!paths.length) throw new Error('Select the proposed files explicitly.');\n  const base = head(root), id = prior?.id ?? randomUUID();\n  const reviewPath = `stratic/reviews/${safeId(id)}.json`;\n  paths = [...new Set(paths)].filter(p => p !== reviewPath);\n  if (paths.some(p => p.startsWith('stratic/reviews/'))) throw new Error('Historical reviews are retained unchanged. Select project files, not review records.');\n  if (!prior && existsSync(pathInside(root, reviewPath))) throw new Error('Review path already exists.');\n  if (prior && readFileSync(pathInside(root, reviewPath), 'utf8') !== readSource(root, reviewPath, prior.finalTree)) throw new Error('The existing review was edited. Preserve or resolve that edit before replacing it.');\n  const contentTree = snapshot(root, paths, base);\n  paths = changedPaths(root, base, contentTree);\n  if (!paths.length) throw new Error('The selected files contain no changes.');\n  const project = loadProject(root, contentTree);\n  if (project.issues.length) throw new Error(`Repair the project before readiness:\\n${project.issues.map(i => `${i.path}: ${i.message}`).join('\\n')}`);\n  const frontier = impact(root, base, contentTree, input.examined);\n  for (const item of frontier.frontier) if (!item.decision) throw new Error(`Review still needs a decision for ${item.id}: ${item.reasons.join(' ')}`);\n  const old = loadProject(root, base);\n  for (const item of input.examined) {\n    const before = old.descriptions.find(d => d.id === item.id), after = project.descriptions.find(d => d.id === item.id);\n    if (!before && !after) throw new Error(`Unknown examined description: ${item.id}`);\n    if (item.outcome === 'unchanged' && (before?.body !== after?.body || JSON.stringify(before?.metadata) !== JSON.stringify(after?.metadata))) throw new Error(`Description changed but was recorded unchanged: ${item.id}`);\n  }\n  for (const u of frontier.unmapped) if (!input.unmapped?.some(x => x.path === u.path)) throw new Error(`Explain unmapped changed regions in ${u.path} or repair their links.`);\n  const checks = input.resultIds.map(id => {\n    const r = results(root).find(r => r.id === id);\n    if (!r) throw new Error(`Missing recorded result: ${id}`);\n    if (r.tree !== contentTree) throw new Error(`Result ${id} examined different content. Record checks for this exact snapshot.`);\n    if (r.outcome !== 'pass' || r.tests.some(t => t.outcome !== 'pass')) throw new Error(`Result ${id} is not a passing check.`);\n    return r;\n  });\n  if (!checks.length) throw new Error('Record at least one appropriate check, including a manual check when automated tests do not apply.');\n  const review: Review & { unmapped: Input['unmapped'] } = {\n    id, base, contentTree, reviewer: input.reviewer, summary: input.summary, examined: input.examined,\n    unresolved: [], results: checks, recordedAt: new Date().toISOString(), unmapped: input.unmapped ?? [],\n  };\n  writeJson(pathInside(root, reviewPath), review);\n  const finalTree = snapshot(root, [...paths, reviewPath], base);\n  if (head(root) !== base || snapshot(root, paths, base) !== contentTree) throw new Error('Files or HEAD changed during preparation. Prepare again.');\n  const state: Prepared = { id, base, contentTree, finalTree, paths, reviewPath, createdAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'ready.json'), state);\n  return { ...state, preparationMs: performance.now() - start };\n}"
+        }
+      }
+    }
+  ]
+}

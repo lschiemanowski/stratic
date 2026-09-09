@@ -1,0 +1,23 @@
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { createQueue, addRelease } from './queue-example.ts';
+import { checkQueue, releaseReview, selected } from './queue-workflow.ts';
+import { accept, prepare, results } from '../src/review.ts';
+import { repository, writeJson } from '../src/git.ts';
+
+const args = process.argv.slice(2);
+const at = args.indexOf('--destination');
+const destination = at < 0 ? join(tmpdir(), `stratic-queue-${Date.now()}`) : resolve(args[at + 1]);
+if (at >= 0) args.splice(at, 2);
+const prepareOnly = args.includes('--prepare-only');
+if (args.some(a => a !== '--prepare-only')) throw new Error('Use --destination NEW_DIRECTORY and optionally --prepare-only.');
+createQueue(destination);
+const root = repository(destination);
+const baseline = checkQueue(root);
+addRelease(root);
+const review = releaseReview(root);
+const prepared = prepare(root, selected(root), review);
+const accepted = prepareOnly ? null : accept(root, prepared.id);
+const report = { project: root, baselineTests: baseline.tests.length, releaseTests: results(root).find(r => r.id === review.resultIds[0])!.tests.length, prepared, accepted };
+writeJson(destination + '-report.json', report);
+console.log(JSON.stringify(report, null, 2));

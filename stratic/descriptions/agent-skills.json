@@ -1,0 +1,11 @@
+{
+  "id": "agent-skills",
+  "parent": {
+    "description": "stratic",
+    "passage": {
+      "quote": "Agent skills guide the work around those commands: investigate existing intent, update descriptions and code together, check the affected behavior, and prepare a change for the user to review. The agent supplies the judgment about accuracy that structural checks cannot provide."
+    }
+  },
+  "realization": "implemented",
+  "links": []
+}

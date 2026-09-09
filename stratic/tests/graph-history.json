@@ -1,0 +1,21 @@
+{
+  "id": "graph-history",
+  "name": "Queue graph has working passage-to-code links and exact historical content",
+  "description": "Queue graph has working passage-to-code links and exact historical content.",
+  "code": [
+    {
+      "path": "test/project.test.ts",
+      "passage": {
+        "quote": "test('Queue graph has working passage-to-code links and exact historical content', t => {\n  const root = fixture(t), base = head(root), baseline = loadProject(root);\n  assert.deepEqual(baseline.issues, []);\n  const detail = inspect(baseline, 'lease-transitions');\n  const source = targetContent(baseline, detail.connections.find(l => l.kind === 'implementation')!.to);\n  assert.match(source.body.slice(source.range!.start, source.range!.end), /export function put/);\n  addRelease(root);\n  assert.deepEqual(loadProject(root).issues, []);\n  assert.doesNotMatch(readSource(root, 'src/queue.ts', base), /export function release/);\n  assert.match(readSource(root, 'src/queue.ts'), /export function release/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "project-loading",
+      "passage": {
+        "quote": "Project loading turns the files in a Git repository into the descriptions, connections, tests, and problems that both the CLI and desktop display. It can read current working files or the content of a requested Git revision, so a historical description is interpreted together with that revision\u2019s metadata and source."
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "commands",
+  "parent": {
+    "description": "queue",
+    "passage": {
+      "quote": "The command interface exposes the queue operations."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The command interface accepts a queue-file path and an operation. Producers submit text with put. Workers claim with a worker name and acknowledge with a job identifier and worker name. Invalid requests report an error."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "import { put, claim, acknowledge } from './queue.ts';\nconst [path, command, first, second] = process.argv.slice(2);\nfunction required(value: string | undefined, label: string): string {\n  if (!value?.trim()) throw new Error(`Provide ${label}.`);\n  return value;\n}\nfunction jobId(value: string | undefined): number {\n  const id = Number(required(value, 'a job identifier'));\n  if (!Number.isSafeInteger(id) || id < 1) throw new Error('A job identifier must be a positive integer.');\n  return id;\n}\nrequired(path, 'a queue file');\nswitch (command) {\n  case 'put': console.log(JSON.stringify(put(path, required(first, 'text')))); break;\n  case 'claim': console.log(JSON.stringify(claim(path, required(first, 'a worker name')))); break;\n  case 'ack': acknowledge(path, jobId(first), required(second, 'a worker name')); break;\n  default: throw new Error('Use put TEXT, claim WORKER, or ack JOB_ID WORKER.');\n}"
+        }
+      }
+    },
+    {
+      "kind": "depends-on",
+      "from": null,
+      "to": {
+        "description": "job-lifecycle"
+      },
+      "reason": "Commands expose the lifecycle operations and their failure behavior."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "terminated-acceptance",
+  "name": "A terminated accepting process leaves a recoverable owned lock and one commit",
+  "description": "A terminated accepting process leaves a recoverable owned lock and one commit.",
+  "code": [
+    {
+      "path": "test/review.test.ts",
+      "passage": {
+        "quote": "test('A terminated accepting process leaves a recoverable owned lock and one commit', t => {\n  const root = fixture(t), proposal = preparedRelease(root);\n  const moduleURL = new URL('../src/review.ts', import.meta.url).href;\n  const script = `import { accept } from ${JSON.stringify(moduleURL)}; accept(process.argv[1], process.argv[2], { afterCommit: () => process.exit(23) });`;\n  assert.throws(() => execFileSync(process.execPath, ['--input-type=module', '-e', script, root, proposal.id], { stdio: 'pipe' }));\n  const commit = head(root); assert.ok(existsSync(join(root, '.git/index.lock')));\n  const recovered = accept(root, proposal.id);\n  assert.equal(recovered.commit, commit); assert.equal(recovered.recovered, true);\n  assert.equal(git(root, ['status', '--porcelain']).trim(), '');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the selected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If selected entries have changed since the interruption, it stops so those newer staged edits can be preserved."
+      }
+    },
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Acceptance uses an index lock and records ownership information. A retry can remove a lock only when the recorded process is dead and the file still has the recorded identity. An unrelated or active lock is not treated as abandoned. This protects concurrent Git work while allowing a terminated Stratic process to recover."
+      }
+    }
+  ]
+}

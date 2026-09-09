@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "scope": [
+    "src/**",
+    "test/**",
+    "scripts/**",
+    "skills/**",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "exclusions": []
+}

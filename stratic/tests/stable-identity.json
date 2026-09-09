@@ -1,0 +1,21 @@
+{
+  "id": "stable-identity",
+  "name": "Filename and title changes retain identity and incoming links",
+  "description": "Filename and title changes retain identity and incoming links.",
+  "code": [
+    {
+      "path": "test/project.test.ts",
+      "passage": {
+        "quote": "test('Filename and title changes retain identity and incoming links', t => {\n  const root = fixture(t);\n  for (const extension of ['md', 'json']) renameSync(join(root, `stratic/descriptions/job-lifecycle.${extension}`), join(root, `stratic/descriptions/different-name.${extension}`));\n  const path = join(root, 'stratic/descriptions/different-name.md');\n  writeFileSync(path, readFileSync(path, 'utf8').replace('# Job lifecycle', '# Work ownership'));\n  const p = loadProject(root);\n  assert.deepEqual(p.issues, []);\n  assert.equal(inspect(p, 'job-lifecycle').description.title, 'Work ownership');\n  assert.equal(inspect(p, 'job-lifecycle').incoming[0].description, 'commands');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "description-identity",
+      "passage": {
+        "quote": "For example, a description can be renamed from \u201cCommands\u201d to \u201cCommand-line interface\u201d without changing its id. Existing incoming links still refer to the same responsibility. Moving it under a different parent instead changes the parent relation and its passage; it does not require inventing a new identity."
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "acceptance",
+  "parent": {
+    "description": "changes",
+    "passage": {
+      "quote": "Acceptance is the final authorized commit step. It verifies that the prepared proposal and its base have not changed, reuses the completed checks, and commits only that content. It does not repeat the investigation or run tests again. If the proposal changes, it must be prepared again; acceptance does not authorize a push."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "depends-on",
+      "from": null,
+      "to": {
+        "description": "changes"
+      },
+      "reason": "Acceptance must use the base, selected files, review, and final tree that preparation pinned."
+    }
+  ]
+}

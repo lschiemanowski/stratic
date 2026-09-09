@@ -1,0 +1,21 @@
+{
+  "id": "claim-order",
+  "name": "Claims follow insertion order and expired jobs become available",
+  "description": "Claims follow insertion order and expired jobs become available.",
+  "code": [
+    {
+      "path": "tests/queue.test.ts",
+      "passage": {
+        "quote": "test('Claims follow insertion order and expired jobs become available', t => {\n  const path = queue(t);\n  const a = put(path, 'first'); put(path, 'second');\n  assert.equal(claim(path, 'a', 0)?.id, a.id);\n  assert.equal(claim(path, 'b', 1)?.text, 'second');\n  assert.equal(claim(path, 'c', 2), null);\n  assert.equal(claim(path, 'c', 30_000)?.id, a.id);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "job-lifecycle",
+      "passage": {
+        "quote": "Claiming selects the oldest available job and grants a 30-second lease; an expired job is available again."
+      }
+    }
+  ]
+}
