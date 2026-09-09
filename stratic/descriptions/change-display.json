@@ -16,7 +16,7 @@
       "to": {
         "path": "src/desktop/renderer.ts",
         "passage": {
-          "quote": "      const before = current.comparison?.before[d.id];\n      const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };\n      reading.append(prose(d.body, outgoing, selected, changes.additions));\n      if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\\n\\n'))); reading.append(removed); }\n      if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }"
+          "quote": "  const before = current.comparison?.before[d.id];\n  const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };\n  reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));\n  if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\\n\\n'))); reading.append(removed); }\n  if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }"
         }
       }
     },

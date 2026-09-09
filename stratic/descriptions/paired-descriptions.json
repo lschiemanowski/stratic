@@ -1,9 +1,9 @@
 {
-  "id": "reader-evidence",
+  "id": "paired-descriptions",
   "parent": {
-    "description": "desktop",
+    "description": "navigation",
     "passage": {
-      "quote": "The Tests view shows the project\u2019s registered checks, their recorded outcomes, and whether those results apply to the content being viewed. It can open a test\u2019s code or the behavior it checks; it does not run the test. Problems lists malformed metadata and broken links. Draft descriptions remain readable while those problems are being repaired."
+      "quote": "Navigation maintains one active description and displays it together with its immediate parent. The parent is on the left and the active description is on the right; opening a child advances that pair by one level. The pair expresses the hierarchy, while the active identity remains the focus for the bottom menu, revision selection, and agent interface."
     }
   },
   "realization": "implemented",
@@ -11,7 +11,31 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "The Tests view displays cataloged tests and their recorded individual outcomes. Each card can open the test\u2019s source or the description passage it checks. Results are labeled according to whether they apply to the viewed content or an earlier snapshot; a test with no individual result is shown as unrecorded rather than inferred to pass from an aggregate result."
+        "quote": "The paired reading view makes a responsibility and its elaboration visible at the same time. The left pane supplies the immediate parent\u2019s account; the right pane supplies the active child\u2019s more detailed account. This is a view of one hierarchy relation, not a history of the last two pages visited."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "function parentDescription(project: Project, id: string, byId = new Map(project.descriptions.map(d => [d.id, d]))): Description | undefined {\n  const parent = byId.get(id)?.metadata?.parent?.description;\n  const seen = new Set([id]);\n  let cursor = parent;\n  while (cursor) {\n    if (seen.has(cursor) || !byId.has(cursor)) return undefined;\n    seen.add(cursor); cursor = byId.get(cursor)?.metadata?.parent?.description;\n  }\n  return parent ? byId.get(parent) : undefined;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The active description determines the bottom menu\u2019s siblings and children, and is the identity reported to agents. Both descriptions are read at the same project revision. Direct navigation through a link, breadcrumb, menu entry, or agent request constructs the pair from the target\u2019s actual parent rather than the page from which the request originated."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "function descriptionPane(p: Project, d: Description, active: boolean, passage?: Passage) {\n  const reading = el('section', undefined, 'reading description-pane' + (active ? ' active-description' : ' parent-description'));\n  reading.setAttribute('aria-label', active ? 'Active reading pane' : 'Parent reading pane');\n  reading.dataset.description = d.id;\n  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id]);\n  reading.append(el('div', active ? 'ACTIVE DESCRIPTION' : 'PARENT', 'eyebrow'));\n  const meta = el('div', undefined, 'description-meta'); meta.append(el('span', d.metadata?.realization ?? 'Incomplete metadata', 'badge'), el('span', d.id, 'muted small')); if (active) meta.append(button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); reading.append(meta);\n  if (d.metadata?.remaining) reading.append(el('p', 'Still to implement: ' + d.metadata.remaining, 'muted small'));\n  if (d.metadata?.parent) reading.append(button('\u2191 ' + (p.descriptions.find(c => c.id === d.metadata!.parent!.description)?.title ?? 'Parent'), () => void open(d.metadata!.parent!), 'parent'));\n  let selected: Range | undefined;\n  try { if (passage) selected = resolvePassage(d.body, passage); } catch { /* Retain the edited description with its problem. */ }\n  const outgoing = links(p, d.id);\n  const before = current.comparison?.before[d.id];\n  const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };\n  reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));\n  if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\\n\\n'))); reading.append(removed); }\n  if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }\n  const issues = p.issues.filter(i => i.description === d.id);\n  if (issues.length) reading.append(button(`${issues.length} connection problem${issues.length === 1 ? '' : 's'} \u2014 inspect`, () => { tab = 'issues'; render(); }, 'problem-link'));\n  const contextual = outgoing.filter(l => !l.from || l.problem);\n  if (contextual.length) {\n    reading.append(el('h2', 'Related responsibilities'));\n    for (const l of contextual) { const b = button(l.label, () => follow([l], d.id), 'relation'); reading.append(b); }\n  }\n  reading.append(el('p', 'Select an underlined passage to follow its explanation or implementation.', 'hint'));\n  return reading;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The two descriptions scroll independently. Changing siblings retains the visible parent\u2019s reading position, so comparing their explanations does not repeatedly move the shared context. A description with no usable parent, including the root or a broken draft, is shown on its own. An empty detail pane contributes no placeholder content."
       },
       "to": {
         "path": "src/desktop/renderer.ts",

@@ -1,4 +1,4 @@
-import type { Project, Connection, CheckResult, Ready, Target, Range, Passage } from '../model.ts';
+import type { Project, Description, Connection, CheckResult, Ready, Target, Range, Passage } from '../model.ts';
 import type { Selection, UIRequest } from '../ui-channel.ts';
 import type { ViewData } from './view-cache.ts';
 import { sourceView } from './source-view.ts';
@@ -16,7 +16,7 @@ let tab: 'description' | 'tests' | 'issues' = 'description';
 let sequence = 0, loadedKey = '';
 let menuOpen = true, menuParent: string | null = null, menuCursor = '', menuContext = '';
 let focusMenu = true;
-let readingContext = '';
+let connectionOwner: string | undefined, detailSequence = 0;
 let highlightChanges = true;
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e;
@@ -28,26 +28,43 @@ function error(e: unknown) {
   let banner = document.querySelector('#error'); if (!banner) { banner = el('div', '', 'error'); banner.id = 'error'; app.prepend(banner); }
   banner.textContent = (e as Error).message;
 }
-async function open(target: Target) {
-  const ticket = ++sequence;
+function clearDetail() {
+  detailSequence++; source = null; selectedConnections = []; connectionOwner = undefined;
+}
+async function open(target: Target, owner = current.selection.description) {
   try {
     if ('description' in target) {
-      tab = 'description'; source = null; selectedConnections = [];
+      tab = 'description'; clearDetail();
       await window.stratic.navigate({ action: 'open', description: target.description, revision: current.selection.revision, passage: target.passage });
     } else {
+      // Source belongs beside the description containing the link, including a visible parent.
+      if (owner && owner !== current.selection.description) {
+        await window.stratic.navigate({ action: 'open', description: owner, revision: current.selection.revision });
+        await refresh(true);
+        if (current.selection.description !== owner) return;
+      }
+      const ticket = ++detailSequence;
       const body = await window.stratic.source(target.path);
-      if (ticket !== sequence) return;
+      if (ticket !== detailSequence) return;
+      selectedConnections = []; connectionOwner = undefined;
       source = { path: target.path, body, passage: target.passage, range: resolvePassage(body, target.passage) }; render();
     }
   } catch (e) { error(e); }
 }
-function follow(connections: Connection[]) {
-  if (connections.length === 1 && !connections[0].problem) {
-    selectedConnections = [];
-    void open(connections[0].to);
-  } else {
-    selectedConnections = connections; source = null; render();
+function follow(connections: Connection[], owner: string) {
+  clearDetail();
+  if (connections.length === 1 && !connections[0].problem) void open(connections[0].to, owner);
+  else { selectedConnections = connections; connectionOwner = owner; render(); }
+}
+function parentDescription(project: Project, id: string, byId = new Map(project.descriptions.map(d => [d.id, d]))): Description | undefined {
+  const parent = byId.get(id)?.metadata?.parent?.description;
+  const seen = new Set([id]);
+  let cursor = parent;
+  while (cursor) {
+    if (seen.has(cursor) || !byId.has(cursor)) return undefined;
+    seen.add(cursor); cursor = byId.get(cursor)?.metadata?.parent?.description;
   }
+  return parent ? byId.get(parent) : undefined;
 }
 function links(project: Project, id: string): Connection[] {
   const d = project.descriptions.find(d => d.id === id)!;
@@ -56,7 +73,7 @@ function links(project: Project, id: string): Connection[] {
   for (const l of result) if (l.from) { try { l.range = resolvePassage(d.body, l.from); } catch (e) { l.problem = (e as Error).message; } }
   return result;
 }
-function prose(body: string, connections: Connection[], selected?: Range, changes: { start: number; end: number }[] = []) {
+function prose(body: string, connections: Connection[], owner: string, selected?: Range, changes: { start: number; end: number }[] = []) {
   const container = el('div', undefined, 'prose');
   // Render repository text exclusively through text nodes. Raw HTML and URLs are inert.
   const chunks = [...body.matchAll(/[^\n]+(?:\n(?!\n)[^\n]+)*|\n+/g)];
@@ -72,7 +89,7 @@ function prose(body: string, connections: Connection[], selected?: Range, change
     for (let i = 0; i < cuts.length - 1; i++) {
       const a = cuts[i], b = cuts[i + 1];
       const targets = relevant.filter(l => l.range!.start <= a && l.range!.end >= b);
-      const part = targets.length ? button(body.slice(a, b), () => follow(targets), 'passage') : el('span', body.slice(a, b));
+      const part = targets.length ? button(body.slice(a, b), () => follow(targets, owner), 'passage') : el('span', body.slice(a, b));
       if (selected && selected.start <= a && selected.end >= b) part.classList.add('selected');
       node.append(part);
     }
@@ -82,17 +99,7 @@ function prose(body: string, connections: Connection[], selected?: Range, change
 }
 function descriptionMenu(p: Project) {
   const byId = new Map(p.descriptions.map(d => [d.id, d]));
-  // A broken or cyclic parent chain belongs at the top so drafts remain reachable.
-  const parentOf = (id: string): string | null => {
-    const parent = byId.get(id)?.metadata?.parent?.description;
-    let cursor: string | undefined = parent;
-    const seen = new Set([id]);
-    while (cursor) {
-      if (seen.has(cursor) || !byId.has(cursor)) return null;
-      seen.add(cursor); cursor = byId.get(cursor)?.metadata?.parent?.description;
-    }
-    return parent ?? null;
-  };
+  const parentOf = (id: string) => parentDescription(p, id, byId)?.id ?? null;
   const children = (id: string | null) => p.descriptions.filter(d => parentOf(d.id) === id);
   const context = JSON.stringify([p.root, current.selection]);
   if (menuContext !== context) {
@@ -162,21 +169,46 @@ function descriptionMenu(p: Project) {
   childColumn.append(childList);
   body.append(path, parentColumn, currentColumn, childColumn); dock.append(body); return dock;
 }
+function descriptionPane(p: Project, d: Description, active: boolean, passage?: Passage) {
+  const reading = el('section', undefined, 'reading description-pane' + (active ? ' active-description' : ' parent-description'));
+  reading.setAttribute('aria-label', active ? 'Active reading pane' : 'Parent reading pane');
+  reading.dataset.description = d.id;
+  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id]);
+  reading.append(el('div', active ? 'ACTIVE DESCRIPTION' : 'PARENT', 'eyebrow'));
+  const meta = el('div', undefined, 'description-meta'); meta.append(el('span', d.metadata?.realization ?? 'Incomplete metadata', 'badge'), el('span', d.id, 'muted small')); if (active) meta.append(button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); reading.append(meta);
+  if (d.metadata?.remaining) reading.append(el('p', 'Still to implement: ' + d.metadata.remaining, 'muted small'));
+  if (d.metadata?.parent) reading.append(button('↑ ' + (p.descriptions.find(c => c.id === d.metadata!.parent!.description)?.title ?? 'Parent'), () => void open(d.metadata!.parent!), 'parent'));
+  let selected: Range | undefined;
+  try { if (passage) selected = resolvePassage(d.body, passage); } catch { /* Retain the edited description with its problem. */ }
+  const outgoing = links(p, d.id);
+  const before = current.comparison?.before[d.id];
+  const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };
+  reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));
+  if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\n\n'))); reading.append(removed); }
+  if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }
+  const issues = p.issues.filter(i => i.description === d.id);
+  if (issues.length) reading.append(button(`${issues.length} connection problem${issues.length === 1 ? '' : 's'} — inspect`, () => { tab = 'issues'; render(); }, 'problem-link'));
+  const contextual = outgoing.filter(l => !l.from || l.problem);
+  if (contextual.length) {
+    reading.append(el('h2', 'Related responsibilities'));
+    for (const l of contextual) { const b = button(l.label, () => follow([l], d.id), 'relation'); reading.append(b); }
+  }
+  reading.append(el('p', 'Select an underlined passage to follow its explanation or implementation.', 'hint'));
+  return reading;
+}
 function render() {
   const p = current.project;
   const menuHadFocus = document.activeElement?.id === 'description-options';
-  const nextReadingContext = JSON.stringify([p?.root, current.selection, tab]);
-  const existingScroll = readingContext === nextReadingContext ? document.querySelector('.reading')?.scrollTop ?? 0 : 0;
-  readingContext = nextReadingContext;
+  const scrolls = new Map(Array.from(document.querySelectorAll<HTMLElement>('[data-reading-key]'), pane => [pane.dataset.readingKey!, pane.scrollTop]));
   app.replaceChildren();
   const header = el('header'); const brand = el('div', 'stratic', 'brand'); brand.append(el('span', ' / v3', 'muted')); header.append(brand);
-  header.append(button('Open project…', () => window.stratic.chooseProject().then(v => { current = v; signature = ''; source = null; selectedConnections = []; tab = 'description'; render(); }).catch(error), 'subtle'));
+  header.append(button('Open project…', () => window.stratic.chooseProject().then(v => { current = v; signature = ''; clearDetail(); tab = 'description'; render(); }).catch(error), 'subtle'));
   if (p) {
     header.append(el('span', p.root.split('/').pop(), 'project-name'));
     const versions = el('select'); versions.setAttribute('aria-label', 'Revision');
     for (const item of [{ id: 'working', title: 'Working files' }, ...current.history]) { const o = el('option', item.id === 'working' ? item.title : `${item.id.slice(0, 7)} · ${item.title}`); o.value = item.id; versions.append(o); }
     versions.value = current.selection.revision;
-    versions.onchange = () => { if (current.selection.description) { source = null; selectedConnections = []; void window.stratic.navigate({ action: 'open', description: current.selection.description, revision: versions.value }).then(() => refresh(true)).catch(error); } };
+    versions.onchange = () => { if (current.selection.description) { clearDetail(); void window.stratic.navigate({ action: 'open', description: current.selection.description, revision: versions.value }).then(() => refresh(true)).catch(error); } };
     header.append(versions, el('span', current.selection.revision !== 'working' ? 'History' : current.dirty ? 'Uncommitted changes' : 'Committed', 'badge'));
   }
   if (current.comparison) {
@@ -187,6 +219,7 @@ function render() {
   if (!p) { app.append(el('section', 'Open a Git project containing a stratic folder to explore its descriptions.', 'empty')); return; }
   const layout = el('main', undefined, 'layout');
   const reading = el('section', undefined, 'reading');
+  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, tab]);
   if (tab === 'issues') {
     reading.append(el('h1', 'Project problems'), el('p', 'Descriptions stay readable while you repair these connections.', 'muted'));
     if (!p.issues.length) reading.append(el('p', 'The hierarchy and passage links resolve. Semantic accuracy is established by review.'));
@@ -206,45 +239,34 @@ function render() {
     const d = p.descriptions.find(d => d.id === current.selection.description);
     if (!d) reading.append(el('h1', 'Select a description'));
     else {
-      const meta = el('div', undefined, 'description-meta'); meta.append(el('span', d.metadata?.realization ?? 'Incomplete metadata', 'badge'), button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle'), el('span', d.id, 'muted small')); reading.append(meta);
-      if (d.metadata?.remaining) reading.append(el('p', 'Still to implement: ' + d.metadata.remaining, 'muted small'));
-      if (d.metadata?.parent) reading.append(button('↑ ' + (p.descriptions.find(c => c.id === d.metadata!.parent!.description)?.title ?? 'Parent'), () => void open(d.metadata!.parent!), 'parent'));
-      let selected: Range | undefined;
-      try { if (current.selection.passage) selected = resolvePassage(d.body, current.selection.passage); } catch { /* Retain the edited description with its problem. */ }
-      const outgoing = links(p, d.id);
-      const before = current.comparison?.before[d.id];
-      const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };
-      reading.append(prose(d.body, outgoing, selected, changes.additions));
-      if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\n\n'))); reading.append(removed); }
-      if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }
-      const issues = p.issues.filter(i => i.description === d.id);
-      if (issues.length) reading.append(button(`${issues.length} connection problem${issues.length === 1 ? '' : 's'} — inspect`, () => { tab = 'issues'; render(); }, 'problem-link'));
-      const contextual = outgoing.filter(l => !l.from || l.problem);
-      if (contextual.length) {
-        reading.append(el('h2', 'Related responsibilities'));
-        for (const l of contextual) { const b = button(l.label, () => follow([l]), 'relation'); reading.append(b); }
+      const parent = parentDescription(p, d.id);
+      if (source || selectedConnections.length) {
+        const owner = p.descriptions.find(item => item.id === connectionOwner) ?? d;
+        layout.append(descriptionPane(p, owner, owner.id === d.id, owner.id === d.id ? current.selection.passage : undefined));
+      } else {
+        if (parent) layout.append(descriptionPane(p, parent, false, d.metadata?.parent?.passage));
+        layout.append(descriptionPane(p, d, true, current.selection.passage));
       }
-      reading.append(el('p', 'Select an underlined passage to follow its explanation or implementation.', 'hint'));
     }
   }
-  layout.append(reading);
+  if (tab !== 'description' || !layout.childElementCount) layout.append(reading);
   const detail = el('aside', undefined, 'detail');
   if (source) {
-    detail.append(el('div', 'SOURCE', 'eyebrow'), el('h2', source.path), button('Close source', () => { source = null; render(); }, 'subtle'));
+    detail.append(el('div', 'SOURCE', 'eyebrow'), el('h2', source.path), button('Close source', () => { clearDetail(); render(); }, 'subtle'));
     if (source.problem) detail.append(el('p', source.problem, 'problem'));
     detail.append(sourceView(source.path, source.body, source.range));
   } else if (selectedConnections.length) {
-    detail.append(el('div', 'THIS PASSAGE', 'eyebrow'), el('h2', 'Follow the connection'));
-    for (const l of selectedConnections) { const card = el('div', undefined, 'connection-card'); card.append(el('span', l.kind, 'badge'), button(l.label + ' →', () => void open(l.to), 'connection-target')); if (l.reason) card.append(el('p', l.reason)); if (l.problem) card.append(el('p', l.problem, 'error')); detail.append(card); }
-  } else {
-    detail.append(el('div', 'EXPLORE', 'eyebrow'), el('h2', 'From intent to implementation'), el('p', 'Follow a passage into a more detailed explanation or the code that realizes it.', 'muted'));
+    detail.append(el('div', 'THIS PASSAGE', 'eyebrow'), el('h2', 'Follow the connection'), button('Close connections', () => { clearDetail(); render(); }, 'subtle'));
+    for (const l of selectedConnections) { const card = el('div', undefined, 'connection-card'); card.append(el('span', l.kind, 'badge'), button(l.label + ' →', () => void open(l.to, connectionOwner), 'connection-target')); if (l.reason) card.append(el('p', l.reason)); if (l.problem) card.append(el('p', l.problem, 'error')); detail.append(card); }
   }
-  layout.append(detail); app.append(layout, descriptionMenu(p));
+  if (source || selectedConnections.length) layout.append(detail);
+  layout.classList.toggle('single-pane', layout.childElementCount === 1);
+  app.append(layout, descriptionMenu(p));
+  for (const pane of Array.from(layout.querySelectorAll<HTMLElement>('[data-reading-key]'))) pane.scrollTop = scrolls.get(pane.dataset.readingKey!) ?? 0;
   if (focusMenu || menuHadFocus) {
     document.querySelector<HTMLElement>('#description-options')?.focus({ preventScroll: true }); focusMenu = false;
   }
   document.querySelector('.menu-option.cursor')?.scrollIntoView({ block: 'nearest' });
-  reading.scrollTop = existingScroll;
   if (source?.range) {
     const pre = detail.querySelector('pre'), selected = detail.querySelector('.highlighted');
     if (pre && selected) pre.scrollTop += selected.getBoundingClientRect().top - pre.getBoundingClientRect().top - pre.clientHeight / 2;
@@ -257,17 +279,18 @@ async function refresh(force = false) {
     const next = JSON.stringify(v);
     if (next === signature && !force) return;
     const key = JSON.stringify(v.selection);
-    if (key !== loadedKey) { source = null; selectedConnections = []; tab = 'description'; loadedKey = key; }
+    if (key !== loadedKey) { clearDetail(); tab = 'description'; loadedKey = key; }
     if (source) {
-      const body = await window.stratic.source(source.path);
-      if (ticket !== sequence) return;
-      source.body = body;
-      try { source.range = resolvePassage(body, source.passage); source.problem = undefined; }
-      catch (e) { source.range = undefined; source.problem = (e as Error).message + ' Select the updated description passage to follow its current link.'; }
+      const openedSource = source;
+      const body = await window.stratic.source(openedSource.path);
+      if (ticket !== sequence || source !== openedSource) return;
+      openedSource.body = body;
+      try { openedSource.range = resolvePassage(body, openedSource.passage); openedSource.problem = undefined; }
+      catch (e) { openedSource.range = undefined; openedSource.problem = (e as Error).message + ' Select the updated description passage to follow its current link.'; }
     }
     current = v; signature = next; render();
-    if (v.selection.passage) document.querySelector('.selected')?.scrollIntoView({ block: 'center' });
+    if (v.selection.passage) document.querySelector('.active-description .selected')?.scrollIntoView({ block: 'center' });
   } catch (e) { error(e); }
 }
-window.stratic.onSelection(() => { tab = 'description'; source = null; selectedConnections = []; menuContext = ''; focusMenu = menuOpen; void refresh(true); });
+window.stratic.onSelection(() => { tab = 'description'; clearDetail(); menuContext = ''; focusMenu = menuOpen; void refresh(true); });
 void refresh(); setInterval(() => void refresh(), 2000);

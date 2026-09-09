@@ -1,6 +1,6 @@
 # Navigation and refresh
 
-Navigation lets the reader move through a large description hierarchy while seeing the local context of the active responsibility. The desktop keeps one current description, together with its project, revision, and optional selected passage. Selecting another description changes that focus rather than opening an accumulation of pages.
+Navigation maintains one active description and displays it together with its immediate parent. The parent is on the left and the active description is on the right; opening a child advances that pair by one level. The pair expresses the hierarchy, while the active identity remains the focus for the bottom menu, revision selection, and agent interface.
 
 The bottom menu shows the selected description’s parent, siblings, and children. With the central list focused, up and down open adjacent siblings, right opens the first child, and left opens the parent. Clicking an entry or breadcrumb also opens it immediately. Folding the menu gives the description and source more space without changing the current selection.
 

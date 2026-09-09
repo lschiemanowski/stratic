@@ -1,6 +1,6 @@
 # Source reading
 
-The source reader helps a person check how a described promise is implemented. Following an implementation link opens the whole source file beside the prose, positioned around the quoted passage. The view is read-only, so exploring implementation does not accidentally edit the proposal.
+The source reader presents the implementation of a claim beside the description that makes it. Following an implementation link in either visible description makes that description active on the left and opens the whole source file on the right, positioned around the quoted passage. Source temporarily replaces the parent-and-child reading pair; closing it restores the active description with its parent. The file view remains read-only.
 
 Line numbers and a background on the linked lines show where the selected claim points. The rest of the file stays visible so callers, surrounding conditions, and neighboring operations can be read in context. A missing or ambiguous quote is reported as a link problem; a working edit does not silently move the selected target to a different occurrence.
 

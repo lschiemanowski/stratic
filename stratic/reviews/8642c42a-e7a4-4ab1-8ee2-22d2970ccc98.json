@@ -1,0 +1,89 @@
+{
+  "id": "8642c42a-e7a4-4ab1-8ee2-22d2970ccc98",
+  "base": "5b4c7fa566f78b81949fad54f2cd3840f4812c55",
+  "contentTree": "e64706a7467fa204bf04d57633f892e0e01f6ca8",
+  "reviewer": "Codex",
+  "summary": "Read parent and child descriptions side by side",
+  "examined": [
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "Implemented parent/child reading with equal panes and no empty detail placeholder. The active child remains the menu and agent selection; source and connection choices temporarily occupy the detail pane."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "Implemented a shared valid-parent lookup with a reused menu identity index, paired rendering, and reading positions keyed by project/revision/description. Siblings preserve the visible parent position; depth and direct navigation use the actual parent."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "revised",
+      "reason": "Bound passage and contextual-link callbacks to the description owning them. Single links remain direct; choices remain beside their owning description, and cross-links construct the destination hierarchy."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "revised",
+      "reason": "Source from either visible description activates its owner and places it beside source. Closing restores that active description with its parent. Request cancellation prevents stale source responses from replacing a newer view; refresh checks that the source object is still current."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "revised",
+      "reason": "Implemented the proposed hierarchy pair, root/draft fallback, independent scrolling, source transitions, and singular active identity. Linked the parent resolver, shared pane renderer, and composition to the description; the desktop smoke checks the specified transitions."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The reader still connects broad explanations to detail and source; the root does not prescribe a single-description layout."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "unchanged",
+      "reason": "Stable identities, parent passage relationships, variable depth, and readable drafts already provide the data required to construct the pair."
+    },
+    {
+      "id": "passages",
+      "outcome": "unchanged",
+      "reason": "Exact quote resolution applies independently to either visible description. Matching and repository boundaries need no change."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "Updated style implementation for equal reading columns, independent overflow, single-pane states, and consistent metadata height. Existing inert text and Electron permission boundaries are unchanged; selectors now identify the current styles."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Updated the renderer selector after extracting shared description panes. Tests and Problems still show their existing content and source inspection behavior; the desktop smoke retains those checks."
+    },
+    {
+      "id": "change-display",
+      "outcome": "revised",
+      "reason": "Updated the implementation selector after moving description rendering into a shared pane function. Comparisons and selected passages are applied independently to each visible description; toggle behavior and text-comparison logic are unchanged."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "e64706a7467fa204bf04d57633f892e0e01f6ca8",
+      "outcome": "pass",
+      "method": "npm run typecheck; npm run test:desktop; CLI validate; implementation and impact review",
+      "environment": "Node v24.16.0; macOS arm64; real Electron desktop",
+      "evidence": "TypeScript typecheck passed. CLI validation reports no issues. The desktop smoke verifies actual parent/active panes, sibling/depth navigation, independent scroll positions and parent retention, source opening from active and parent descriptions, restoration on source close, cross-relationship navigation to the destination parent, root and broken-ancestry single-pane display, 300-leaf menus, history, inert content, individual test outcomes, syntax text preservation, and the restricted renderer API. The first development run checked a repaired fixture before its background reload completed; it failed with one sibling instead of two. The assertion now waits for the documented refresh to load the fixture. That failed output is retained in /private/tmp/stratic-pairs-smoke-first.txt. Reviewed source-request cancellation and identity-index reuse. Before/after snapshots match, and the impact frontier and uncovered renderer setup have explicit decisions. Backend unit tests were not rerun: project/review/Git logic is unchanged.\n\n\n> stratic-v3@0.1.0 test:desktop\n> npm run build && node scripts/desktop-smoke.ts\n\n\n> stratic-v3@0.1.0 build\n> node scripts/build.ts\n\n{\n  \"passed\": true,\n  \"navigationMs\": [\n    18.099041000000398,\n    8.640708999999788,\n    6.775500000000193\n  ],\n  \"checked\": [\n    \"paired descriptions, sibling/depth navigation, independent scroll, and source from either pane\",\n    \"folding and agent navigation synchronization\",\n    \"300 leaves in a bounded menu\",\n    \"direct single-destination links and multiple-destination chooser\",\n    \"syntax colors, multiline tokens, exact source text, and safe plain-text fallback\",\n    \"copyable identity\",\n    \"agent current/open\",\n    \"individual test results\",\n    \"historical content\",\n    \"broken draft browsing\",\n    \"inert repository HTML\",\n    \"sandboxed renderer API\"\n  ],\n  \"screenshot\": \"/Users/lothar/workspace/stratic_v3/artifacts/desktop.png\"\n}\n",
+      "tests": [
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        }
+      ],
+      "id": "0c10cd10-32e8-4175-a50d-c0f8e33e3d26",
+      "recordedAt": "2026-09-09T13:39:40.053Z"
+    }
+  ],
+  "recordedAt": "2026-09-09T13:40:15.335Z",
+  "unmapped": [
+    {
+      "path": "src/desktop/renderer.ts",
+      "reason": "Inspected the shared Description import, detail owner/cancellation state, active-view state, and element/button/error helpers outside the coherent linked functions. The new local state associates transient source/choice views with one owner and cancels obsolete source loads; it does not alter persisted project or CLI selection shape."
+    }
+  ]
+}

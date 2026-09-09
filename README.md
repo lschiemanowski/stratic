@@ -26,7 +26,11 @@ Open the printed project path in the desktop app:
 npm start -- --project /path/printed/by/the/demo
 ```
 
-Follow underlined passages through the hierarchy and into highlighted source.
+The reader shows the active description on the right and its parent on the
+left. Selecting a sibling retains the parent; going deeper advances the pair.
+Follow underlined passages in either pane through the hierarchy and into source.
+Source appears beside the description containing its link. Closing source
+restores that description with its parent.
 A passage with one destination opens it directly; passages with several
 destinations offer a choice in the side pane.
 Source syntax colors use [Highlight.js](https://highlightjs.org/), with the
