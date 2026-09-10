@@ -1,0 +1,87 @@
+{
+  "id": "cli-workflow",
+  "name": "CLI snapshots, records evidence, prepares, withdraws, and accepts an exact change",
+  "description": "Runs snapshot, impact, evidence recording, preparation, withdrawal and acceptance through separate CLI processes. Checks exact content, retained evidence, one commit, and preservation of unrelated staging and working edits.",
+  "code": [
+    {
+      "path": "test/cli.test.ts",
+      "passage": {
+        "quote": "test('CLI snapshots, records evidence, prepares, withdraws, and accepts an exact change', t => {\n  const root = fixture(t);\n  writeFileSync(join(root, 'unrelated.txt'), 'base\\n'); git(root, ['add', 'unrelated.txt']); git(root, ['commit', '-qm', 'Unrelated baseline']);\n  const base = head(root); addRelease(root);\n  writeFileSync(join(root, 'unrelated.txt'), 'staged\\n'); git(root, ['add', 'unrelated.txt']); writeFileSync(join(root, 'unrelated.txt'), 'working\\n');\n  const paths = selected(root).filter(path => path !== 'unrelated.txt');\n  const before = durableState(root), capture = command(root, ['snapshot', '--paths', ...paths]);\n  assert.equal(capture.base, base); assert.deepEqual(capture.paths, paths); assert.deepEqual(durableState(root), before);\n  assert.equal(git(root, ['show', `${capture.tree}:unrelated.txt`]), 'base\\n');\n  const all = command(root, ['snapshot']);\n  assert.ok(all.paths.includes('unrelated.txt')); assert.equal(git(root, ['show', `${all.tree}:unrelated.txt`]), 'working\\n');\n  assert.deepEqual(durableState(root), before);\n  assert.equal(command(root, ['ready']), null); assert.deepEqual(command(root, ['check', 'list']), []);\n  const environment = { ...process.env }; delete environment.NODE_TEST_CONTEXT;\n  const evidence = execFileSync(process.execPath, ['--test', '--test-reporter=tap', 'tests/queue.test.ts'], { cwd: root, encoding: 'utf8', env: environment });\n  assert.match(evidence, /# pass 4\\n# fail 0/);\n  assert.equal(command(root, ['snapshot', '--paths', ...paths]).tree, capture.tree);\n  const resultPath = join(dirname(root), 'observed.json');\n  // This aggregate record deliberately names no individual results; the CLI must not invent them.\n  writeJson(resultPath, { tree: capture.tree, method: 'node --test tests/queue.test.ts', outcome: 'pass', environment: `Node ${process.version}`, evidence, tests: [] });\n  const result: CheckResult = command(root, ['check', 'record', '--file', resultPath]);\n  assert.equal(result.tree, capture.tree); assert.ok(result.id); assert.ok(result.recordedAt); assert.deepEqual(result.tests, []);\n  assert.deepEqual(command(root, ['check', 'list']), [result]);\n  const reviewPath = join(dirname(root), 'review.json');\n  const review: ReviewInput & { unmapped: { path: string; reason: string }[] } = { reviewer: 'CLI test', summary: 'Release a live queue lease', unresolved: [], resultIds: [result.id], unmapped: [], examined: [\n    ...['commands', 'job-lifecycle', 'lease-transitions'].map(id => ({ id, outcome: 'revised' as const, reason: 'Adds early release while retaining the job and enforcing lease ownership.' })),\n    ...['queue', 'engine', 'storage'].map(id => ({ id, outcome: 'unchanged' as const, reason: 'The local queue purpose and existing nullable lease fields and persistence support release.' })),\n  ] };\n  writeJson(reviewPath, review);\n  const affected = command(root, ['impact', '--base', base, '--review', reviewPath, '--paths', ...paths]);\n  assert.equal(affected.reviewedBase, false); assert.ok(affected.frontier.every((f: { decision?: unknown }) => f.decision));\n  assert.ok(affected.paths.includes('src/queue.ts'));\n  review.unmapped = affected.unmapped.map((u: { path: string }) => ({ path: u.path, reason: 'Inspected example imports and separators with the linked release function and tests.' })); writeJson(reviewPath, review);\n  const prepared: Ready = command(root, ['prepare', '--review', reviewPath, '--paths', ...paths]);\n  assert.equal(head(root), base); assert.equal(prepared.contentTree, capture.tree);\n  assert.equal(command(root, ['ready']).id, prepared.id); assert.ok(existsSync(join(root, prepared.reviewPath)));\n  const proposal = JSON.parse(git(root, ['show', `${prepared.finalTree}:${prepared.reviewPath}`]));\n  assert.deepEqual(proposal.results, [result]); assert.equal(proposal.contentTree, capture.tree);\n  assert.deepEqual(command(root, ['check', 'list']), [result]);\n  const withdrawn = command(root, ['discard', '--id', prepared.id]);\n  assert.equal(withdrawn.discarded, prepared.id); assert.equal(command(root, ['ready']), null); assert.equal(existsSync(join(root, prepared.reviewPath)), false);\n  assert.deepEqual(durableState(root).files, before.files); assert.deepEqual(command(root, ['check', 'list']), [result]);\n  const next: Ready = command(root, ['prepare', '--review', reviewPath, '--paths', ...paths]);\n  assert.notEqual(next.id, prepared.id);\n  const accepted = command(root, ['accept', '--id', next.id]);\n  assert.equal(accepted.commit, head(root)); assert.equal(git(root, ['rev-parse', 'HEAD^{tree}']).trim(), next.finalTree);\n  assert.equal(git(root, ['rev-list', '--count', `${base}..HEAD`]).trim(), '1');\n  assert.equal(command(root, ['ready']), null); assert.deepEqual(command(root, ['check', 'list']), [result]);\n  assert.equal(readFileSync(join(root, 'unrelated.txt'), 'utf8'), 'working\\n'); assert.equal(git(root, ['show', ':unrelated.txt']), 'staged\\n');\n  assert.equal(git(root, ['show', 'HEAD:unrelated.txt']), 'base\\n');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-snapshot",
+      "passage": {
+        "quote": "The request can select whole repository-relative files, including deletions; otherwise the project file list is used. The response identifies the resulting tree, base, and selected paths. Generated and historical review files are excluded from the CLI’s selection of proposed edits because preparation handles the review record separately."
+      }
+    },
+    {
+      "description": "cli-snapshot",
+      "passage": {
+        "quote": "The tree starts from HEAD and overlays the selected working-file contents through a temporary Git index. Unselected files retain their base contents. Git objects are written, but the branch and the user’s staging area are not changed. This distinguishes a captured proposal from both a commit and the current staged state."
+      }
+    },
+    {
+      "description": "cli-impact",
+      "passage": {
+        "quote": "The command constructs a tree from selected working files and compares it with a supplied base, defaulting to HEAD. An optional review input contributes previously recorded examined decisions. The response contains changed paths, whether the base has an exact review, the required descriptions with reasons and available decisions, and unmapped regions."
+      }
+    },
+    {
+      "description": "cli-check-record",
+      "passage": {
+        "quote": "The request supplies a JSON record naming the examined tree, method, environment, evidence, overall outcome, and an explicit list of individual test outcomes. Pass, fail, and inconclusive are recordable outcomes. An empty individual list represents a check for which no cataloged test outcomes were established."
+      }
+    },
+    {
+      "description": "cli-check-record",
+      "passage": {
+        "quote": "The record is validated for its required fields, an existing Git tree, and unique individual test identities. The operation assigns a result identity and timestamp, appends it to local storage, and returns the saved record. Preparation can later select passing records for matching content."
+      }
+    },
+    {
+      "description": "cli-check-list",
+      "passage": {
+        "quote": "The operation returns the local records as a JSON array, retaining their tree identities, methods, evidence, timestamps, overall outcomes, and individual results. With no saved records, the result is an empty array."
+      }
+    },
+    {
+      "description": "cli-prepare",
+      "passage": {
+        "quote": "The request supplies a review file and either selected paths or explicit selection of the entire eligible change. The review contains examined decisions with reasons, a summary and reviewer, unresolved blockers, result identities, and explanations of unmapped regions. Missing selection and unexpected command arguments are rejected before preparation proceeds."
+      }
+    },
+    {
+      "description": "cli-prepare",
+      "passage": {
+        "quote": "The preparation model validates the selected project, accounts for the required investigation, and selects matching passing evidence. It writes a review into the proposed content and a local ready record containing the base, content tree, final tree, paths, and identity. The CLI returns that record together with the preparation duration."
+      }
+    },
+    {
+      "description": "cli-ready",
+      "passage": {
+        "quote": "The response is the locally stored prepared record or null when no record exists. A record identifies the review, base, selected tree, final tree, paths, and generated review file. An interrupted acceptance can leave additional commit and index information needed for recovery."
+      }
+    },
+    {
+      "description": "cli-discard",
+      "passage": {
+        "quote": "The model retains project edits and independent check results. It removes an unchanged generated review when eligible and clears the ready record. If the recorded commit is already HEAD, recovery through acceptance is required instead of treating the commit as an uncommitted proposal."
+      }
+    },
+    {
+      "description": "cli-discard",
+      "passage": {
+        "quote": "Withdrawal does not restore source files to their base versions or erase the evidence accumulated during investigation. A later preparation can form a new handoff from the retained or further revised work."
+      }
+    },
+    {
+      "description": "cli-accept",
+      "passage": {
+        "quote": "The model verifies the base and proposed content against the pinned handoff, checks structural validity, and commits the selected tree while honoring hooks and preserving unrelated staged and working edits. Saved commit and index state permit a retry to finish an interrupted acceptance without creating a duplicate commit."
+      }
+    }
+  ]
+}

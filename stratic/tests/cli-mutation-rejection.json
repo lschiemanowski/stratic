@@ -1,0 +1,45 @@
+{
+  "id": "cli-mutation-rejection",
+  "name": "CLI rejects invalid mutation requests without changing files, staging, evidence, readiness, or history",
+  "description": "Rejects 25 missing, malformed or unexpected mutation requests while comparing project-file bytes, Git staging and history, readiness and evidence before and after every request.",
+  "code": [
+    {
+      "path": "test/cli.test.ts",
+      "passage": {
+        "quote": "test('CLI rejects invalid mutation requests without changing files, staging, evidence, readiness, or history', t => {\n  const root = fixture(t), prepared = preparedRelease(root);\n  const valid = join(dirname(root), 'valid-result.json'), malformed = join(dirname(root), 'malformed.json'), wrong = join(dirname(root), 'wrong.json'), duplicate = join(dirname(root), 'duplicate.json');\n  const input = { tree: prepared.contentTree, method: 'Synthetic rejection fixture', outcome: 'pass', environment: 'CLI test', evidence: 'Must not be imported.', tests: [] };\n  writeJson(valid, input); writeFileSync(malformed, '{broken'); writeJson(wrong, {});\n  writeJson(duplicate, { ...input, tests: [{ id: 'same', outcome: 'pass' }, { id: 'same', outcome: 'pass' }] });\n  const review = join(dirname(root), 'valid-review.json');\n  writeJson(review, { ...JSON.parse(readFileSync(join(root, prepared.reviewPath), 'utf8')), resultIds: command(root, ['check', 'list']).map((r: CheckResult) => r.id) });\n  const cases: string[][] = [\n    ['check', 'record'], ['check', 'record', '--file'], ['check', 'record', '--file', malformed], ['check', 'record', '--file', wrong], ['check', 'record', '--file', duplicate], ['check', 'record', '--file', valid, '--unexpected'],\n    ['prepare', '--all'], ['prepare', '--review'], ['prepare', '--review', malformed, '--all'], ['prepare', '--review', wrong, '--all'], ['prepare', '--review', review], ['prepare', '--review', review, '--paths'], ['prepare', '--review', review, '--all', '--unexpected'],\n    ...['accept', 'discard'].flatMap(action => [[action], [action, '--id'], [action, '--id', 'wrong-review'], [action, '--id', prepared.id, '--unexpected'], [action, '--id', prepared.id, 'extra'], [action, '--id', prepared.id, '--id', prepared.id]]),\n  ];\n  const before = durableState(root);\n  for (const args of cases) {\n    command(root, args, 1);\n    assert.deepEqual(durableState(root), before, `Rejected command changed durable state: ${args.join(' ')}`);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-check-record",
+      "passage": {
+        "quote": "The record is validated for its required fields, an existing Git tree, and unique individual test identities. The operation assigns a result identity and timestamp, appends it to local storage, and returns the saved record. Preparation can later select passing records for matching content."
+      }
+    },
+    {
+      "description": "cli-prepare",
+      "passage": {
+        "quote": "The request supplies a review file and either selected paths or explicit selection of the entire eligible change. The review contains examined decisions with reasons, a summary and reviewer, unresolved blockers, result identities, and explanations of unmapped regions. Missing selection and unexpected command arguments are rejected before preparation proceeds."
+      }
+    },
+    {
+      "description": "cli-discard",
+      "passage": {
+        "quote": "The request must identify the current prepared review. An absent or different identity is rejected, preventing withdrawal of an unrelated handoff. The response identifies the discarded review and whether its generated review file was removed."
+      }
+    },
+    {
+      "description": "cli-accept",
+      "passage": {
+        "quote": "The request must provide the identity of the prepared review. A missing or different identity is rejected. A successful result contains the commit identity, whether recovery was performed, and the acceptance duration; the operation requires the branch and repository state supported by the acceptance model."
+      }
+    },
+    {
+      "description": "cli-accept",
+      "passage": {
+        "quote": "The CLI rejects unexpected arguments before acceptance acts. Completed evidence is reused rather than rerunning tests or investigation. Content drift, hook failure, or a conflicting recovery state prevents normal completion and remains visible as an error. Acceptance has no push operation."
+      }
+    }
+  ]
+}

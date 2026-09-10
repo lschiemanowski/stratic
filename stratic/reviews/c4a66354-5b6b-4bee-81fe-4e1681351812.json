@@ -1,0 +1,202 @@
+{
+  "id": "c4a66354-5b6b-4bee-81fe-4e1681351812",
+  "base": "3526b4dcfbd1ef2621ad441eead545d2487f2c34",
+  "contentTree": "f9099fcb4137691f72fe286bbb0b4c79bc87a846",
+  "reviewer": "Codex",
+  "summary": "Test CLI reading, the complete reviewed-change workflow, and rejection before mutation",
+  "examined": [
+    {
+      "id": "cli-accept",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow, cli-mutation-rejection."
+    },
+    {
+      "id": "cli-check-list",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow."
+    },
+    {
+      "id": "cli-check-record",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow, cli-mutation-rejection."
+    },
+    {
+      "id": "cli-discard",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow, cli-mutation-rejection."
+    },
+    {
+      "id": "cli-impact",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-reading."
+    },
+    {
+      "id": "cli-prepare",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow, cli-mutation-rejection."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-reading."
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-workflow."
+    },
+    {
+      "id": "cli-source",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-reading."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "unchanged",
+      "reason": "The CLI contract remains unchanged. New subprocess tests exercise its documented behavior and JSON/error boundary; assertions link directly to the corresponding passages. Exercised by: cli-reading."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "f9099fcb4137691f72fe286bbb0b4c79bc87a846",
+      "method": "npm run typecheck; node --test --test-reporter=tap test/*.test.ts; node src/cli.ts validate; git diff --check; test-link and impact review",
+      "outcome": "pass",
+      "environment": "Node v24.16.0; macOS arm64",
+      "evidence": "All 29 top-level tests passed, with zero failures or skips. The 28 product unit-test catalog entries are matched by exact executed TAP names; the queue example CLI test also passed but has no Stratic product-catalog identity. Three new subprocess tests cover working/historical CLI reads and diagnostics, the selected-file workflow through snapshot/check/prepare/discard/accept, and 25 invalid mutation requests with unchanged file bytes, staging, history, readiness and evidence. Typechecking, structural/link validation and whitespace checks passed. Impact has no missing decisions; shared test helpers are reviewed in the unmapped explanation. Before/after content trees match. Logs: /private/tmp/stratic-cli-suite.txt and /private/tmp/stratic-cli-typecheck.txt. An initial test-only macOS path expectation failure is preserved in /private/tmp/stratic-cli-first.txt; canonical-path comparison corrected it. Desktop integration was not rerun for this test-only addition.",
+      "tests": [
+        {
+          "id": "bounded-diff",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-mutation-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-workflow",
+          "outcome": "pass"
+        },
+        {
+          "id": "draft-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "drift-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "exact-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "explicit-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "graph-history",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-failure",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-message",
+          "outcome": "pass"
+        },
+        {
+          "id": "impact-baseline",
+          "outcome": "pass"
+        },
+        {
+          "id": "independent-checks",
+          "outcome": "pass"
+        },
+        {
+          "id": "interruption",
+          "outcome": "pass"
+        },
+        {
+          "id": "markdown-positions",
+          "outcome": "pass"
+        },
+        {
+          "id": "paragraph-changes",
+          "outcome": "pass"
+        },
+        {
+          "id": "project-images",
+          "outcome": "pass"
+        },
+        {
+          "id": "review-completeness",
+          "outcome": "pass"
+        },
+        {
+          "id": "selectors",
+          "outcome": "pass"
+        },
+        {
+          "id": "source-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "stable-identity",
+          "outcome": "pass"
+        },
+        {
+          "id": "summary-metadata",
+          "outcome": "pass"
+        },
+        {
+          "id": "terminated-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-folds",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-layout",
+          "outcome": "pass"
+        },
+        {
+          "id": "unexpected-arguments",
+          "outcome": "pass"
+        },
+        {
+          "id": "withdraw-readiness",
+          "outcome": "pass"
+        },
+        {
+          "id": "worktree-acceptance",
+          "outcome": "pass"
+        }
+      ],
+      "id": "f2b750d4-9010-4e95-8fce-8eb11047ccdb",
+      "recordedAt": "2026-09-10T10:24:55.987Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T10:25:21.852Z",
+  "unmapped": [
+    {
+      "path": "test/cli.test.ts",
+      "reason": "Shared imports, the subprocess JSON/exit-status helper, and durable-state hashing support the three linked executable tests. State comparison covers working-file bytes and membership, index bytes, HEAD/history, and local readiness/evidence; Git object creation alone is allowed for snapshots. No application implementation changed."
+    }
+  ]
+}

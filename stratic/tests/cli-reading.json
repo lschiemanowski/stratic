@@ -1,0 +1,57 @@
+{
+  "id": "cli-reading",
+  "name": "CLI reads working and historical descriptions, source, and structural problems",
+  "description": "Reads working and historical descriptions and exact source, exposes resolved passage links and associated tests, and reports missing targets, broken links and readable drafts.",
+  "code": [
+    {
+      "path": "test/cli.test.ts",
+      "passage": {
+        "quote": "test('CLI reads working and historical descriptions, source, and structural problems', t => {\n  const root = fixture(t), base = head(root);\n  const oldSource = readFileSync(join(root, 'src/queue.ts'), 'utf8');\n  addRelease(root);\n  const listing = command(root, ['list']);\n  assert.equal(listing.project, realpathSync(root)); assert.equal(listing.revision, 'working'); assert.deepEqual(listing.issues, []);\n  assert.ok(listing.descriptions.some((d: Description) => d.id === 'lease-transitions'));\n  assert.ok(listing.descriptions.every((d: Description) => !('body' in d)));\n  const detail = command(root, ['show', 'lease-transitions']);\n  assert.equal(detail.description.id, 'lease-transitions'); assert.equal(detail.parent.id, 'job-lifecycle');\n  assert.match(detail.description.body, /Release locates/);\n  const link: Connection = detail.connections.find((c: Connection) => 'path' in c.to && c.to.passage.quote.startsWith('export function release'));\n  assert.ok(link.range); assert.equal(detail.description.body.slice(link.range.start, link.range.end), link.from!.quote);\n  assert.ok('path' in link.to);\n  const source = command(root, ['source', link.to.path]);\n  assert.equal(source.content, readFileSync(join(root, link.to.path), 'utf8')); assert.ok(source.content.includes(link.to.passage.quote));\n  assert.equal(source.path, link.to.path); assert.equal(source.revision, 'working');\n  const lifecycle = command(root, ['show', 'job-lifecycle']);\n  assert.equal(lifecycle.tests.length, 4); assert.ok(lifecycle.incoming.some((c: { description: string }) => c.description === 'commands'));\n  assert.ok(lifecycle.connections.some((c: Connection) => c.kind === 'elaboration' && 'description' in c.to && c.to.description === 'lease-transitions'));\n  assert.deepEqual(command(root, ['validate']), { valid: true, issues: [] });\n  assert.equal(command(root, ['source', 'src/queue.ts', '--revision', base]).content, oldSource);\n  assert.doesNotMatch(command(root, ['show', 'lease-transitions', '--revision', base]).description.body, /Release locates/);\n  assert.equal(command(root, ['list', '--revision', base]).revision, git(root, ['rev-parse', `${base}^{tree}`]).trim());\n  for (const args of [['show', 'absent'], ['show'], ['source', 'missing.ts'], ['source'], ['source', '../secret'], ['show', 'queue', '--revision', 'missing-ref']]) command(root, args, 1);\n  const metadataPath = join(root, 'stratic/descriptions/lease-transitions.json'), metadata = JSON.parse(readFileSync(metadataPath, 'utf8'));\n  metadata.links[0].to.passage.quote = 'This source passage does not exist.'; writeJson(metadataPath, metadata);\n  assert.match(command(root, ['show', 'lease-transitions']).connections[0].problem, /no longer exists/);\n  const invalid = command(root, ['validate'], 1); // Validation failures are structured results, checked below.\n  assert.equal(invalid.valid, false);\n  writeFileSync(metadataPath, '{ broken');\n  const draft = command(root, ['list']);\n  assert.ok(draft.issues.length); assert.ok(draft.descriptions.some((d: Description) => d.title === 'Lease transitions'));\n  assert.deepEqual(command(root, ['validate', '--revision', base]), { valid: true, issues: [] });\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-list",
+      "passage": {
+        "quote": "The command loads the selected project at the requested revision, defaulting to working content. Its JSON result contains the resolved project and revision, description identities, titles, parent identities, implementation status, and project issues. The hierarchy is represented by parent references in a flat collection."
+      }
+    },
+    {
+      "description": "cli-list",
+      "passage": {
+        "quote": "The projection is built from the same loaded descriptions used elsewhere in Stratic. Readable drafts therefore remain present even when metadata is incomplete, and their issues accompany the result. List does not independently reconstruct or repair a hierarchy that the loader rejected."
+      }
+    },
+    {
+      "description": "cli-list",
+      "passage": {
+        "quote": "Omitting description bodies keeps the response bounded by the catalog rather than the total prose. Detailed reading is handled by show. Reported issues are data in this response; the dedicated validation operation additionally represents invalid structure through its exit status."
+      }
+    },
+    {
+      "description": "cli-show",
+      "passage": {
+        "quote": "The request identifies a description by stable identity within the selected project and revision. The identity is resolved after loading that project; a missing or ambiguous identity is an error. Renaming the Markdown file or title does not change which responsibility the request denotes."
+      }
+    },
+    {
+      "description": "cli-show",
+      "passage": {
+        "quote": "The result combines the description body and metadata with its parent, outgoing connections, incoming cross-connections, associated tests, and relevant issues. Child descriptions appear as elaboration destinations. Connections include resolved ranges or reported passage problems, so consumers can distinguish an available relationship from a broken selector."
+      }
+    },
+    {
+      "description": "cli-source",
+      "passage": {
+        "quote": "The request supplies a repository-relative path and an optional historical revision. The response contains that path, the requested revision, and the complete decoded file text. Passage selection and syntax coloring are separate concerns; this command neither crops the file to a quote nor decorates its text."
+      }
+    },
+    {
+      "description": "cli-validate",
+      "passage": {
+        "quote": "The command loads the selected working or historical project and returns valid together with its issues. An issue-free project has a successful exit status. Discovered structural problems produce a nonzero status while preserving the complete diagnostic response."
+      }
+    }
+  ]
+}
