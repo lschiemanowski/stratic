@@ -1,0 +1,21 @@
+{
+  "id": "summary-metadata",
+  "name": "Summary metadata is optional, historical, validated and included in change impact",
+  "description": "Summary metadata is optional, historical, validated and included in change impact.",
+  "code": [
+    {
+      "path": "test/reading-views.test.ts",
+      "passage": {
+        "quote": "test('Summary metadata is optional, historical, validated and included in change impact', t => {\n  const root = fixture(t), path = join(root, 'stratic/descriptions/engine.json');\n  const metadata = readJson<Metadata>(path);\n  assert.equal(inspect(loadProject(root), 'engine').description.metadata?.summary, undefined);\n  metadata.summary = ['Persists successful operations.', 'Keeps lease ownership consistent.']; writeJson(path, metadata);\n  git(root, ['add', 'stratic/descriptions/engine.json']); git(root, ['commit', '-m', 'Add summary']); const base = head(root);\n  metadata.summary = ['A revised persistence promise.']; writeJson(path, metadata);\n  assert.deepEqual(inspect(loadProject(root, base), 'engine').description.metadata?.summary, ['Persists successful operations.', 'Keeps lease ownership consistent.']);\n  assert.deepEqual(inspect(loadProject(root), 'engine').description.metadata?.summary, metadata.summary);\n  assert.ok(impact(root, base, snapshot(root, ['stratic/descriptions/engine.json'])).frontier.some(item => item.id === 'engine'));\n  for (const summary of [null, 'not bullets', [42], ['  ']]) {\n    writeJson(path, { ...metadata, summary }); const p = loadProject(root);\n    assert.ok(p.issues.some(i => i.path.endsWith('engine.json')));\n    assert.ok(p.descriptions.some(d => d.title === 'Queue engine' && d.body.length > 0));\n  }\n  writeJson(path, { ...metadata, summary: [] }); assert.deepEqual(loadProject(root).issues, []);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "description-summaries",
+      "passage": {
+        "quote": "The summary is an optional summary array in the description’s JSON metadata, with one nonempty text string per bullet. An omitted or empty array means no summary. Loading and CLI inspection return it with the description, including at historical revisions. Validation rejects malformed bullets while keeping the full Markdown readable as a draft. Summary edits use the same file snapshots and affected-description review as other metadata edits."
+      }
+    }
+  ]
+}

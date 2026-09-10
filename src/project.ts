@@ -21,6 +21,7 @@ const sourceTarget = (v: unknown): v is SourceTarget => object(v) && !('descript
 function metadata(v: unknown): v is Metadata {
   return object(v) && id(v.id) && (v.parent === null || (descriptionTarget(v.parent) && isPassage(v.parent.passage))) &&
     ['implemented', 'partial', 'unimplemented'].includes(v.realization) &&
+    (v.summary === undefined || (Array.isArray(v.summary) && v.summary.every(text))) &&
     (v.remaining === undefined || typeof v.remaining === 'string') && Array.isArray(v.links) && v.links.every((l: any) =>
       object(l) && (l.from === null || isPassage(l.from)) &&
       (l.kind === 'implementation' ? sourceTarget(l.to) :
@@ -53,7 +54,7 @@ export function loadProject(path: string, ref = 'working'): Project {
     const entry: Description = { id: `draft:${path}`, title: /^#\s+(.+)$/m.exec(body)?.[1] ?? basename(path, '.md'), body, path };
     try {
       const value = json(dataPath);
-      if (!metadata(value)) throw new Error('Metadata needs an id, parent, realization, and well-formed links.');
+      if (!metadata(value)) throw new Error('Metadata needs an id, parent, realization, well-formed links, and optional summary bullets containing nonempty text.');
       entry.id = value.id; entry.metadata = value;
     } catch (e) { issue(dataPath, (e as Error).message, entry.id); }
     project.descriptions.push(entry);

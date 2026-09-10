@@ -9,3 +9,5 @@ Working files compare against a prepared proposal’s base when one exists, or H
 The comparator preserves matching paragraphs in order and classifies the remaining occurrences as added or removed. Repeated paragraphs are treated as occurrences, so deleting one repeated paragraph is not lost merely because identical wording remains elsewhere. The view highlights prose changes; a metadata-only link or status edit is not a word change in the paragraph.
 
 For unusually fragmented descriptions, the comparison falls back to marking the whole text changed rather than allocating an unbounded paragraph-comparison table. This loses fine detail but keeps the reader responsive and still indicates that the text differs.
+
+Summary bullets are compared separately against their earlier metadata at the same comparison base. Added or edited bullets are highlighted, and removed bullets can be expanded. Full-description changes and summary changes remain distinct: a prose edit does not mark an unchanged summary as edited.

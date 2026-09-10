@@ -1,0 +1,53 @@
+{
+  "id": "description-summaries",
+  "parent": {
+    "description": "descriptions",
+    "passage": {
+      "quote": "A description may also have a short bullet summary that gives a faithful abbreviated account of the same responsibility. The full text remains the complete description; its summary is optional content maintained and reviewed alongside it. Summaries belong to the project’s versioned account and must preserve the conditions and limitations needed to understand the behavior being promised."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The summary is an optional summary array in the description’s JSON metadata, with one nonempty text string per bullet. An omitted or empty array means no summary. Loading and CLI inspection return it with the description, including at historical revisions. Validation rejects malformed bullets while keeping the full Markdown readable as a draft. Summary edits use the same file snapshots and affected-description review as other metadata edits."
+      },
+      "to": {
+        "path": "src/model.ts",
+        "passage": {
+          "quote": "export interface Metadata {\n  id: string;\n  parent: (DescriptionTarget & { passage: Passage }) | null;\n  realization: 'implemented' | 'partial' | 'unimplemented';\n  remaining?: string;\n  summary?: string[];\n  links: Link[];\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The summary is an optional summary array in the description’s JSON metadata, with one nonempty text string per bullet. An omitted or empty array means no summary. Loading and CLI inspection return it with the description, including at historical revisions. Validation rejects malformed bullets while keeping the full Markdown readable as a draft. Summary edits use the same file snapshots and affected-description review as other metadata edits."
+      },
+      "to": {
+        "path": "src/project.ts",
+        "passage": {
+          "quote": "function metadata(v: unknown): v is Metadata {\n  return object(v) && id(v.id) && (v.parent === null || (descriptionTarget(v.parent) && isPassage(v.parent.passage))) &&\n    ['implemented', 'partial', 'unimplemented'].includes(v.realization) &&\n    (v.summary === undefined || (Array.isArray(v.summary) && v.summary.every(text))) &&\n    (v.remaining === undefined || typeof v.remaining === 'string') && Array.isArray(v.links) && v.links.every((l: any) =>\n      object(l) && (l.from === null || isPassage(l.from)) &&\n      (l.kind === 'implementation' ? sourceTarget(l.to) :\n        ['depends-on', 'reference'].includes(l.kind) && descriptionTarget(l.to) && (l.kind !== 'depends-on' || text(l.reason))));\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The full description supplies the complete account. Its summary preserves the qualifications that matter to understanding its promises, while leaving detailed explanations to the full text. A summary must not introduce a different promise or conceal an important limitation. The coding agent maintains it alongside the description, and a review of changed behavior includes checking that any existing summary still agrees."
+      },
+      "to": {
+        "path": "skills/stratic-v3/SKILL.md",
+        "passage": {
+          "quote": "Descriptions may include an optional `summary` array in their JSON metadata, with one nonempty text string per bullet. When changing a description that has a summary, review and update those bullets in the same change so promises, conditions, and limitations stay consistent. Add summaries where useful; absence is valid. Summarize the program responsibility, not the list of topics or children, and keep implementation passage links in the full description."
+        }
+      }
+    }
+  ],
+  "summary": [
+    "Optional bullets condense a responsibility’s behavior, conditions, and boundaries without replacing its complete description.",
+    "Agents maintain and review summaries with the full account; the desktop does not generate them on demand.",
+    "Summaries are string arrays in the existing metadata, sharing description identity and Git history. Implementation links stay in the full text."
+  ]
+}

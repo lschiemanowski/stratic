@@ -3,6 +3,7 @@ import { loadProject } from '../project.ts';
 import type { Project, Ready, Review } from '../model.ts';
 export interface Comparison {
   base: string; label: string; before: Record<string, string>;
+  summariesBefore: Record<string, string[]>;
   removed: { title: string; body: string }[];
 }
 const bases = new Map<string, Project>();
@@ -22,9 +23,12 @@ export function comparison(root: string, project: Project, pending: Ready | null
   let previous = bases.get(key);
   if (!previous) { previous = loadProject(root, base); if (bases.size >= 4) bases.delete(bases.keys().next().value!); bases.set(key, previous); }
   const before: Record<string, string> = Object.create(null);
+  const summariesBefore: Record<string, string[]> = Object.create(null);
   for (const d of project.descriptions) {
     const old = previous.descriptions.find(old => old.id === d.id)?.body ?? '';
     if (old !== d.body) before[d.id] = old;
+    const oldSummary = previous.descriptions.find(old => old.id === d.id)?.metadata?.summary ?? [];
+    if (JSON.stringify(oldSummary) !== JSON.stringify(d.metadata?.summary ?? [])) summariesBefore[d.id] = oldSummary;
   }
-  return { base, label, before, removed: previous.descriptions.filter(d => !project.descriptions.some(next => next.id === d.id)).map(d => ({ title: d.title, body: d.body })) };
+  return { base, label, before, summariesBefore, removed: previous.descriptions.filter(d => !project.descriptions.some(next => next.id === d.id)).map(d => ({ title: d.title, body: d.body })) };
 }

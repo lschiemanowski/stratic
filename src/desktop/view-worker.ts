@@ -23,7 +23,7 @@ function view(root: string, revision: string) {
     if (result && typeof result.id === 'string' && Array.isArray(result.tests)) checks.set(result.id, result);
   }
   const branches = git(root, ['log', '-12', '--format=%H%x09%s']).trim().split('\n').map(line => { const [id, ...title] = line.split('\t'); return { id, title: title.join('\t') }; });
-  return { project, comparison: comparison(root, project, pending, history, tree), ready: pending, history: branches,
+  return { tree, project, comparison: comparison(root, project, pending, history, tree), ready: pending, history: branches,
     dirty: !!git(root, ['status', '--porcelain']).trim(),
     checks: [...checks.values()].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).map(r => ({ ...r, current: equivalents.has(r.tree) })) };
 }

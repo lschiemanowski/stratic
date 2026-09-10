@@ -47,8 +47,8 @@ ancestors directly from the title bar. Partial and unimplemented descriptions
 show their status; implemented descriptions start directly with their prose.
 The title-bar Projects button reveals a collapsible left panel for switching
 between recent folders or opening another project. The View menu contains
-revision selection, tests, change highlighting, and Copy ID.
-The Tests view shows individual recorded outcomes; the revision selector shows
+revision selection, change highlighting, and Copy ID.
+Tests appear with the descriptions they check and beneath open implementation. Each has a short explanation and a result disk; expand it to inspect its code. Earlier and missing results remain distinct from a current pass or failure. The revision selector shows
 historical descriptions and source. Editing the project files refreshes the view,
 including visible problems for broken draft links.
 
@@ -148,3 +148,18 @@ The example's hierarchy and source are under [examples/queue](examples/queue).
 The [design direction](docs/design.md) and [data model](docs/data-model.md) explain
 our choices. Internal responsibilities remain small: file reading and links,
 impact, review/Git operations, the CLI, and the desktop interface.
+
+The list-style button at the upper right of each reading pane toggles its bullet
+summary independently. Descriptions without summaries show full text without a button. Summaries live in the description metadata
+as a `summary` array and are maintained alongside the full account.
+View → Tree overview places main branches side by side and stacks deeper descriptions vertically.
+Fold branches individually or limit visible levels with the depth slider. Drag or
+scroll to pan, use the zoom buttons or pinch to zoom, and select a node to return
+to paired reading. Escape or Back to reading returns without changing selection.
+
+Descriptions render CommonMark and GitHub-style lists, tables, emphasis, quotations
+and code blocks. Use `$...$` for inline equations and `$$` blocks for display
+equations. Images use `![alternate text](relative/path.png)`, relative to the
+description file, or `/path/from/project/root.png`. Project images follow the
+displayed revision; external image URLs are not fetched. See the live
+[formatted description](stratic/descriptions/formatted-descriptions.md) for an example.

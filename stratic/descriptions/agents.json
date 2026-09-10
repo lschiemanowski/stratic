@@ -7,5 +7,10 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "The CLI exposes project descriptions, source, structural validation, impact, and recorded check evidence.",
+    "Preparation and explicit acceptance identify an exact proposal; the caller supplies semantic judgment and runs checks with existing tools.",
+    "UI current and UI open coordinate the reader’s focus without granting edit or commit authority."
+  ]
 }

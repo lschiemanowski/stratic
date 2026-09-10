@@ -1,0 +1,13 @@
+# Tree overview
+
+The tree overview makes the overall structure of a project visible. Each description appears as a titled node, and connecting lines express parent–child relationships. The root sits above a horizontal row of its main branches. Within each branch, descendants stack vertically, with indentation and connecting lines showing further depth. Separate branch columns use the window width while keeping deeper explanations compact.
+
+Unlike the bottom menu’s local neighborhood, the diagram can show the whole description hierarchy. A reader can see which broad responsibilities divide the project and where they have many descendants or deeper explanations. Each branch can be folded independently using a control beside its title; the title itself still opens the description. A depth slider limits the visible levels across the whole diagram, counting the root as level one. Increasing the limit reveals deeper levels while preserving individual folds. Expanding a branch at the depth limit raises that limit by one level. These choices change only presentation and remain in place when returning to the overview for the same project revision.
+
+The overview opens from View in the reading area and highlights the active description. Panning moves around the diagram and zooming changes its scale. Fit tree fits the currently visible nodes; changing the depth limit refits the diagram, while folding an individual branch keeps its control in place. Current description reveals the active node through any folded ancestors or depth limit and centers it at a readable scale. These movements and folds never change the hierarchy or active selection.
+
+Selecting a node opens that description and returns to paired reading with its actual parent. For example, selecting a deeply nested storage responsibility shows its immediate parent beside it, without requiring a sequence of clicks through every ancestor. Returning from the overview without selecting a node retains the active description. Both panes’ summary preferences and bottom-menu visibility are retained on return.
+
+The diagram uses the project revision currently being read. Historical inspection therefore shows the hierarchy from that revision, rather than combining old descriptions with the current working tree. Opening a node uses the same identity-based navigation as the other reader controls.
+
+Incomplete drafts remain inspectable. A description without a usable parent appears separately rather than being attached to an invented parent; malformed relationships are still reported as project problems. The overview does not repair project content or require a valid finished tree before it can be opened.

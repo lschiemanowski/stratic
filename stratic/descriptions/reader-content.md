@@ -2,7 +2,7 @@
 
 The desktop displays files supplied by the project being read. Those files are content to inspect, not instructions for the Electron application to execute. A description containing HTML or an external URL should remain readable without gaining control of the reader.
 
-The renderer creates text nodes for repository prose and implements links through Stratic’s own targets. It currently recognizes headings and paragraphs; other Markdown syntax is shown literally. Source rendering likewise preserves text while adding syntax token classes. This keeps repository strings from becoming executable HTML.
+Descriptions render Markdown structure, inline and display equations, and images stored in the project. The reader keeps the original Markdown as the authority for passage selectors and comparison, while formatting makes the account easier to read. Raw HTML stays literal, ordinary web links do not navigate the app, and project content cannot create executable elements. Source rendering likewise preserves text while adding syntax token classes.
 
 The Electron window disables Node integration, enables context isolation and sandboxing, and exposes a small preload API for reading project data, navigating, choosing a project, and copying an identity. The main process checks the sender of those calls, rejects external navigation and new windows, and denies permission requests.
 

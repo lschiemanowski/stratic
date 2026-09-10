@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdirSync, writeFileSync, symlinkSync } from 'node:fs';
+import { join } from 'node:path';
+import { fixture } from './helpers.ts';
+import { git, head, readBinarySource } from '../src/git.ts';
+import { loadProject } from '../src/project.ts';
+import { imagePath, projectImage } from '../src/desktop/images.ts';
+import { parseMarkdown, textPositions } from '../src/desktop/markdown.ts';
+
+test('Markdown positions retain escapes, entities, nested blocks and math source', () => {
+  const body = '# Title\n\nA **bold** claim with \\*literal\\* &amp; &#x1f600;.\n\n> quoted &copy;\n> continuation\n\n- nested\n  text\n\n$x^2$\n\n$$\n\\frac{a}{b}\n$$\n';
+  const tree = parseMarkdown(body), nodes: ReturnType<typeof parseMarkdown>[] = [];
+  const visit = (node: typeof tree) => { nodes.push(node); node.children?.forEach(visit); }; visit(tree);
+  assert.ok(nodes.some(n => n.type === 'strong'));
+  assert.ok(nodes.some(n => n.type === 'inlineMath' && n.value === 'x^2'));
+  assert.ok(nodes.some(n => n.type === 'math' && n.value === '\\frac{a}{b}'));
+  const text = nodes.find(n => n.type === 'text' && n.value?.includes('*literal*'))!;
+  const positions = textPositions(body, text), value = text.value!;
+  assert.equal(positions.length, value.length);
+  assert.equal(body.slice(positions[value.indexOf('*')].start, positions[value.indexOf('*')].end), '\\*');
+  assert.equal(body.slice(positions[value.indexOf('&')].start, positions[value.indexOf('&')].end), '&amp;');
+  assert.equal(body.slice(positions[value.indexOf('😀')].start, positions[value.indexOf('😀')].end), '&#x1f600;');
+  const quote = nodes.find(n => n.type === 'text' && n.value?.includes('continuation'))!;
+  const mapped = textPositions(body, quote); assert.equal(body.slice(mapped[quote.value!.indexOf('continuation')].start, mapped.at(-1)!.end), 'continuation');
+});
+test('Project images preserve revision bytes and reject paths outside the repository', t => {
+  const root = fixture(t); mkdirSync(join(root, 'stratic/assets'));
+  const path = 'stratic/assets/example.svg', before = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>';
+  writeFileSync(join(root, path), before); git(root, ['add', path]); git(root, ['commit', '-m', 'Image fixture']); const base = head(root);
+  writeFileSync(join(root, path), before.replace('red', 'blue'));
+  assert.equal(imagePath('stratic/descriptions/queue.md', '../assets/example.svg'), path);
+  assert.equal(imagePath('stratic/descriptions/queue.md', '/stratic/assets/example.svg'), path);
+  const old = projectImage(loadProject(root, base), 'queue', '../assets/example.svg');
+  const current = projectImage(loadProject(root), 'queue', '../assets/example.svg');
+  assert.notEqual(old, current); assert.equal(Buffer.from(old.split(',')[1], 'base64').toString(), before);
+  const binary = Buffer.from([137,80,78,71,13,10,26,10,255,0,128]); writeFileSync(join(root, 'stratic/assets/binary.png'), binary);
+  assert.deepEqual(readBinarySource(root, 'stratic/assets/binary.png'), binary);
+  git(root, ['add', 'stratic/assets/binary.png']); git(root, ['commit', '-m', 'Binary fixture']);
+  assert.deepEqual(readBinarySource(root, 'stratic/assets/binary.png', head(root)), binary);
+  for (const url of ['https://example.com/a.png', '//example.com/a.png', 'file:///etc/passwd', 'data:image/png;base64,AA', '../../../outside.svg', '/.git/config', '/%2e%2e/outside.svg', '..\\outside.svg']) assert.throws(() => projectImage(loadProject(root), 'queue', url));
+  writeFileSync(join(root, 'outside.svg'), before); symlinkSync(join(root, 'outside.svg'), join(root, 'stratic/assets/link.svg'));
+  assert.throws(() => projectImage(loadProject(root), 'queue', '../assets/link.svg'), /Symbolic links/);
+  writeFileSync(join(root, 'stratic/assets/huge.png'), Buffer.alloc(2_000_001)); assert.throws(() => projectImage(loadProject(root), 'queue', '../assets/huge.png'), /2 MB/);
+  writeFileSync(join(root, 'stratic/assets/fake.png'), '<script>bad()</script>'); assert.throws(() => projectImage(loadProject(root), 'queue', '../assets/fake.png'), /Unsupported/);
+});

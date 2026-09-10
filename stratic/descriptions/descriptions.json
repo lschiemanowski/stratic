@@ -7,5 +7,10 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "Each description explains one responsibility on its own; children elaborate meaningful passages at variable depths.",
+    "Stable identities connect Markdown descriptions and JSON metadata; exact quotes locate implementation and other linked passages.",
+    "Optional summary bullets condense the same account and are reviewed with it. Broken metadata remains inspectable as draft prose."
+  ]
 }

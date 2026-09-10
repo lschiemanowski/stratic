@@ -1,0 +1,235 @@
+{
+  "id": "9f9ef479-bace-4e95-aabb-8f6b92846815",
+  "base": "d3be4560e6de510da50989a932da32dcfad464b5",
+  "contentTree": "0057ff34e96b2c78058b1789e57cde688a3ee8dc",
+  "reviewer": "Codex",
+  "summary": "Add summaries, a foldable tree, formatted descriptions, and contextual test evidence",
+  "examined": [
+    {
+      "id": "agent-skills",
+      "outcome": "revised",
+      "reason": "Adds a concise summary checked against the full responsibility: Agent skills guide investigation and judgment around Stratic’s mechanical tools. The bundled workflow keeps descriptions, implementation, and evidence consistent before user-authorized acceptance. The skill is a reviewable checkout file that must be made available to the agent; its presence does not prove semantic accuracy."
+    },
+    {
+      "id": "agent-workflow",
+      "outcome": "revised",
+      "reason": "Adds maintaining and reviewing existing summaries alongside full descriptions to the bundled agent workflow."
+    },
+    {
+      "id": "agents",
+      "outcome": "revised",
+      "reason": "Adds a concise summary checked against the full responsibility: The CLI exposes project descriptions, source, structural validation, impact, and recorded check evidence. Preparation and explicit acceptance identify an exact proposal; the caller supplies semantic judgment and runs checks with existing tools. UI current and UI open coordinate the reader’s focus without granting edit or commit authority."
+    },
+    {
+      "id": "change-display",
+      "outcome": "revised",
+      "reason": "Compares optional summary bullets independently from prose, including highlighted additions and expandable removals; the comparison base and review meaning stay the same."
+    },
+    {
+      "id": "changes",
+      "outcome": "revised",
+      "reason": "Adds a concise summary checked against the full responsibility: A proposal records revised and unchanged responsibilities, reasons, and checks bound to the exact selected content. Preparation validates links, impact decisions, and matching evidence, then pins the proposal for inspection. User-authorized acceptance reuses those checks and commits only the unchanged prepared content; it never pushes."
+    },
+    {
+      "id": "checks",
+      "outcome": "revised",
+      "reason": "Existing catalog and exact-content evidence comparison already provide the required associations and current/earlier flags. Presentation prefers matching individual results and never infers individual passes from an aggregate outcome; storage and acceptance semantics are unchanged."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing cli list contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "unchanged",
+      "reason": "Show already exposes the loaded metadata, so optional summary bullets are returned without a new operation or recursive expansion."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing cli validate contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "description-identity",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing description identity contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "revised",
+      "reason": "Adds optional summaries beneath descriptions and links while retaining full Markdown as the complete account and the sole home of passage links."
+    },
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "Adds Markdown, equations, project images, summaries and the tree overview; test evidence now accompanies the descriptions and implementation it concerns rather than occupying a separate view."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "revised",
+      "reason": "Replaces literal paragraph splitting with source-position-aware Markdown text segments. Formatting and decoded entities preserve target membership; equations, code and images are atomic displayed targets. Existing single/multiple destination navigation and paired source reading remain in force."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "Retains the content-tree field and existing global navigation. A selection/content change clears expanded-test state; asynchronous source results are attached only to rows still belonging to the displayed view."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing paired descriptions contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "project-loading",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing project loading contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "project-model",
+      "outcome": "revised",
+      "reason": "Adds a concise summary checked against the full responsibility: Descriptions, links, tests, and reviews are versioned together as ordinary project files. Stable identities and passage links connect broad responsibilities to detailed explanations and source. Intended behavior, implementation status, and evidence for a particular change are distinct; structural validation does not prove semantic accuracy."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "Reconciles the rendering contract with Markdown and KaTeX, supported DOM elements and bounded local image reads. CSP permits KaTeX styles and bundled fonts plus image data, while scripts, network navigation and repository HTML remain restricted. The preload adds one validated image-read operation."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Keeps per-pane summary toggles and optional tree overview; removes Tests from View because tests now accompany descriptions and implementation."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Uses existing catalog verifies/source links to show directly associated tests with descriptions and beneath implementation. Expandable rows retain the owning view and source, expose exact test code and check details, and distinguish current individual results from earlier, missing and inconclusive evidence. Removes the standalone Tests view."
+    },
+    {
+      "id": "relationships",
+      "outcome": "revised",
+      "reason": "Refreshed exact implementation selectors after the summary and tree-view changes. The existing relationships contract still holds; loading, identity, links and reading behavior remain as described."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "revised",
+      "reason": "Implementation remains beside its owning claim; relevant tests appear below it and expand in place using the existing syntax-colored source renderer and exact passage resolution."
+    },
+    {
+      "id": "stratic",
+      "outcome": "revised",
+      "reason": "Adds a concise summary checked against the full responsibility: Stratic keeps a hierarchical account of a program’s responsibilities connected to implementation and tests. People read and request changes at useful levels of detail; agents maintain descriptions, code, and their connections together. Prepared changes bind review and checks to exact file contents; acceptance requires user authorization and commits without pushing."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "revised",
+      "reason": "Defines optional versioned summary bullets, their consistency with the full account, validation and shared review identity; implemented by the metadata loader and agent guidance."
+    },
+    {
+      "id": "tree-overview",
+      "outcome": "revised",
+      "reason": "Implements the revised spatial layout: root above horizontal main branches, deeper nodes stacked and indented within independent columns. Individual folds and a level slider limit detail without changing selection or hierarchy. Current description reveals its ancestors, while pan, zoom, historical content and draft handling retain their meaning. Layout and Electron checks cover these interactions."
+    },
+    {
+      "id": "acceptance",
+      "outcome": "unchanged",
+      "reason": "Summary metadata uses the existing exact snapshot as ordinary description content. Review identity, user authorization, hooks and recovery are unchanged; acceptance implementation was not modified."
+    },
+    {
+      "id": "passages",
+      "outcome": "revised",
+      "reason": "Refreshed repository-read implementation links after introducing binary reads. Exact source quotes, offsets and ambiguity handling are unchanged; image decoding does not alter Markdown selectors."
+    },
+    {
+      "id": "formatted-descriptions",
+      "reason": "Implements CommonMark/GFM rendering through Remark and KaTeX equations, retaining original source ranges for Stratic links. Project-relative images use revision-bound binary reads and constrained image data; raw HTML, resource-loading LaTeX commands and remote images remain inert. New unit and Electron cases exercise formatting, source spans, live image changes, historical bytes and hostile inputs.",
+      "outcome": "revised"
+    },
+    {
+      "id": "cli-source",
+      "reason": "Refreshed the source selector after factoring binary repository reads from UTF-8 decoding. The CLI continues to return the same source string with the same size, path and revision boundaries.",
+      "outcome": "revised"
+    },
+    {
+      "id": "preparation",
+      "reason": "Refreshed the Git command implementation selector: byte output now underlies the existing UTF-8 wrapper. Temporary indices, exact selected snapshots, review checks and acceptance ownership are unchanged.",
+      "outcome": "revised"
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "unchanged",
+      "reason": "The Git wrapper now preserves bytes internally before decoding its ordinary string output; selected-file capture, temporary index behavior and tree identities are unchanged."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "unchanged",
+      "reason": "UI open still resolves stable identities and exact Markdown quotes and changes only the reader selection. Formatted rendering uses those same offsets without changing the CLI request or its authority."
+    },
+    {
+      "id": "impact",
+      "outcome": "unchanged",
+      "reason": "Impact still computes changed files, resolves exact source spans and expands explicit revised responsibilities to their parents and dependencies. Markdown display does not change stored selectors or introduce another review identity; the repository-read refactor preserves UTF-8 text used by impact."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "0057ff34e96b2c78058b1789e57cde688a3ee8dc",
+      "method": "npm run typecheck; npm run test:desktop; node src/cli.ts validate; git diff --check",
+      "outcome": "pass",
+      "environment": "Node v24.16.0; macOS arm64; Electron 43.2.0",
+      "evidence": "Typecheck and structural/link validation passed, with no whitespace errors. The complete desktop smoke passed, including directly associated tests, inline source expansion and positioning, retained implementation, current pass/fail, earlier failure after an edit, inconclusive and unnamed individual results. It also covers Markdown, images, summaries, tree folding, navigation, project/revision switching, draft errors and renderer isolation. Desktop fixture waits now explicitly await repeated reads; earlier failures and diagnosis are preserved in /private/tmp/stratic-context-desktop-first.txt, /private/tmp/stratic-context-desktop.txt and /private/tmp/stratic-context-desktop-final.txt. Passing output: /private/tmp/stratic-context-desktop-verified.txt. Before/after content trees match. The non-desktop suite was not rerun for this UI-only increment.",
+      "tests": [
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        }
+      ],
+      "id": "0034d013-54ca-4697-9bec-c9ca6e4c931a",
+      "recordedAt": "2026-09-10T09:33:18.920Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T09:34:17.514Z",
+  "unmapped": [
+    {
+      "path": "src/desktop/renderer.ts",
+      "reason": "Module imports wire the reviewed Markdown and tree renderers into the reader. The bounded image-promise cache is keyed by project, revision, content tree, description and URL, so data is reused during navigation and refreshed after file changes. Remaining module-scope state selects independent summaries and retains the tree camera; executable rendering/navigation is linked. The testView import and local expansion set wire contextual evidence into both reading paths; expansion is reset on content or selection changes."
+    },
+    {
+      "path": "src/desktop/tree-view.ts",
+      "reason": "The uncovered import supplies Description and Project types. Both executable layout and interaction sections are linked directly to Tree overview."
+    },
+    {
+      "path": "test/reading-views.test.ts",
+      "reason": "The uncovered test imports establish the fixture, model types and tested entry points. Each executable test is registered with its exact body and verified description passage."
+    },
+    {
+      "path": "src/desktop/main.ts",
+      "reason": "The new projectImage import wires the reviewed image helper into the sender-validated preload handler; the executable handler is inside the linked window setup block."
+    },
+    {
+      "path": "test/markdown.test.ts",
+      "reason": "Imports connect the standard test runner and fixture to Markdown source mapping and binary image helpers. Each executable test body is registered against Formatted descriptions."
+    },
+    {
+      "path": "package.json",
+      "reason": "Pins Remark, its GFM/math parser extensions, KaTeX and the shared Markdown escape decoder. These are the established parsers/renderers used by Formatted descriptions; existing scripts and application entry points are unchanged."
+    },
+    {
+      "path": "scripts/build.ts",
+      "reason": "Reviewed the unchanged existing Electron bundles and static-file copying, plus copying KaTeX CSS and fonts into the distribution. The new formatted-description link covers the final build script; the baseline had no link over its changed import."
+    },
+    {
+      "path": "src/desktop/test-view.ts",
+      "reason": "New contextual test renderer is linked in full from Reading test evidence. It reuses catalog associations, current flags, exact passage matching and source coloring; no execution or model authority is added. The accepted baseline had no link to this new file."
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "reason": "Added catalog and synthetic evidence fixtures exercise direct associations, in-place code expansion, source positioning, and current/earlier/pass/fail/inconclusive/unrecorded states. Replaced ineffective asynchronous predicate waits with explicitly awaited polling for newly written fixture descriptions. The entire final script remains registered as desktop-smoke."
+    },
+    {
+      "path": "src/desktop/style.css",
+      "reason": "Inspected compact test rows, focus indicators, status disks and bounded source panels; removed unused test-card styling. The complete final stylesheet remains linked from Rendering repository content."
+    }
+  ]
+}

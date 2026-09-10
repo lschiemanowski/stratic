@@ -7,5 +7,21 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [
+    {
+      "kind": "reference",
+      "from": {
+        "quote": "Descriptions can be read as short bullet summaries when a full account would interrupt orientation."
+      },
+      "to": {
+        "description": "description-summaries"
+      }
+    }
+  ],
+  "summary": [
+    "Paired panes show a parent and active child together; implementation links place the owning description beside source.",
+    "Arrows navigate throughout the reader. The bottom menu shows nearby descriptions, and the tree overview exposes the whole hierarchy.",
+    "Each pane can switch independently to summary reading. View offers change highlighting, history, and tests; unfinished behavior and actual problems remain visible.",
+    "The desktop reads project content and reflects external edits; it neither edits nor accepts changes."
+  ]
 }

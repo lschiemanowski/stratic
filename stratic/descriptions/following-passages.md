@@ -8,4 +8,4 @@ If a selected segment has one valid connection, it opens directly. A child descr
 
 Passages in either visible description can be followed. Selecting another child of the visible parent replaces the right-hand description; following a child of the active description moves that description left and opens the next level on the right. Connections without an anchored passage remain available under Related responsibilities. A broken anchor stays inspectable with its problem, and a failed target does not silently substitute another responsibility.
 
-Text is rendered through text nodes, including linked segments. Link behavior comes from validated Stratic metadata, not from executing Markdown or HTML supplied by the repository.
+Markdown formatting preserves source positions for linked text. A linked claim can span emphasis or other formatting without losing its destination; each displayed text segment keeps the targets covering its source range. Equations, code spans, and images are indivisible displayed objects, so a selector inside one applies to that whole object. Link behavior comes from validated Stratic metadata; repository HTML does not execute.

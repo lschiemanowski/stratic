@@ -9,3 +9,5 @@ Investigation follows the changed responsibilities and records why nearby promis
 The agent runs appropriate checks, captures the content examined, and records what was actually observed. It prepares a review only after the descriptions, links, evidence, and impact decisions agree. The user authorizes acceptance of that concrete proposal; navigation requests and a prior test pass are not permission to commit.
 
 The skill also asks for an explicit v3 executable path when several Stratic versions are available. It is guidance for agent behavior, not an automated proof that the agent followed the workflow. Its own instructions remain reviewable as a file in the checkout.
+
+When a description has a summary, the agent checks its bullets against the full account during the same investigation. Changes to promises, conditions, or limitations must be reflected in both. A useful new summary can be added as optional metadata, but the workflow does not require summaries for every description. The summary condenses the responsibility’s behavior rather than listing its children or introducing separate implementation links.

@@ -63,6 +63,7 @@ Each metadata file has the following fields:
 |---|---|
 | `id` | Stable identity, independent of title, filename, and parent. |
 | `parent` | The parent description and the passage elaborated there; null for the root. |
+| `summary` | Optional array of nonempty strings, one per summary bullet. Omitted or empty means no summary. |
 | `realization` | `implemented`, `partial`, or `unimplemented`. |
 | `remaining` | A short explanation of intentionally absent behavior, when applicable. |
 | `links` | Implementation links, dependencies, and contextual references originating here. |

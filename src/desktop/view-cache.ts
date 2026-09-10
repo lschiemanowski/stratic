@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import type { Project, CheckResult, Ready } from '../model.ts';
 import type { Comparison } from './comparison.ts';
 export interface ViewData {
-  project: Project; checks: (CheckResult & { current: boolean })[]; ready: Ready | null;
+  tree: string; project: Project; checks: (CheckResult & { current: boolean })[]; ready: Ready | null;
   history: { id: string; title: string }[]; dirty: boolean; comparison: Comparison | null;
 }
 let worker: Worker | undefined, nextId = 0;

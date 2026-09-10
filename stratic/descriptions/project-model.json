@@ -7,5 +7,10 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "Descriptions, links, tests, and reviews are versioned together as ordinary project files.",
+    "Stable identities and passage links connect broad responsibilities to detailed explanations and source.",
+    "Intended behavior, implementation status, and evidence for a particular change are distinct; structural validation does not prove semantic accuracy."
+  ]
 }

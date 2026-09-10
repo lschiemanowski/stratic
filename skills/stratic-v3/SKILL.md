@@ -15,6 +15,8 @@ For a requested behavior change, clarify consequential uncertainty after investi
 
 Keep descriptions self-contained. A child adds useful detail to its parent. Write about outcomes and contracts at broader scopes and representations and algorithms where they help explain implementation. Links select complete meaningful passages; a dependency explains the promise being relied on. Use `validate` to detect mechanical problems. It does not establish semantic accuracy.
 
+Descriptions may include an optional `summary` array in their JSON metadata, with one nonempty text string per bullet. When changing a description that has a summary, review and update those bullets in the same change so promises, conditions, and limitations stay consistent. Add summaries where useful; absence is valid. Summarize the program responsibility, not the list of topics or children, and keep implementation passage links in the full description.
+
 Use `impact --paths FILE ...` to start investigation. Record each examined description as `revised` when its contract or implementation meaning changes, or `unchanged` when its abstraction still holds, with a concrete reason. Supply these decisions through `impact --review /tmp/review.json --paths FILE ...` to expand revised branches to parents, dependencies, and dependents. Investigate further effects when evidence warrants it. Describe uncovered changed regions in the review's `unmapped` list, or repair the missing mappings.
 
 ## Check and prepare

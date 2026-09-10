@@ -7,5 +7,10 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "Agent skills guide investigation and judgment around Stratic’s mechanical tools.",
+    "The bundled workflow keeps descriptions, implementation, and evidence consistent before user-authorized acceptance.",
+    "The skill is a reviewable checkout file that must be made available to the agent; its presence does not prove semantic accuracy."
+  ]
 }

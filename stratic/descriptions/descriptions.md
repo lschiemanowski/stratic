@@ -2,6 +2,8 @@
 
 A description explains one responsibility of the program: what it does, the conditions it relies on, and the behavior it promises. It should make sense when opened on its own. A child adds a more detailed account of a meaningful passage in its parent, so readers can stop at the level of detail they need. There are no fixed levels that every branch must fill.
 
+A description may also have a short bullet summary that gives a faithful abbreviated account of the same responsibility. The full text remains the complete description; its summary is optional content maintained and reviewed alongside it. Summaries belong to the project’s versioned account and must preserve the conditions and limitations needed to understand the behavior being promised.
+
 A project stores descriptions as Markdown with JSON metadata under stratic. A stable identity connects each description to its parent and incoming links, independently of its title or filename. The parent relationship identifies the passage being elaborated; it does not require the prose to be a list of its children.
 
 Passage links connect particular claims to explanations, implementation, and tests. They store an exact quote, with surrounding text when needed to distinguish repeated occurrences. A source link therefore identifies the code that supports the claim, rather than only naming a file. A missing or ambiguous match is reported instead of silently pointing somewhere else.

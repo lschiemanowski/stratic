@@ -4,11 +4,14 @@ import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 export function git(root: string, args: string[], input?: string | Buffer, env: NodeJS.ProcessEnv = {}): string {
+  return gitBytes(root, args, input, env).toString('utf8');
+}
+export function gitBytes(root: string, args: string[], input?: string | Buffer, env: NodeJS.ProcessEnv = {}): Buffer {
   const inherited = { ...process.env };
   for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE']) delete inherited[name];
   try {
     return execFileSync('git', ['--literal-pathspecs', '-C', root, ...args], {
-      encoding: 'utf8', input, maxBuffer: 32 * 1024 * 1024,
+      input, maxBuffer: 32 * 1024 * 1024,
       env: { ...inherited, GIT_OPTIONAL_LOCKS: '0', ...env }, stdio: ['pipe', 'pipe', 'pipe'],
     });
   } catch (error) {
@@ -48,18 +51,21 @@ export function revision(root: string, ref: string): string {
   return git(root, ['rev-parse', '--verify', '--end-of-options', `${ref}^{tree}`]).trim();
 }
 export function readSource(root: string, path: string, view = 'working'): string {
+  return readBinarySource(root, path, view).toString('utf8');
+}
+export function readBinarySource(root: string, path: string, view = 'working'): Buffer {
   pathInside(root, path);
   if (view === 'working') {
     const full = pathInside(root, path);
     if (lstatSync(full).size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);
-    return readFileSync(full, 'utf8');
+    return readFileSync(full);
   }
   const tree = /^[0-9a-f]{40,64}$/.test(view) ? view : revision(root, view);
   const entry = git(root, ['ls-tree', tree, '--', path]);
   if (!entry.startsWith('100644 ') && !entry.startsWith('100755 ')) throw new Error(`Not a regular file at this revision: ${path}`);
   const size = Number(git(root, ['cat-file', '-s', `${tree}:${path}`]).trim());
   if (size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);
-  return git(root, ['show', `${tree}:${path}`]);
+  return gitBytes(root, ['show', `${tree}:${path}`]);
 }
 export function files(root: string, view = 'working'): string[] {
   const output = view === 'working'

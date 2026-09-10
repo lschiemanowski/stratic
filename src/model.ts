@@ -10,6 +10,7 @@ export interface Metadata {
   parent: (DescriptionTarget & { passage: Passage }) | null;
   realization: 'implemented' | 'partial' | 'unimplemented';
   remaining?: string;
+  summary?: string[];
   links: Link[];
 }
 export interface Description { id: string; title: string; body: string; path: string; metadata?: Metadata }

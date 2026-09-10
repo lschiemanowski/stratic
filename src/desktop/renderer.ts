@@ -1,25 +1,32 @@
 import type { Project, Description, Connection, CheckResult, Ready, Target, Range, Passage } from '../model.ts';
 import type { Selection, UIRequest } from '../ui-channel.ts';
 import type { ViewData } from './view-cache.ts';
+import { markdownView } from './markdown.ts';
+import { testView } from './test-view.ts';
 import { sourceView } from './source-view.ts';
+import { treeView, type TreeCamera } from './tree-view.ts';
 import { textChanges } from './text-changes.ts';
 import { resolvePassage } from '../passages.ts';
 
 type View = Omit<ViewData, 'project'> & { project: Project | null; selection: Selection; projects: string[] };
 declare global { interface Window { stratic: {
   copyId(): Promise<void>; view(): Promise<View>; navigate(request: UIRequest): Promise<Selection>; source(path: string): Promise<string>;
+  image(request: {project: string; revision: string; tree: string; description: string; url: string}): Promise<string>;
   chooseProject(path?: string): Promise<View>; onSelection(callback: () => void): void;
 } } }
 const app = document.querySelector('#app')!;
 let current: View, signature = '', selectedConnections: Connection[] = [], source: { path: string; body: string; passage: Passage; range?: Range; problem?: string } | null = null;
-let tab: 'description' | 'tests' | 'issues' = 'description';
+let tab: 'description' | 'issues' | 'tree' = 'description';
 let sequence = 0, loadedKey = '';
 let menuOpen = true;
 let focusMenu = true;
 let connectionOwner: string | undefined, detailSequence = 0;
 let highlightChanges = true;
+const expandedTests = new Set<string>();
+const summaryModes = { parent: false, active: false };
+let treeKey = '', treeCamera: TreeCamera = { x: 0, y: 0, scale: 1, initialized: false };
 let projectsOpen: boolean | undefined;
-let optionsOpen = false;
+let optionsOpen = false, choosingProject = false;
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e;
 }
@@ -31,9 +38,10 @@ function error(e: unknown) {
   banner.textContent = (e as Error).message;
 }
 function clearDetail() {
-  detailSequence++; source = null; selectedConnections = []; connectionOwner = undefined;
+  detailSequence++; expandedTests.clear(); source = null; selectedConnections = []; connectionOwner = undefined;
 }
 async function open(target: Target, owner = current.selection.description) {
+  if (choosingProject) return;
   try {
     if ('description' in target) {
       tab = 'description'; clearDetail();
@@ -75,29 +83,19 @@ function links(project: Project, id: string): Connection[] {
   for (const l of result) if (l.from) { try { l.range = resolvePassage(d.body, l.from); } catch (e) { l.problem = (e as Error).message; } }
   return result;
 }
+const images = new Map<string, Promise<string>>();
 function prose(body: string, connections: Connection[], owner: string, selected?: Range, changes: { start: number; end: number }[] = []) {
-  const container = el('div', undefined, 'prose');
-  // Render repository text exclusively through text nodes. Raw HTML and URLs are inert.
-  const chunks = [...body.matchAll(/[^\n]+(?:\n(?!\n)[^\n]+)*|\n+/g)];
-  for (const chunk of chunks) {
-    const raw = chunk[0], at = chunk.index!;
-    if (!raw.trim()) continue;
-    const heading = /^(#{1,4}) /.exec(raw), skip = heading?.[0].length ?? 0;
-    const node = heading ? el(heading[1].length === 1 ? 'h1' : 'h2') : el('p');
-    const start = at + skip, end = at + raw.length;
-    if (changes.some(c => c.start < end && c.end > start)) node.classList.add('changed-text');
-    const relevant = connections.filter(l => l.range && l.range.start < end && l.range.end > start);
-    const cuts = [...new Set([start, end, ...relevant.flatMap(l => [Math.max(start, l.range!.start), Math.min(end, l.range!.end)]), ...(selected && selected.start < end && selected.end > start ? [Math.max(start, selected.start), Math.min(end, selected.end)] : [])])].sort((a, b) => a - b);
-    for (let i = 0; i < cuts.length - 1; i++) {
-      const a = cuts[i], b = cuts[i + 1];
-      const targets = relevant.filter(l => l.range!.start <= a && l.range!.end >= b);
-      const part = targets.length ? button(body.slice(a, b), () => follow(targets, owner), 'passage') : el('span', body.slice(a, b));
-      if (selected && selected.start <= a && selected.end >= b) part.classList.add('selected');
-      node.append(part);
+  const project = current.project!, tree = current.tree;
+  return markdownView(body, { connections, selected, changes, follow: targets => follow(targets, owner), image: url => {
+    const request = { project: project.root, revision: project.revision, tree, description: owner, url }, key = JSON.stringify(request);
+    let result = images.get(key);
+    if (!result) {
+      if (images.size >= 32) images.delete(images.keys().next().value!);
+      result = window.stratic.image(request); images.set(key, result);
+      result.catch(() => images.delete(key));
     }
-    container.append(node);
-  }
-  return container;
+    return result;
+  } });
 }
 function neighborhood(p: Project, id: string) {
   const byId = new Map(p.descriptions.map(d => [d.id, d]));
@@ -162,7 +160,16 @@ function descriptionPane(p: Project, d: Description, active: boolean, passage?: 
   const reading = el('section', undefined, 'reading description-pane' + (active ? ' active-description' : ' parent-description'));
   reading.setAttribute('aria-label', active ? 'Active reading pane' : 'Parent reading pane');
   reading.dataset.description = d.id;
-  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id]);
+  const mode = active ? 'active' : 'parent', summaries = summaryModes[mode];
+  if (d.metadata?.summary?.length && !source && !selectedConnections.length) {
+    const toggle = iconButton('Summary', 'summary', () => {
+      summaryModes[mode] = !summaryModes[mode]; render();
+      document.querySelector<HTMLButtonElement>(`.${active ? 'active' : 'parent'}-description .summary-button`)?.focus();
+    });
+    toggle.classList.add('summary-button'); toggle.setAttribute('aria-pressed', String(summaries));
+    toggle.title = summaries ? 'Show full description' : 'Show summary'; reading.append(toggle);
+  }
+  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id, summaries]);
   const realization = d.metadata?.realization;
   if (realization !== 'implemented') {
     const notice = el('div', undefined, 'implementation-notice');
@@ -173,10 +180,29 @@ function descriptionPane(p: Project, d: Description, active: boolean, passage?: 
   let selected: Range | undefined;
   try { if (passage) selected = resolvePassage(d.body, passage); } catch { /* Retain the edited description with its problem. */ }
   const outgoing = links(p, d.id);
-  const before = current.comparison?.before[d.id];
-  const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };
-  reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));
-  if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\n\n'))); reading.append(removed); }
+  const summary = summaries && !source && !selectedConnections.length ? d.metadata?.summary : undefined;
+  if (summary?.length) {
+    reading.append(el('h1', d.title));
+    const list = el('ul', undefined, 'description-summary');
+    const previous = current.comparison?.summariesBefore[d.id];
+    const changes = highlightChanges && previous ? textChanges(previous.join('\n\n'), summary.join('\n\n')) : { additions: [], removed: [] };
+    let offset = 0;
+    for (const bullet of summary) {
+      list.append(el('li', bullet, changes.additions.some(c => c.start < offset + bullet.length && c.end > offset) ? 'changed-text' : ''));
+      offset += bullet.length + 2;
+    }
+    reading.append(list);
+    if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed summary text'), el('pre', changes.removed.join('\n\n'))); reading.append(removed); }
+  } else {
+    const before = current.comparison?.before[d.id];
+    const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };
+    reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));
+    if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\n\n'))); reading.append(removed); }
+    const removedSummary = current.comparison?.summariesBefore[d.id];
+    if (summaries && highlightChanges && !d.metadata?.summary?.length && removedSummary?.length) {
+      const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed summary text'), el('pre', removedSummary.join('\n\n'))); reading.append(removed);
+    }
+  }
   if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }
   const issues = p.issues.filter(i => i.description === d.id);
   if (issues.length) reading.append(button(`${issues.length} connection problem${issues.length === 1 ? '' : 's'} — inspect`, () => { tab = 'issues'; render(); }, 'problem-link'));
@@ -185,7 +211,11 @@ function descriptionPane(p: Project, d: Description, active: boolean, passage?: 
     reading.append(el('h2', 'Related responsibilities'));
     for (const l of contextual) { const b = button(l.label, () => follow([l], d.id), 'relation'); reading.append(b); }
   }
+  if (!source) { const tests = testsFor(d); if (tests) reading.append(tests); }
   return reading;
+}
+function testsFor(description: Description) {
+  return testView(description, current.project!.tests, current.checks, expandedTests, path => window.stratic.source(path), target => void open(target));
 }
 function iconButton(label: string, icon: string, action: () => void) {
   const control = button('', action, 'subtle icon-button');
@@ -194,23 +224,26 @@ function iconButton(label: string, icon: string, action: () => void) {
   return control;
 }
 async function chooseProject(path?: string) {
+  if (choosingProject) return;
+  choosingProject = true; render();
   try {
     const v = await window.stratic.chooseProject(path);
-    current = v; signature = ''; clearDetail(); tab = 'description'; optionsOpen = false; render();
-  } catch (e) { error(e); }
+    current = v; signature = ''; clearDetail(); tab = 'description'; optionsOpen = false;
+    choosingProject = false; render();
+  } catch (e) { choosingProject = false; render(); error(e); }
 }
 function projectPanel() {
-  const panel = el('aside', undefined, 'project-panel'); panel.id = 'project-panel'; panel.setAttribute('aria-label', 'Projects');
+  const panel = el('aside', undefined, 'project-panel'); panel.id = 'project-panel'; panel.setAttribute('aria-label', 'Projects'); panel.setAttribute('aria-busy', String(choosingProject));
   const heading = el('div', undefined, 'panel-heading');
   heading.append(el('h2', 'Projects'), iconButton('Hide projects', 'close', () => { projectsOpen = false; render(); document.querySelector<HTMLButtonElement>('#projects-toggle')?.focus(); }));
   panel.append(heading);
   for (const path of current.projects) {
-    const item = button('', () => void chooseProject(path), 'project-option'); item.title = path;
+    const item = button('', () => void chooseProject(path), 'project-option'); item.title = path; item.disabled = choosingProject;
     item.setAttribute('aria-current', String(path === current.project?.root));
     item.append(el('span', path.split('/').pop()), el('span', path, 'muted small'));
     panel.append(item);
   }
-  panel.append(button('Open project…', () => void chooseProject(), 'subtle open-project'));
+  const picker = button(choosingProject ? 'Opening project…' : 'Open project…', () => void chooseProject(), 'subtle open-project'); picker.disabled = choosingProject; panel.append(picker);
   return panel;
 }
 function titleBar(p: Project | null) {
@@ -251,13 +284,14 @@ function titleBar(p: Project | null) {
       const highlight = button(current.comparison.label, () => { highlightChanges = !highlightChanges; render(); }, 'subtle change-toggle');
       highlight.setAttribute('aria-pressed', String(highlightChanges)); highlight.title = 'Highlight changes compared with ' + current.comparison.base.slice(0, 7); panel.append(highlight);
     }
-    panel.append(button('Tests', () => { optionsOpen = false; tab = 'tests'; render(); }, 'subtle'));
+    panel.append(button('Tree overview', () => { optionsOpen = false; clearDetail(); tab = 'tree'; render(); }, 'subtle'));
     if (current.selection.description) {
       const identity = el('div', undefined, 'identity'); identity.append(el('span', current.selection.description, 'muted small'), button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); panel.append(identity);
     }
     options.append(panel);
   }
-  header.append(options); return header;
+  header.append(options);
+  return header;
 }
 function render() {
   const p = current.project;
@@ -270,6 +304,12 @@ function render() {
   if (projectsOpen ?? !p) workspace.append(projectPanel());
   const reader = el('div', undefined, 'reader'); workspace.append(reader); app.append(workspace);
   if (!p) { reader.append(el('section', 'Choose a project to start reading.', 'empty')); return; }
+  if (tab === 'tree') {
+    const key = JSON.stringify([p.root, p.revision]);
+    if (treeKey !== key) { treeKey = key; treeCamera = { x: 0, y: 0, scale: 1, initialized: false }; }
+    reader.append(treeView(p, current.selection.description, treeCamera, id => void open({ description: id }), () => { tab = 'description'; render(); }));
+    return;
+  }
   const layout = el('main', undefined, 'layout');
   const reading = el('section', undefined, 'reading');
   reading.dataset.readingKey = JSON.stringify([p.root, p.revision, tab]);
@@ -277,17 +317,7 @@ function render() {
     reading.append(el('h1', 'Project problems'), el('p', 'Descriptions stay readable while you repair these connections.', 'muted'));
     if (!p.issues.length) reading.append(el('p', 'The hierarchy and passage links resolve. Semantic accuracy is established by review.'));
     for (const issue of p.issues) { const row = el('div', undefined, 'problem'); row.append(el('strong', issue.path), el('p', issue.message)); if (issue.description) row.append(button('Open description', () => void open({ description: issue.description! }))); reading.append(row); }
-  } else if (tab === 'tests') {
-    reading.append(el('div', 'VERIFICATION', 'eyebrow'), el('h1', 'Tests'), el('p', 'Registered tests and recorded outcomes. Opening a test does not run it.', 'muted'));
-    for (const test of p.tests) {
-      const check = current.checks.find(r => r.tests.some(t => t.id === test.id));
-      const outcome = check?.tests.find(t => t.id === test.id)?.outcome;
-      const card = el('article', undefined, 'test-card'); card.append(el('span', check ? `${outcome} · ${check.current ? 'same content' : 'earlier content'}` : 'No recorded result', 'badge ' + (check?.current ? outcome : 'historical')), el('h2', test.name), el('p', test.description));
-      if (check) card.append(el('p', `${check.recordedAt} · ${check.environment}`, 'muted small'));
-      for (const c of test.code) card.append(button('Inspect test code', () => void open(c)));
-      for (const v of test.verifies) card.append(button('Verified behavior', () => void open(v), 'subtle'));
-      reading.append(card);
-    }
+
   } else {
     const d = p.descriptions.find(d => d.id === current.selection.description);
     if (!d) reading.append(el('h1', 'Select a description'));
@@ -309,6 +339,8 @@ function render() {
     heading.append(el('h2', source.path), iconButton('Close source', 'close', () => { clearDetail(); render(); })); detail.append(heading);
     if (source.problem) detail.append(el('p', source.problem, 'problem'));
     detail.append(sourceView(source.path, source.body, source.range));
+    const owner = p.descriptions.find(d => d.id === current.selection.description);
+    if (owner) { const tests = testsFor(owner); if (tests) detail.append(tests); }
   } else if (selectedConnections.length) {
     const heading = el('div', undefined, 'detail-heading');
     heading.append(el('h2', 'Follow this passage'), iconButton('Close connections', 'close', () => { clearDetail(); render(); })); detail.append(heading);
@@ -334,6 +366,7 @@ async function refresh(force = false) {
     const next = JSON.stringify(v);
     if (next === signature && !force) return;
     const key = JSON.stringify(v.selection);
+    if (current && (v.tree !== current.tree || v.project?.root !== current.project?.root)) expandedTests.clear();
     if (key !== loadedKey) { clearDetail(); tab = 'description'; loadedKey = key; }
     if (source) {
       const openedSource = source;
@@ -357,6 +390,7 @@ document.addEventListener('click', event => {
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && optionsOpen) { event.preventDefault(); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); return; }
+  if (event.key === 'Escape' && tab === 'tree') { event.preventDefault(); tab = 'description'; render(); return; }
   if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
   const target = event.target;
   if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;

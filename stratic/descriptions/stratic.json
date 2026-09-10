@@ -2,5 +2,10 @@
   "id": "stratic",
   "parent": null,
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "Stratic keeps a hierarchical account of a program’s responsibilities connected to implementation and tests.",
+    "People read and request changes at useful levels of detail; agents maintain descriptions, code, and their connections together.",
+    "Prepared changes bind review and checks to exact file contents; acceptance requires user authorization and commits without pushing."
+  ]
 }

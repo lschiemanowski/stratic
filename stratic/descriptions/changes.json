@@ -7,5 +7,10 @@
     }
   },
   "realization": "implemented",
-  "links": []
+  "links": [],
+  "summary": [
+    "A proposal records revised and unchanged responsibilities, reasons, and checks bound to the exact selected content.",
+    "Preparation validates links, impact decisions, and matching evidence, then pins the proposal for inspection.",
+    "User-authorized acceptance reuses those checks and commits only the unchanged prepared content; it never pushes."
+  ]
 }

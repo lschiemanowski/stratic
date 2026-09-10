@@ -1,3 +1,4 @@
+import { projectImage } from './images.ts';
 import { viewData, stopViewWorker } from './view-cache.ts';
 import { app, BrowserWindow, clipboard, dialog, ipcMain, session } from 'electron';
 import { join } from 'node:path';
@@ -43,7 +44,7 @@ async function attach(path: string) {
   catch (error) { console.error('Could not save recent projects:', error); }
 }
 async function view() {
-  if (!root) return { selection, projects, project: null, checks: [], ready: null, history: [], dirty: false, comparison: null };
+  if (!root) return { tree: '', selection, projects, project: null, checks: [], ready: null, history: [], dirty: false, comparison: null };
   const at = selection;
   const data = await viewData(root, at.revision);
   if (selection !== at) return view();
@@ -74,6 +75,13 @@ ipcMain.handle('view', event => { verify(event); return view(); });
 ipcMain.handle('navigate', (event, request) => { verify(event); return navigate(request); });
 ipcMain.handle('copy-id', event => { verify(event); if (!selection.description) throw new Error('Select a description first.'); clipboard.writeText(selection.description); });
 ipcMain.handle('source', (event, path) => { verify(event); if (typeof path !== 'string') throw new Error('Expected a source path.'); return readSource(root, path, selection.revision); });
+ipcMain.handle('image', async (event, request) => {
+  verify(event);
+  if (!request || typeof request.description !== 'string' || typeof request.url !== 'string' || request.project !== root || request.revision !== selection.revision) throw new Error('Image request does not match the displayed project.');
+  const at = selection, data = await viewData(root, at.revision);
+  if (selection.project !== at.project || request.tree !== data.tree) throw new Error('The displayed content changed; retry after refresh.');
+  return projectImage(data.project, request.description, request.url, data.tree);
+});
 ipcMain.handle('choose-project', async (event, path?: unknown) => {
   verify(event);
   if (path !== undefined) {

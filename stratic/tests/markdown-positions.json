@@ -1,0 +1,21 @@
+{
+  "id": "markdown-positions",
+  "name": "Markdown preserves source positions",
+  "description": "Markdown preserves source positions.",
+  "code": [
+    {
+      "path": "test/markdown.test.ts",
+      "passage": {
+        "quote": "test('Markdown positions retain escapes, entities, nested blocks and math source', () => {\n  const body = '# Title\\n\\nA **bold** claim with \\\\*literal\\\\* &amp; &#x1f600;.\\n\\n> quoted &copy;\\n> continuation\\n\\n- nested\\n  text\\n\\n$x^2$\\n\\n$$\\n\\\\frac{a}{b}\\n$$\\n';\n  const tree = parseMarkdown(body), nodes: ReturnType<typeof parseMarkdown>[] = [];\n  const visit = (node: typeof tree) => { nodes.push(node); node.children?.forEach(visit); }; visit(tree);\n  assert.ok(nodes.some(n => n.type === 'strong'));\n  assert.ok(nodes.some(n => n.type === 'inlineMath' && n.value === 'x^2'));\n  assert.ok(nodes.some(n => n.type === 'math' && n.value === '\\\\frac{a}{b}'));\n  const text = nodes.find(n => n.type === 'text' && n.value?.includes('*literal*'))!;\n  const positions = textPositions(body, text), value = text.value!;\n  assert.equal(positions.length, value.length);\n  assert.equal(body.slice(positions[value.indexOf('*')].start, positions[value.indexOf('*')].end), '\\\\*');\n  assert.equal(body.slice(positions[value.indexOf('&')].start, positions[value.indexOf('&')].end), '&amp;');\n  assert.equal(body.slice(positions[value.indexOf('\ud83d\ude00')].start, positions[value.indexOf('\ud83d\ude00')].end), '&#x1f600;');\n  const quote = nodes.find(n => n.type === 'text' && n.value?.includes('continuation'))!;\n  const mapped = textPositions(body, quote); assert.equal(body.slice(mapped[quote.value!.indexOf('continuation')].start, mapped.at(-1)!.end), 'continuation');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "The renderer parses Markdown with Remark into a syntax tree carrying original source positions. It creates only the supported elements, with repository text inserted as text. Explicit Stratic passage links retain their exact source ranges across formatting, escapes and character references. Inline code, equations and images are treated as whole objects when a passage selects part of their source. Changed blocks are highlighted against the existing comparison base. A formatted block can contain several source paragraphs; its highlight indicates an intersecting change, not that every displayed word changed."
+      }
+    }
+  ]
+}

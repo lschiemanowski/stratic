@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { mkdirSync, copyFileSync } from 'node:fs';
+import { mkdirSync, copyFileSync, cpSync } from 'node:fs';
 mkdirSync('dist', { recursive: true });
 await Promise.all([
   build({ entryPoints: ['src/desktop/view-worker.ts'], outfile: 'dist/view-worker.cjs', bundle: true, platform: 'node', format: 'cjs' }),
@@ -10,3 +10,6 @@ await Promise.all([
 for (const name of ['index.html', 'style.css']) copyFileSync(`src/desktop/${name}`, `dist/${name}`);
 
 copyFileSync('node_modules/highlight.js/styles/github.css', 'dist/highlight.css');
+
+copyFileSync('node_modules/katex/dist/katex.min.css', 'dist/katex.css');
+cpSync('node_modules/katex/dist/fonts', 'dist/fonts', { recursive: true });
