@@ -1,0 +1,33 @@
+{
+  "id": "desktop-source",
+  "name": "Source coloring and passage selection",
+  "description": "Opens implementation beside its description, preserves the complete source and linked-line highlights, and checks multiline colors, CRLF text and plain-text fallback.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  const releasePassage = page.locator('.passage').filter({ hasText: 'Release locates the job and checks the worker and strictly future expiry.' }).first();\n  await releasePassage.click();\n  await page.locator('.highlighted').first().waitFor();\n  assert.match(await page.locator('.detail').innerText(), /export function release/);\n  assert.ok(await page.locator('.source-code .hljs-keyword').count(), 'Source keywords should be colored.');\n  const displayedSource = await page.locator('.code-line code').allTextContents();\n  assert.equal(displayedSource.join('\\n'), readFileSync(join(root, 'src/queue.ts'), 'utf8'));\n  assert.ok(await page.locator('.highlighted .hljs-keyword').count(), 'Passage backgrounds and syntax colors should coexist.');\n  assert.equal(await active.getAttribute('data-description'), 'lease-transitions');\n  assert.equal(await parentPane.count(), 0);\n  await page.getByRole('button', { name: 'Close source', exact: true }).click();\n  assert.equal(await parentPane.getAttribute('data-description'), 'job-lifecycle');\n  assert.equal(await active.getAttribute('data-description'), 'lease-transitions');\n  await releasePassage.click();\n  await page.locator('.highlighted').first().waitFor();\n  await page.locator('.source-code').click();\n  await page.keyboard.press('ArrowLeft');\n  await active.getByRole('heading', { name: 'Job lifecycle', exact: true }).waitFor();\n  assert.equal(await page.locator('.detail').count(), 0, 'Arrow navigation from source returns to the selected description pair.');\n  await requestUI(root, { action: 'open', description: 'lease-transitions' });\n  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  const sample = '/* first line\\r\\nsecond line */\\r\\nconst markup = `<img src=x onerror=\"window.injected=true\">`;\\r\\n\\r\\n';\n  writeFileSync(join(root, 'src/syntax-fixture.ts'), sample);\n  writeFileSync(join(root, 'src/syntax-fixture.unknown'), sample);\n  const storageMetadataPath = join(root, 'stratic/descriptions/storage.json');\n  const storageMetadata = JSON.parse(readFileSync(storageMetadataPath, 'utf8'));\n  for (const path of ['src/syntax-fixture.ts', 'src/syntax-fixture.unknown']) storageMetadata.links.push({ kind: 'implementation', from: null, to: { path, passage: { quote: sample } } });\n  writeFileSync(storageMetadataPath, JSON.stringify(storageMetadata));\n  await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n  await page.getByRole('button', { name: 'src/syntax-fixture.ts', exact: true }).click();\n  await page.getByRole('heading', { name: 'src/syntax-fixture.ts', exact: true }).waitFor();\n  assert.equal((await page.locator('.code-line code').allTextContents()).join('\\n'), sample);\n  assert.equal(await page.locator('.source-code img, .source-code script').count(), 0);\n  assert.equal(await page.evaluate(() => (window as any).injected), undefined);\n  assert.equal(await page.locator('.code-line:nth-child(2) .hljs-comment').count(), 1);\n  await page.getByRole('button', { name: 'src/syntax-fixture.unknown', exact: true }).click();\n  await page.getByRole('heading', { name: 'src/syntax-fixture.unknown', exact: true }).waitFor();\n  assert.equal((await page.locator('.code-line code').allTextContents()).join('\\n'), sample);\n  assert.equal(await page.locator('.source-code code span').count(), 0);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "source-reading",
+      "passage": {
+        "quote": "Line numbers and a background on the linked lines show where the selected claim points. The rest of the file stays visible so callers, surrounding conditions, and neighboring operations can be read in context. A missing or ambiguous quote is reported as a link problem; a working edit does not silently move the selected target to a different occurrence."
+      }
+    },
+    {
+      "description": "source-reading",
+      "passage": {
+        "quote": "The renderer combines syntax colors with passage backgrounds without altering the source text. Tokens that span lines are split for display while original line endings and blank lines are preserved. Source strings that resemble HTML are inserted as text, not executable markup."
+      }
+    }
+  ]
+}

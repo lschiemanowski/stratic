@@ -1,0 +1,33 @@
+{
+  "id": "desktop-boundaries",
+  "name": "Renderer isolation and readable problems",
+  "description": "Checks the restricted preload API and blocked repository escape, then verifies that malformed metadata is reported while other descriptions remain readable and raw HTML stays inert.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  assert.equal(await page.evaluate(() => typeof (window as any).require), 'undefined');\n  assert.deepEqual(await page.evaluate(() => Object.keys((window as any).stratic).sort()), ['chooseProject', 'copyId', 'image', 'navigate', 'onSelection', 'source', 'view']);\n  const escaped = await page.evaluate(async () => { try { await (window as any).stratic.source('../secret'); return false; } catch { return true; } });\n  assert.equal(escaped, true);"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  const metadataPath = join(root, 'stratic/descriptions/job-lifecycle.json'), metadata = readFileSync(metadataPath, 'utf8');\n  writeFileSync(metadataPath, '{ broken');\n  await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  await page.getByRole('button', { name: /^Problems · [1-9]/ }).click();\n  assert.match(await page.locator('.reading').innerText(), /job-lifecycle/);\n  writeFileSync(metadataPath, metadata);\n  const prosePath = join(root, 'stratic/descriptions/storage.md'), prose = readFileSync(prosePath, 'utf8');\n  writeFileSync(prosePath, prose + '\\n<img src=x onerror=\"window.injected=true\">\\n');\n  await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  assert.equal(await page.locator('.reading img').count(), 0);\n  assert.equal(await page.evaluate(() => (window as any).injected), undefined);\n  writeFileSync(prosePath, prose);\n  await requestUI(root, { action: 'open', description: 'lease-transitions', revision: 'working' });\n  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "reader-content",
+      "passage": {
+        "quote": "The Electron window disables Node integration, enables context isolation and sandboxing, and exposes a small preload API for reading project data, navigating, choosing a project, and copying an identity."
+      }
+    },
+    {
+      "description": "reader-evidence",
+      "passage": {
+        "quote": "The Problems view lists issues discovered while loading the project, including malformed metadata, invalid hierarchy, and broken passage links. A title-bar shortcut appears when there are problems; a zero count is not displayed. Where an issue identifies a description, it can be opened for inspection. Descriptions also expose their own connection problems, so a reader can find the affected prose directly."
+      }
+    }
+  ]
+}

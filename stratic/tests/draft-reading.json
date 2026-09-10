@@ -16,6 +16,18 @@
       "passage": {
         "quote": "For example, while an agent repairs a JSON file, the associated Markdown can remain visible under a temporary draft identity based on its path. Duplicate stable identities likewise become visible drafts with errors, rather than allowing an incoming link to select one at random. Metadata without its Markdown partner is reported too. If the prose file itself cannot be read, the loader reports that problem instead of manufacturing a description."
       }
+    },
+    {
+      "description": "description-identity",
+      "passage": {
+        "quote": "Duplicate identities are reported as problems rather than resolved by choosing an arbitrary file."
+      }
+    },
+    {
+      "description": "description-identity",
+      "passage": {
+        "quote": "The project has one root with no parent; every other description belongs beneath a parent, and parent chains must not cycle."
+      }
     }
   ]
 }

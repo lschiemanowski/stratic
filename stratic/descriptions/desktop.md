@@ -16,7 +16,7 @@ Change highlighting shows how the descriptions differ from the proposal’s star
 
 Tests accompany the descriptions they check and appear alongside implementation when source is open. Each has a short expandable description, linked test code, and a small result indicator that distinguishes current outcomes from earlier evidence. Reading a test does not run it. Problems lists malformed metadata and broken links; draft descriptions remain readable during repairs.
 
-The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, tests, and identity controls are available in the View menu.
+The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, and identity controls are available in the View menu.
 
 The reader does not edit project files or accept changes. Edits made by an agent or editor appear through background refresh, which may take a few seconds. A description marked partial shows what remains to implement, separately from the highlighting of a proposed change.
 

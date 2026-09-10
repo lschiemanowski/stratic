@@ -1,0 +1,51 @@
+{
+  "id": "desktop-pairs",
+  "name": "Parents, children and passage destinations",
+  "description": "Checks independent pane scrolling, sibling context, single and multiple destinations, source opened from the parent, and readable descriptions with broken ancestry.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await requestUI(root, { action: 'open', description: 'queue', revision: 'working' });\n  await active.getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();\n  await page.getByRole('button', { name: 'The command interface exposes the queue operations.', exact: true }).click();\n  await active.getByRole('heading', { name: 'Command interface', exact: true }).waitFor();\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'commands');\n  assert.equal(await page.locator('.connection-target').count(), 0, 'A single description link should open without a chooser.');\n  await requestUI(root, { action: 'open', description: 'lease-transitions', revision: 'working' });\n  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1280, 850));\n  const notes = 'Context '.repeat(120);\n  writeFileSync(join(root, 'stratic/descriptions/pair-parent.md'), '# Pair parent\\n\\nThe first detail elaborates this parent.\\n\\nThe second detail also elaborates this parent.\\n\\n' + Array.from({ length: 12 }, (_, i) => `Context ${i}: ${notes}`).join('\\n\\n') + '\\n');\n  writeFileSync(join(root, 'stratic/descriptions/pair-parent.json'), JSON.stringify({ id: 'pair-parent', parent: { description: 'queue', passage: { quote: 'The command interface exposes the queue operations.' } }, realization: 'implemented', links: [{ kind: 'implementation', from: { quote: 'The first detail elaborates this parent.' }, to: { path: 'src/queue.ts', passage: { quote: 'export function release' } } }] }));\n  for (const [id, title, quote] of [['pair-a', 'First detail', 'The first detail elaborates this parent.'], ['pair-b', 'Second detail', 'The second detail also elaborates this parent.']]) {\n    writeFileSync(join(root, `stratic/descriptions/${id}.md`), `# ${title}\\n\\n${notes}\\n`);\n    writeFileSync(join(root, `stratic/descriptions/${id}.json`), JSON.stringify({ id, parent: { description: 'pair-parent', passage: { quote } }, realization: 'implemented', links: id === 'pair-b' ? [{ kind: 'reference', from: null, to: { description: 'storage' } }] : [] }));\n  }\n  await waitForDescription('pair-a');\n  await requestUI(root, { action: 'open', description: 'pair-a', revision: 'working' });\n  await active.getByRole('heading', { name: 'First detail', exact: true }).waitFor();\n  assert.equal(await parentPane.getAttribute('data-description'), 'pair-parent');\n  await parentPane.evaluate(e => { e.scrollTop = 300; });\n  const parentScroll = await parentPane.evaluate(e => e.scrollTop);\n  assert.ok(parentScroll > 200);\n  await menu.focus();\n  await page.keyboard.press('ArrowDown');\n  await active.getByRole('heading', { name: 'Second detail', exact: true }).waitFor();\n  assert.equal(await parentPane.evaluate(e => e.scrollTop), parentScroll, 'Sibling navigation preserves the visible parent position.');\n  await active.evaluate(e => { e.scrollTop = 150; });\n  assert.equal(await parentPane.evaluate(e => e.scrollTop), parentScroll, 'Each pane scrolls independently.');\n  // A link clicked in the visible parent offers destinations beside that parent.\n  await parentPane.getByRole('button', { name: 'The first detail elaborates this parent.', exact: true }).click();\n  assert.equal(await page.locator('.connection-target').count(), 2);\n  assert.equal(await page.locator('.description-pane').getAttribute('data-description'), 'pair-parent');\n  await page.getByRole('button', { name: 'src/queue.ts →', exact: true }).click();\n  await page.getByRole('heading', { name: 'src/queue.ts', exact: true }).waitFor();\n  assert.equal(await active.getAttribute('data-description'), 'pair-parent');\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'pair-parent');\n  await page.getByRole('button', { name: 'Close source', exact: true }).click();\n  assert.equal(await parentPane.getAttribute('data-description'), 'queue');\n  assert.equal(await active.getAttribute('data-description'), 'pair-parent');\n  // A cross-relationship uses the destination's hierarchy, never the previous page as a parent.\n  await requestUI(root, { action: 'open', description: 'pair-b', revision: 'working' });\n  await active.getByRole('heading', { name: 'Second detail', exact: true }).waitFor();\n  await active.getByRole('button', { name: 'Persistent storage', exact: true }).click();\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  assert.equal(await parentPane.getAttribute('data-description'), 'engine');\n  await requestUI(root, { action: 'open', description: 'pair-a', revision: 'working' });\n  await active.getByRole('heading', { name: 'First detail', exact: true }).waitFor();\n  assert.equal(await parentPane.getAttribute('data-description'), 'pair-parent');\n  // Invalid ancestry is still readable as a single pane.\n  writeFileSync(join(root, 'stratic/descriptions/pair-a.json'), JSON.stringify({ id: 'pair-a', parent: { description: 'missing-parent', passage: { quote: 'Missing.' } }, realization: 'implemented', links: [] }));\n  await page.waitForFunction(() => !document.querySelector('.parent-description'));\n  assert.equal(await active.getAttribute('data-description'), 'pair-a');\n  assert.equal(await page.locator('.layout.single-pane').count(), 1);\n  await viewAction('Tree overview');\n  assert.equal(await page.locator('.tree-node[data-description=\"pair-a\"]').count(), 1);\n  await page.keyboard.press('Escape');\n  assert.equal(await active.getAttribute('data-description'), 'pair-a');\n\n  writeFileSync(join(root, 'stratic/descriptions/pair-a.json'), JSON.stringify({ id: 'pair-a', parent: { description: 'pair-parent', passage: { quote: 'The first detail elaborates this parent.' } }, realization: 'partial', remaining: 'One detail is still missing.', links: [] }));\n  await active.getByText('Partly implemented', { exact: true }).waitFor();\n  assert.equal(await active.getByText('One detail is still missing.', { exact: true }).count(), 1);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "paired-descriptions",
+      "passage": {
+        "quote": "Opening a child keeps its parent on the left and displays the child on the right. Selecting a sibling changes the active child while retaining the same parent. Going deeper promotes the active child to the left and opens its selected child on the right. Moving to a parent makes that parent active and displays it with its own parent, if it has one."
+      }
+    },
+    {
+      "description": "paired-descriptions",
+      "passage": {
+        "quote": "The two descriptions scroll independently. Changing siblings retains the visible parent’s reading position, so comparing their explanations does not repeatedly move the shared context. A description with no usable parent, including the root or a broken draft, is shown on its own. An empty detail pane contributes no placeholder content."
+      }
+    },
+    {
+      "description": "paired-descriptions",
+      "passage": {
+        "quote": "Following implementation temporarily shows the description containing the selected link on the left and its source on the right. That description becomes active; closing source restores it with its own parent. Choosing a different description leaves source view and constructs that description’s parent-and-child pair."
+      }
+    },
+    {
+      "description": "following-passages",
+      "passage": {
+        "quote": "If a selected segment has one valid connection, it opens directly. A child description becomes active on the right with its parent on the left. A link to another responsibility displays that destination with its own parent, preserving the meaning of the pair even when the link crosses the hierarchy. Multiple connections are offered as a choice beside the description containing the selected passage; choosing a destination then applies the same navigation rules."
+      }
+    },
+    {
+      "description": "relationships",
+      "passage": {
+        "quote": "The remaining field can explain the work still needed."
+      }
+    }
+  ]
+}

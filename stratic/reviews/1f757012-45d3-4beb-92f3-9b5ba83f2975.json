@@ -1,0 +1,269 @@
+{
+  "id": "1f757012-45d3-4beb-92f3-9b5ba83f2975",
+  "base": "794b61d5ed8500312111170af29eda98ab0d34fb",
+  "contentTree": "1561ab3970b33f41229ba9837256b310c7aeed62",
+  "reviewer": "Codex",
+  "summary": "Review test associations and expose focused desktop checks beside the responsibilities they verify",
+  "examined": [
+    {
+      "id": "change-display",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: bounded-diff, desktop-highlights, paragraph-changes, desktop-summaries."
+    },
+    {
+      "id": "checks",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-test-evidence, independent-checks, review-completeness."
+    },
+    {
+      "id": "cli-accept",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: explicit-acceptance, unexpected-arguments."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: explicit-acceptance."
+    },
+    {
+      "id": "description-identity",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: stable-identity, draft-reading."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: summary-metadata, desktop-summaries."
+    },
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "Corrected the stale View-menu promise and matching summary. Tests accompany descriptions and implementation; the complete integration run stays at this broad responsibility while focused assertion groups link to its children."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-pairs, desktop-markdown."
+    },
+    {
+      "id": "formatted-descriptions",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: markdown-positions, project-images, desktop-markdown."
+    },
+    {
+      "id": "navigation",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-navigation."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-pairs."
+    },
+    {
+      "id": "preparation",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: worktree-acceptance, review-completeness."
+    },
+    {
+      "id": "project-loading",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: graph-history, draft-reading."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-boundaries, desktop-markdown."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Updated the parent passage anchor after correcting Desktop reader. Its own controls description already places test evidence outside View; the implementation remains unchanged."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-test-evidence, desktop-boundaries."
+    },
+    {
+      "id": "relationships",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-pairs, graph-history."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: desktop-test-evidence, desktop-source."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The purpose remains a hierarchical account connected to implementation and tests. The catalog audit improves those connections without adding runtime behavior, a test runner, or acceptance authority."
+    },
+    {
+      "id": "tree-overview",
+      "outcome": "unchanged",
+      "reason": "Reviewed the linked assertions and their description passages. Catalog links now identify the actual exercised behavior; the program contract is unchanged. Associated tests: tree-layout, tree-folds, desktop-tree."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "1561ab3970b33f41229ba9837256b310c7aeed62",
+      "method": "node --test --test-reporter=tap test/*.test.ts; npm run test:desktop; node src/cli.ts validate; git diff --check; manual test-link audit",
+      "outcome": "pass",
+      "environment": "Node v24.16.0; macOS arm64; Electron 43.2.0",
+      "evidence": "All 26 top-level unit tests passed (0 failed or skipped). Each of the 25 product unit-test catalog entries was matched to its named passing TAP result; the example CLI test is intentionally outside this catalog. The complete desktop smoke passed, establishing all assertions in its ten focused catalog groups and the full integration entry. All 36 named outcomes are therefore established by execution, not inferred from test names. Structural/link validation and whitespace checks passed. Inspected assertions against exact linked description passages; gaps and limits are recorded in docs/test-catalog-audit.md. Impact frontier has 20 examined descriptions, no missing decisions and no unmapped regions. Unit log: /private/tmp/stratic-catalog-unit.txt. Desktop log: /private/tmp/stratic-catalog-desktop.txt. Before/after snapshots match.",
+      "tests": [
+        {
+          "id": "bounded-diff",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-highlights",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-markdown",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-navigation",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-pairs",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-projects",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-source",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-summaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-test-evidence",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-tree",
+          "outcome": "pass"
+        },
+        {
+          "id": "draft-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "drift-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "exact-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "explicit-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "graph-history",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-failure",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-message",
+          "outcome": "pass"
+        },
+        {
+          "id": "impact-baseline",
+          "outcome": "pass"
+        },
+        {
+          "id": "independent-checks",
+          "outcome": "pass"
+        },
+        {
+          "id": "interruption",
+          "outcome": "pass"
+        },
+        {
+          "id": "markdown-positions",
+          "outcome": "pass"
+        },
+        {
+          "id": "paragraph-changes",
+          "outcome": "pass"
+        },
+        {
+          "id": "project-images",
+          "outcome": "pass"
+        },
+        {
+          "id": "review-completeness",
+          "outcome": "pass"
+        },
+        {
+          "id": "selectors",
+          "outcome": "pass"
+        },
+        {
+          "id": "source-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "stable-identity",
+          "outcome": "pass"
+        },
+        {
+          "id": "summary-metadata",
+          "outcome": "pass"
+        },
+        {
+          "id": "terminated-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-folds",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-layout",
+          "outcome": "pass"
+        },
+        {
+          "id": "unexpected-arguments",
+          "outcome": "pass"
+        },
+        {
+          "id": "withdraw-readiness",
+          "outcome": "pass"
+        },
+        {
+          "id": "worktree-acceptance",
+          "outcome": "pass"
+        }
+      ],
+      "id": "5d2407e3-70cd-4a3a-b292-9611cbaa6a18",
+      "recordedAt": "2026-09-10T09:46:19.542Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T09:46:49.233Z",
+  "unmapped": []
+}

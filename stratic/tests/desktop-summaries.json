@@ -1,0 +1,45 @@
+{
+  "id": "desktop-summaries",
+  "name": "Independent summary controls",
+  "description": "Toggles each pane independently, checks safe summary text and change highlights, and preserves the choices during navigation. Historical descriptions do not borrow current summaries.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await active.getByRole('button', { name: 'Summary', exact: true }).click();\n  assert.equal(await active.locator('.summary-button').getAttribute('aria-pressed'), 'true');\n  assert.equal(await active.locator('.summary-button .icon-summary').count(), 1);\n  assert.equal(await active.locator('.description-summary li').count(), 2);\n  assert.equal(await active.locator('.description-summary .changed-text').count(), 2);\n  assert.equal(await page.locator('.description-summary img').count(), 0);\n  assert.equal(await page.evaluate(() => (window as any).injected), undefined);\n  await page.keyboard.press('ArrowRight');\n  await active.getByRole('heading', { name: 'Command interface', exact: true }).waitFor();\n  assert.equal(await active.locator('.description-summary').count(), 0, 'A missing summary falls back to full text.');\n  assert.equal(await active.getByRole('button', { name: 'Summary', exact: true }).count(), 0, 'No summary control without a summary.');\n  assert.equal(await parentPane.locator('.description-summary').count(), 0, 'The other pane retains its independent choice.');\n  await parentPane.getByRole('button', { name: 'Summary', exact: true }).click();\n  assert.equal(await parentPane.locator('.description-summary li').count(), 2);\n  await page.keyboard.press('ArrowDown');\n  await active.getByRole('heading', { name: 'Queue engine', exact: true }).waitFor();\n  assert.equal(await page.locator('.description-summary').count(), 2, 'Independent pane preferences survive navigation.');\n  await page.screenshot({ path: 'artifacts/desktop-summaries.png' });"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await page.getByRole('button', { name: 'Back to reading', exact: true }).click();\n  assert.equal(await page.locator('.description-summary').count(), 2);\n  assert.equal(await page.locator('#menu-body').count(), 1);\n  await active.getByRole('button', { name: 'Summary', exact: true }).click();\n  assert.equal(await parentPane.locator('.description-summary').count(), 1, 'Toggling the active pane leaves the parent summary visible.');\n  await parentPane.getByRole('button', { name: 'Summary', exact: true }).click();\n  assert.equal(await page.locator('.description-summary').count(), 0);\n  await requestUI(root, { action: 'open', description: 'queue' });\n  await active.getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await requestUI(root, { action: 'open', description: 'lease-transitions', revision: base });\n  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();\n  assert.doesNotMatch(await active.locator('.prose').innerText(), /Release locates the job/);\n  assert.equal(await page.locator('.summary-button').count(), 0, 'Historical descriptions do not borrow current summary controls.');\n  assert.equal(await page.locator('.description-summary').count(), 0, 'Historical descriptions must not borrow summaries from working files.');\n  assert.match(await page.locator('.titlebar').innerText(), /History/);\n  await page.getByRole('button', { name: 'View', exact: true }).click();\n  await page.getByRole('combobox', { name: 'Revision' }).selectOption('working');\n  await page.waitForFunction(() => !document.querySelector('.titlebar')?.textContent?.includes('History'));"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "reader-controls",
+      "passage": {
+        "quote": "Each reading pane offers a compact list-style button in its upper-right corner when that description has a summary. The button switches only that pane between its summary and full account, and its pressed state shows which is selected. The parent and active panes keep independent choices as the reader navigates. A description without a summary shows its full text and needs no summary button. Returning to full text restores its passage links. While source or a passage-destination chooser is open, its owning description uses full text so the implementation remains beside the claim being inspected. Implementation status and relevant problems remain visible in either mode; the active identity, displayed revision, source-reading behavior, and arrow navigation keep their existing meaning."
+      }
+    },
+    {
+      "description": "description-summaries",
+      "passage": {
+        "quote": "A summary belongs to the same description identity and project revision as the full account."
+      }
+    },
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "Summary bullets are compared separately against their earlier metadata at the same comparison base."
+      }
+    }
+  ]
+}

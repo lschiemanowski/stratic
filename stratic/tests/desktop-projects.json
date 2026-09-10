@@ -1,0 +1,33 @@
+{
+  "id": "desktop-projects",
+  "name": "Project selection and remembered folders",
+  "description": "Switches projects, preserves the current project after cancellation or an invalid choice, and restores the recent-folder list after restarting.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  assert.equal(await page.locator('.titlebar').evaluate(e => getComputedStyle(e).getPropertyValue('-webkit-app-region')), 'drag');\n  assert.equal(await page.getByRole('button', { name: 'Projects', exact: true }).evaluate(e => getComputedStyle(e).getPropertyValue('-webkit-app-region')), 'no-drag');\n  // The collapsible project panel opens folders through the picker and remembers them.\n  assert.equal(await page.getByRole('complementary', { name: 'Projects' }).count(), 0);\n  await page.getByRole('button', { name: 'Projects', exact: true }).click();\n  const projectPanel = page.getByRole('complementary', { name: 'Projects' });\n  await projectPanel.waitFor();\n  assert.match(await projectPanel.innerText(), /queue/);\n  const secondProject = join(directory, 'second-queue'); createQueue(secondProject);\n  await app.evaluate(({ dialog }, path) => { (globalThis as any).originalPicker = dialog.showOpenDialog; (dialog as any).showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, secondProject);\n  await projectPanel.getByRole('button', { name: 'Open project…', exact: true }).click();\n  await page.waitForFunction(path => document.querySelector('.project-option[aria-current=\"true\"]')?.getAttribute('title') === path, repository(secondProject));\n  await projectPanel.getByRole('button', { name: `queue ${root}`, exact: true }).click();\n  await page.waitForFunction(path => document.querySelector('.project-option[aria-current=\"true\"]')?.getAttribute('title') === path, root);\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'queue');\n  // Cancellation and an invalid new folder preserve the existing project.\n  await app.evaluate(({ dialog }) => { (dialog as any).showOpenDialog = async () => ({ canceled: true, filePaths: [] }); });\n  await projectPanel.getByRole('button', { name: 'Open project…', exact: true }).click();\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'queue');\n  const plainRepository = join(directory, 'plain-repository'); createQueue(plainRepository); rmSync(join(plainRepository, 'stratic'), { recursive: true });\n  for (const invalid of [join(directory, 'missing'), plainRepository]) {\n    await app.evaluate(({ dialog }, path) => { (dialog as any).showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, invalid);\n    await projectPanel.getByRole('button', { name: 'Open project…', exact: true }).click();\n    await page.locator('#error').waitFor();\n    assert.equal((await requestUI(root, { action: 'current' })).description, 'queue');\n    assert.equal((await page.evaluate(() => window.stratic.view())).project?.root, root);\n  }\n  await app.evaluate(({ dialog }) => { dialog.showOpenDialog = (globalThis as any).originalPicker; });\n  const unknownProject = await page.evaluate(async () => { try { await window.stratic.chooseProject('/unknown'); return false; } catch { return true; } });\n  assert.equal(unknownProject, true);\n  assert.deepEqual(JSON.parse(readFileSync(join(directory, 'user-data/projects.json'), 'utf8')), [root, repository(secondProject)]);\n  await projectPanel.getByRole('button', { name: `queue ${root}`, exact: true }).click();\n  await page.waitForFunction(() => !document.querySelector('#error'));\n  await page.screenshot({ path: 'artifacts/desktop-projects.png' });\n  await page.waitForFunction(() => document.querySelector('#project-panel')?.getAttribute('aria-busy') === 'false');\n  await page.getByRole('button', { name: 'Hide projects', exact: true }).click();\n  assert.equal(await projectPanel.count(), 0);"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  const reopened = await _electron.launch({ executablePath: createRequire(import.meta.url)('electron'), args: [resolve('.')], env: { ...process.env, STRATIC_USER_DATA: join(directory, 'user-data') }, timeout: 30000 });\n  try {\n    const restored = await reopened.firstWindow();\n    await restored.getByRole('complementary', { name: 'Projects' }).waitFor();\n    assert.equal(await restored.locator('.project-option').count(), 2);\n    await restored.locator('.project-option').first().click();\n    await restored.locator('.active-description').getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();\n  } finally { await reopened.close(); }"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "reader-controls",
+      "passage": {
+        "quote": "Project selection lives in a collapsible panel on the left. It lists recently opened project folders and offers a native folder picker for another project. The current folder is selected, and full paths distinguish projects with the same name. Opening a project resets reading to its working root description. An invalid choice leaves the current project available and reports the problem."
+      }
+    },
+    {
+      "description": "reader-controls",
+      "passage": {
+        "quote": "It remembers locations, not saved reading views, and gives the desktop no editing or acceptance authority."
+      }
+    }
+  ]
+}

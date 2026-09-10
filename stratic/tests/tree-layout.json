@@ -1,12 +1,12 @@
 {
   "id": "tree-layout",
-  "name": "Compact tree layout, valid edges, depth limits and individual folds",
-  "description": "Exercises nonoverlapping branch columns, vertical descendants, malformed draft parents, depth limits and independent folds.",
+  "name": "Tree layout retains nodes and usable edges",
+  "description": "Keeps 300 leaves and malformed drafts visible without overlapping cards; missing, cyclic and ambiguous parents produce no invented edges.",
   "code": [
     {
       "path": "test/reading-views.test.ts",
       "passage": {
-        "quote": "test('Tree layout preserves every node and only usable hierarchy edges', () => {\n  const description = (id: string, parent: string | null): Description => ({ id, title: id, path: id + '.md', body: id, metadata: { id, parent: parent ? { description: parent, passage: { quote: id } } : null, realization: 'implemented', links: [] } });\n  const input = [description('root', null), description('branch', 'root'), ...Array.from({ length: 300 }, (_, i) => description(`leaf-${i}`, 'branch')), description('orphan', 'missing'), description('cycle-a', 'cycle-b'), description('cycle-b', 'cycle-a'), description('dup', null), description('dup', null), description('ambiguous-parent', 'dup')];\n  const { nodes } = treeLayout(input); assert.equal(nodes.length, input.length);\n  for (let i = 0; i < nodes.length; i++) {\n    assert.ok(Number.isFinite(nodes[i].x) && Number.isFinite(nodes[i].y));\n    if (nodes[i].parent !== undefined) assert.ok(nodes[i].y > nodes[nodes[i].parent!].y);\n    for (let j = 0; j < i; j++) assert.ok(Math.abs(nodes[i].x - nodes[j].x) >= 220 || Math.abs(nodes[i].y - nodes[j].y) >= 52, 'Visible cards must not overlap.');\n  }\n  for (const name of ['orphan', 'cycle-a', 'cycle-b', 'dup', 'ambiguous-parent']) assert.ok(nodes.filter(n => n.description.id === name).every(n => n.parent === undefined));\n});\n\ntest('Compact branches and depth limits preserve independent folds and hierarchy', () => {\n  const d = (id: string, parent: string | null): Description => ({ id, title: id, path: id, body: id, metadata: { id, parent: parent ? { description: parent, passage: { quote: id } } : null, realization: 'implemented', links: [] } });\n  const input = [d('root', null), d('a', 'root'), d('b', 'root'), d('a1', 'a'), d('a2', 'a'), d('a11', 'a1'), d('b1', 'b')];\n  const all = treeLayout(input), byId = new Map(all.nodes.map(n => [n.description.id, n]));\n  assert.equal(byId.get('a')!.y, byId.get('b')!.y);\n  assert.ok(byId.get('a')!.x < byId.get('b')!.x);\n  assert.equal(byId.get('a1')!.x, byId.get('a2')!.x);\n  assert.ok(byId.get('a11')!.y < byId.get('a2')!.y);\n  assert.equal(all.maxDepth, 4);\n  const ids = (depth: number, folds = new Set<string>()) => treeLayout(input, depth, folds).nodes.map(n => n.description.id);\n  assert.deepEqual(ids(1), ['root']);\n  assert.deepEqual(ids(2), ['root', 'a', 'b']);\n  assert.deepEqual(ids(3), ['root', 'a', 'b', 'a1', 'a2', 'b1']);\n  const folds = new Set(['a']);\n  assert.deepEqual(ids(4, folds), ['root', 'a', 'b', 'b1']);\n  ids(1, folds); assert.deepEqual(ids(4, folds), ['root', 'a', 'b', 'b1']);\n  assert.deepEqual(input.map(n => n.metadata!.parent?.description ?? null), [null, 'root', 'root', 'a', 'a', 'a1', 'b']);\n});"
+        "quote": "test('Tree layout preserves every node and only usable hierarchy edges', () => {\n  const description = (id: string, parent: string | null): Description => ({ id, title: id, path: id + '.md', body: id, metadata: { id, parent: parent ? { description: parent, passage: { quote: id } } : null, realization: 'implemented', links: [] } });\n  const input = [description('root', null), description('branch', 'root'), ...Array.from({ length: 300 }, (_, i) => description(`leaf-${i}`, 'branch')), description('orphan', 'missing'), description('cycle-a', 'cycle-b'), description('cycle-b', 'cycle-a'), description('dup', null), description('dup', null), description('ambiguous-parent', 'dup')];\n  const { nodes } = treeLayout(input); assert.equal(nodes.length, input.length);\n  for (let i = 0; i < nodes.length; i++) {\n    assert.ok(Number.isFinite(nodes[i].x) && Number.isFinite(nodes[i].y));\n    if (nodes[i].parent !== undefined) assert.ok(nodes[i].y > nodes[nodes[i].parent!].y);\n    for (let j = 0; j < i; j++) assert.ok(Math.abs(nodes[i].x - nodes[j].x) >= 220 || Math.abs(nodes[i].y - nodes[j].y) >= 52, 'Visible cards must not overlap.');\n  }\n  for (const name of ['orphan', 'cycle-a', 'cycle-b', 'dup', 'ambiguous-parent']) assert.ok(nodes.filter(n => n.description.id === name).every(n => n.parent === undefined));\n});"
       }
     }
   ],
@@ -15,18 +15,6 @@
       "description": "tree-overview",
       "passage": {
         "quote": "Incomplete drafts remain inspectable. A description without a usable parent appears separately rather than being attached to an invented parent; malformed relationships are still reported as project problems. The overview does not repair project content or require a valid finished tree before it can be opened."
-      }
-    },
-    {
-      "description": "tree-overview",
-      "passage": {
-        "quote": "The tree overview makes the overall structure of a project visible. Each description appears as a titled node, and connecting lines express parent–child relationships. The root sits above a horizontal row of its main branches. Within each branch, descendants stack vertically, with indentation and connecting lines showing further depth. Separate branch columns use the window width while keeping deeper explanations compact."
-      }
-    },
-    {
-      "description": "tree-overview",
-      "passage": {
-        "quote": "Unlike the bottom menu’s local neighborhood, the diagram can show the whole description hierarchy. A reader can see which broad responsibilities divide the project and where they have many descendants or deeper explanations. Each branch can be folded independently using a control beside its title; the title itself still opens the description. A depth slider limits the visible levels across the whole diagram, counting the root as level one. Increasing the limit reveals deeper levels while preserving individual folds. Expanding a branch at the depth limit raises that limit by one level. These choices change only presentation and remain in place when returning to the overview for the same project revision."
       }
     }
   ]

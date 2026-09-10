@@ -1,7 +1,7 @@
 {
   "id": "project-images",
   "name": "Images retain revision and repository boundaries",
-  "description": "Images retain revision and repository boundaries.",
+  "description": "Compares working and historical image bytes; rejects escaping paths, Git internals, symbolic links, oversized files and unsupported content.",
   "code": [
     {
       "path": "test/markdown.test.ts",
@@ -14,7 +14,7 @@
     {
       "description": "formatted-descriptions",
       "passage": {
-        "quote": "Images use ordinary Markdown image syntax. A relative path is resolved from the description file\u2019s directory; a path beginning with a slash is relative to the project root. PNG, JPEG, GIF, WebP and SVG images load from the displayed Git revision, or the working content snapshot used by the reader. Paths cannot leave the project, read Git internals or traverse symbolic links. Images share the existing two-megabyte resource limit. Missing, unsupported or blocked images show their alternate text and a compact explanation; remote URLs do not trigger downloads."
+        "quote": "Images use ordinary Markdown image syntax. A relative path is resolved from the description file’s directory; a path beginning with a slash is relative to the project root. PNG, JPEG, GIF, WebP and SVG images load from the displayed Git revision, or the working content snapshot used by the reader. Paths cannot leave the project, read Git internals or traverse symbolic links. Images share the existing two-megabyte resource limit. Missing, unsupported or blocked images show their alternate text and a compact explanation; remote URLs do not trigger downloads."
       }
     }
   ]

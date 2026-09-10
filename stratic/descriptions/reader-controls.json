@@ -3,7 +3,7 @@
   "parent": {
     "description": "desktop",
     "passage": {
-      "quote": "The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, tests, and identity controls are available in the View menu."
+      "quote": "The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, and identity controls are available in the View menu."
     }
   },
   "realization": "implemented",

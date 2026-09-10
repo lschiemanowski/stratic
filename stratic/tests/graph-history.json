@@ -14,7 +14,13 @@
     {
       "description": "project-loading",
       "passage": {
-        "quote": "Project loading turns the files in a Git repository into the descriptions, connections, tests, and problems that both the CLI and desktop display. It can read current working files or the content of a requested Git revision, so a historical description is interpreted together with that revision\u2019s metadata and source."
+        "quote": "Project loading turns the files in a Git repository into the descriptions, connections, tests, and problems that both the CLI and desktop display. It can read current working files or the content of a requested Git revision, so a historical description is interpreted together with that revision’s metadata and source."
+      }
+    },
+    {
+      "description": "relationships",
+      "passage": {
+        "quote": "An implementation link connects a claim in the prose to a quoted source passage."
       }
     }
   ]

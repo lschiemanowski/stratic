@@ -1,0 +1,45 @@
+{
+  "id": "desktop-test-evidence",
+  "name": "Tests alongside descriptions and implementation",
+  "description": "Expands directly associated test code without replacing implementation; checks current passes, failures and inconclusive results, missing individual evidence, and earlier results after an edit.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await page.getByRole('button', { name: 'View', exact: true }).click();\n  assert.equal(await page.getByRole('button', { name: 'Tests', exact: true }).count(), 0, 'There is no separate Tests view.');\n  await page.keyboard.press('Escape');\n  assert.equal(await parentPane.locator('.result-disk.pass').count(), 4);\n  assert.equal(await active.locator('.test-row').count(), 2, 'Only directly associated tests appear, without inheriting all parent tests.');\n  assert.equal(await active.locator('.result-disk.unrecorded').count(), 1, 'Aggregate pass never supplies an unnamed individual result.');\n  await releasePassage.click();\n  const testRow = page.locator('.detail .test-row[data-test=\"release-by-owner\"]');\n  await testRow.locator(':scope > summary').click();\n  await testRow.locator('.source-code .highlighted').first().waitFor();\n  assert.match(await testRow.innerText(), /Release keeps the job/);\n  assert.ok(await testRow.locator('.source-code').evaluate(code => {\n    const selected = code.querySelector('.highlighted')!.getBoundingClientRect(), viewport = code.getBoundingClientRect();\n    return selected.top >= viewport.top && selected.top < viewport.bottom;\n  }), 'Expanded code is positioned at the linked test, retaining original line numbers.');\n  assert.equal(await page.locator('.detail > .source-code').count(), 1, 'Expanding test code retains the implementation.');\n  assert.equal(await page.locator('.detail .test-row').count(), 2);\n  assert.equal(await active.getAttribute('data-description'), 'lease-transitions');\n  await page.screenshot({ path: resolve('artifacts/desktop-context-tests.png') });\n  // Synthetic evidence exercises presentation states; this is not a claim that queue execution failed.\n  const evidenceTree = workingSnapshot(root);\n  recordCheck(root, { tree: evidenceTree, method: 'Synthetic desktop status fixture', outcome: 'fail', environment: 'UI test fixture', evidence: 'Exercise a current individual failure and inconclusive result.', tests: [{ id: 'release-by-owner', outcome: 'fail' }, { id: 'release-invalid', outcome: 'inconclusive' }] });\n  await testRow.locator('.result-disk.fail').waitFor();\n  await testRow.locator('.source-code').waitFor();\n  assert.equal(await testRow.getAttribute('open'), '', 'Result refresh preserves the expanded test.');\n  const changedDescription = join(root, 'stratic/descriptions/lease-transitions.md');\n  const beforeEvidenceEdit = readFileSync(changedDescription, 'utf8');\n  writeFileSync(changedDescription, beforeEvidenceEdit + '\\n');\n  await testRow.locator('.result-disk.earlier').waitFor();\n  assert.match(await testRow.locator(':scope > summary').innerText(), /Earlier fail/);\n  assert.equal(await page.locator('.detail .result-disk.pass, .detail .result-disk.fail').count(), 0, 'Changed content cannot retain solid current pass/fail disks.');\n  writeFileSync(changedDescription, beforeEvidenceEdit);\n  await testRow.locator('.result-disk.fail').waitFor();\n  await page.getByRole('button', { name: 'Close source', exact: true }).click();\n  await parentPane.locator('.result-disk.inconclusive').waitFor();\n  assert.match(await parentPane.innerText(), /Current inconclusive/);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "reader-evidence",
+      "passage": {
+        "quote": "Tests appear with the descriptions whose behavior they check. The existing test catalog connects a short account of each test to exact description passages and executable source passages. The reader shows only tests directly associated with the description being read; it does not infer coverage from nearby code or collect tests from every descendant. When implementation is open, that description’s tests appear beneath the source, keeping both kinds of evidence together. Otherwise they appear after the description. There is no separate Tests view."
+      }
+    },
+    {
+      "description": "reader-evidence",
+      "passage": {
+        "quote": "Each test starts as a compact expandable row containing its short description and a small result disk. Expanding it reveals the linked test source, with syntax colors and the selected lines highlighted, plus links back to the claims it checks. Expanding a test keeps the current description and implementation in place. Opening it reads source at the viewed revision; it never executes the test."
+      }
+    },
+    {
+      "description": "reader-evidence",
+      "passage": {
+        "quote": "A green disk means a recorded individual pass for the viewed content; a red disk means an individual failure. An inconclusive or missing result uses a neutral disk. Earlier evidence uses an outlined disk and a short label such as “Earlier pass”, so an old success cannot be mistaken for a current one. The reader prefers the newest matching result, falling back to the newest earlier result only when none matches. Expanded rows identify the recorded time, environment, method and evidence. An aggregate result supplies no individual outcome unless that test is named explicitly."
+      }
+    },
+    {
+      "description": "source-reading",
+      "passage": {
+        "quote": "Tests directly associated with the owning description appear below the implementation as compact rows; expanding one shows its code without replacing the implementation or moving the description."
+      }
+    },
+    {
+      "description": "checks",
+      "passage": {
+        "quote": "An earlier result may still inform the agent, but exact matching means it cannot simply be relabeled as a pass for changed content."
+      }
+    }
+  ]
+}

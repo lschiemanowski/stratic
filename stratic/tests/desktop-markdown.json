@@ -1,0 +1,51 @@
+{
+  "id": "desktop-markdown",
+  "name": "Formatted prose, equations and images",
+  "description": "Renders Markdown, equations and project images; follows links across formatting and entities, refreshes edited images, and keeps hostile HTML, URLs and unsupported equations inert.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  // Formatted prose keeps source links and never turns repository HTML into active DOM.\n  const network: string[] = []; page.on('request', request => { if (/^https?:/.test(request.url())) network.push(request.url()); });\n  mkdirSync(join(root, 'stratic/assets'), { recursive: true });\n  const drawing = '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"240\" height=\"70\"><rect width=\"240\" height=\"70\" rx=\"10\" fill=\"seagreen\"/><script>parent.injected=true</script><text x=\"20\" y=\"42\" fill=\"white\">Project image</text></svg>';\n  writeFileSync(join(root, 'stratic/assets/diagram.svg'), drawing);\n  const rich = '# Formatted description\\n\\nA **bold** claim with *emphasis*, ~~old text~~ and &amp;.\\n\\n- First item\\n- Second item\\n\\n> A quoted responsibility.\\n\\n| Promise | State |\\n| --- | --- |\\n| Persists | Yes |\\n\\nInline $x^2$ and a displayed equation:\\n\\n$$\\n\\\\frac{a}{b} = \\\\sum_{i=1}^{n} x_i\\n$$\\n\\n![Project diagram](../assets/diagram.svg)\\n\\n```ts\\nconst value = \"<img src=x>\";\\n```\\n\\n- [x] Completed condition\\n\\nBad equation $\\\\notacommand{x}$.\\n\\n$\\\\href{javascript:alert(1)}{bad}$\\n\\n![Remote image](https://example.invalid/image.png)\\n\\n![Missing image](missing.png)\\n\\n<img src=x onerror=\"window.injected=true\">\\n\\n[Unsafe](javascript:alert(1))\\n';\n  writeFileSync(join(root, 'stratic/descriptions/rich.md'), rich);\n  writeFileSync(join(root, 'stratic/descriptions/rich.json'), JSON.stringify({ id: 'rich', parent: { description: 'queue', passage: { quote: 'A local work queue keeps jobs between command-line invocations.' } }, realization: 'implemented', links: [\n    { kind: 'reference', from: { quote: 'A **bold** claim' }, to: { description: 'engine' } },\n    { kind: 'reference', from: { quote: '&amp;' }, to: { description: 'storage' } },\n    { kind: 'reference', from: { quote: '\\\\frac{a}{b}' }, to: { description: 'engine' } },\n  ] }));\n  await waitForDescription('rich');\n  await requestUI(root, { action: 'open', description: 'rich' });\n  await active.getByRole('heading', { name: 'Formatted description', exact: true }).waitFor();\n  assert.equal(await active.locator('strong').innerText(), 'bold');\n  assert.equal(await active.locator('table tbody td').count(), 2);\n  assert.equal(await active.locator('blockquote').innerText(), 'A quoted responsibility.');\n  assert.equal(await active.locator('.task-item input:checked:disabled').count(), 1);\n  assert.ok(await active.locator('.katex').count() >= 2);\n  assert.equal(await active.locator('.display-equation .katex').count(), 1);\n  assert.ok(await active.locator('.math-error').count() >= 1);\n  await page.waitForFunction(() => { const image = document.querySelector<HTMLImageElement>('.active-description .description-image img'); return image?.complete && image.naturalWidth === 240; });\n  assert.equal(await active.locator('.image-error').count(), 2);\n  assert.equal(await active.locator('a, script, img[onerror]').count(), 0);\n  assert.equal(await page.evaluate(() => (window as any).injected), undefined);\n  assert.deepEqual(network, []);\n  assert.equal(await active.locator('.markdown-code .hljs-keyword').innerText(), 'const');\n  assert.ok(await active.locator('table.changed-text').count() > 0);\n  await active.getByRole('button', { name: 'bold', exact: true }).click();\n  await active.getByRole('heading', { name: 'Queue engine', exact: true }).waitFor();\n  await requestUI(root, { action: 'open', description: 'rich', passage: { quote: '**bold**' } });\n  await active.locator('strong .selected').waitFor();\n  await active.getByRole('button', { name: '&', exact: true }).click();\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  await requestUI(root, { action: 'open', description: 'rich' });\n  await active.locator('.display-equation[role=\"button\"]').click();\n  await active.getByRole('heading', { name: 'Queue engine', exact: true }).waitFor();\n  await requestUI(root, { action: 'open', description: 'rich' });\n  await active.getByRole('heading', { name: 'Formatted description', exact: true }).waitFor();\n  const imageBefore = await active.locator('.description-image img').getAttribute('src');\n  writeFileSync(join(root, 'stratic/assets/diagram.svg'), drawing.replace('seagreen', 'navy'));\n  await page.waitForFunction(before => { const image = document.querySelector<HTMLImageElement>('.active-description .description-image img'); return image?.complete && image.naturalWidth === 240 && image.src !== before; }, imageBefore);\n  await active.evaluate(e => { e.scrollTop = 0; });\n  await page.screenshot({ path: 'artifacts/desktop-markdown.png' });\n  assert.deepEqual(network, []);\n  assert.deepEqual(errors, []);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "Formatted descriptions let a program’s account contain structured prose, mathematical statements, and visual explanations. CommonMark headings, emphasis, lists, quotations, inline code and code blocks render as their usual elements. GitHub-style tables, strikethrough and task lists add compact structure; task checkboxes are read-only. The stored Markdown remains unchanged, including when read through the CLI."
+      }
+    },
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "The renderer parses Markdown with Remark into a syntax tree carrying original source positions. It creates only the supported elements, with repository text inserted as text. Explicit Stratic passage links retain their exact source ranges across formatting, escapes and character references. Inline code, equations and images are treated as whole objects when a passage selects part of their source. Changed blocks are highlighted against the existing comparison base. A formatted block can contain several source paragraphs; its highlight indicates an intersecting change, not that every displayed word changed."
+      }
+    },
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "Equations use KaTeX for inline $x^2 + y^2 = z^2$ and display mathematics."
+      }
+    },
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "Missing, unsupported or blocked images show their alternate text and a compact explanation; remote URLs do not trigger downloads."
+      }
+    },
+    {
+      "description": "following-passages",
+      "passage": {
+        "quote": "Markdown formatting preserves source positions for linked text. A linked claim can span emphasis or other formatting without losing its destination; each displayed text segment keeps the targets covering its source range. Equations, code spans, and images are indivisible displayed objects, so a selector inside one applies to that whole object. Link behavior comes from validated Stratic metadata; repository HTML does not execute."
+      }
+    },
+    {
+      "description": "reader-content",
+      "passage": {
+        "quote": "Descriptions render Markdown structure, inline and display equations, and images stored in the project. The reader keeps the original Markdown as the authority for passage selectors and comparison, while formatting makes the account easier to read. Raw HTML stays literal, ordinary web links do not navigate the app, and project content cannot create executable elements. Source rendering likewise preserves text while adding syntax token classes."
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "desktop-highlights",
+  "name": "Change highlights survive navigation",
+  "description": "Checks that proposed prose changes remain highlighted after navigation, and that toggling highlights keeps the View menu usable.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  const navigationMs: number[] = [];\n  for (const [id, title] of [['lease-transitions', 'Lease transitions'], ['storage', 'Persistent storage'], ['lease-transitions', 'Lease transitions']]) {\n    const began = performance.now();\n    await page.evaluate(id => window.stratic.navigate({ action: 'open', description: id }), id);\n    await active.getByRole('heading', { name: title, exact: true }).waitFor();\n    navigationMs.push(performance.now() - began);\n  }\n  assert.match(await active.locator('.changed-text').innerText(), /Release locates/);\n  await page.getByRole('button', { name: 'View', exact: true }).click();\n  await page.getByRole('button', { name: 'Proposed changes', exact: true }).click();\n  assert.equal(await page.locator('.changed-text').count(), 0);\n  await page.getByRole('button', { name: 'Proposed changes', exact: true }).click();\n  assert.match(await active.locator('.changed-text').innerText(), /Release locates/);\n  for (let i = 0; i < 8; i++) {\n    await page.getByRole('button', { name: 'Proposed changes', exact: true }).click();\n    assert.equal(await page.getByRole('button', { name: 'Proposed changes', exact: true }).getAttribute('aria-pressed'), String(i % 2 === 1));\n    assert.equal(await page.getByRole('region', { name: 'View options' }).count(), 1, 'A toggle must not be mistaken for an outside click after rebuilding the view.');\n  }\n  await page.keyboard.press('Escape');\n  assert.equal(await page.getByRole('region', { name: 'View options' }).count(), 0);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "Switching descriptions retains the comparison and toggle choice, so highlights do not disappear just because the reader follows a link."
+      }
+    }
+  ]
+}

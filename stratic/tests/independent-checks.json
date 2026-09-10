@@ -1,7 +1,7 @@
 {
   "id": "independent-checks",
   "name": "Checks can be recorded before review, and individual outcomes come from execution",
-  "description": "Checks can be recorded before review, and individual outcomes come from execution.",
+  "description": "Records results before any proposal is prepared and confirms that individual outcomes come from the executed queue tests.",
   "code": [
     {
       "path": "test/review.test.ts",

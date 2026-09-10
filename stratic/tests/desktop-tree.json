@@ -1,0 +1,51 @@
+{
+  "id": "desktop-tree",
+  "name": "Tree navigation and folding",
+  "description": "Folds branches, changes the depth limit, reveals the active node, and checks zoom, pan and selection in a 300-leaf tree. Broken-parent drafts remain reachable.",
+  "code": [
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  await viewAction('Tree overview');\n  await page.locator('.tree-node').first().waitFor();\n  assert.equal(await page.locator('.tree-node[aria-current]').getAttribute('data-description'), 'engine');\n  assert.equal(await page.locator('#menu-body').count(), 0);\n  const levels = page.getByRole('slider', { name: 'Visible tree levels' });\n  const setLevels = async (value: number) => { await levels.fill(String(value)); await levels.dispatchEvent('input'); };\n  await page.getByRole('button', { name: 'Fold Queue engine', exact: true }).click();\n  assert.equal(await page.locator('.tree-node[data-description=\"storage\"]').count(), 0);\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'engine');\n  await setLevels(1); assert.equal(await page.locator('.tree-node').count(), 1);\n  await levels.focus(); await page.keyboard.press('ArrowRight');\n  assert.equal(await levels.inputValue(), '2', 'Slider arrows change depth, not the active description.');\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'engine');\n  await setLevels(Number(await levels.getAttribute('max')));\n  assert.equal(await page.locator('.tree-node[data-description=\"storage\"]').count(), 0, 'Individual folds survive global depth changes.');\n  await page.getByRole('button', { name: 'Expand Queue engine', exact: true }).click();\n  assert.equal(await page.locator('.tree-node[data-description=\"storage\"]').count(), 1);\n  await page.getByRole('button', { name: 'Fold Local work queue', exact: true }).click();\n  await page.getByRole('button', { name: 'Current description', exact: true }).click();\n  assert.equal(await page.locator('.tree-node[aria-current]').getAttribute('data-description'), 'engine');\n  await page.getByRole('button', { name: 'Fit tree', exact: true }).click();\n  await page.screenshot({ path: 'artifacts/desktop-tree-compact.png' });\n  await page.getByRole('button', { name: 'Back to reading', exact: true }).click();\n  assert.equal(await page.locator('.description-summary').count(), 2);\n  assert.equal(await page.locator('#menu-body').count(), 1);"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  // Hundreds of leaves stay local to their parent and within the drawer viewport.\n  for (let i = 0; i < 300; i++) {\n    const id = `scale-${String(i).padStart(3, '0')}`;\n    writeFileSync(join(root, `stratic/descriptions/${id}.md`), `# Operation ${i}\\n\\nA sample responsibility for navigation.\\n`);\n    writeFileSync(join(root, `stratic/descriptions/${id}.json`), JSON.stringify({ id, parent: { description: 'storage', passage: { quote: 'Persistent storage preserves the queue between short-lived commands.' } }, realization: 'unimplemented', links: [] }));\n  }\n  await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  await page.waitForFunction(() => document.querySelectorAll('[aria-label=\"Child descriptions\"] button').length === 300);\n  assert.equal(await menu.getByRole('option').count(), 2, 'Unrelated leaves should not appear at this level.');\n  assert.equal(await page.getByRole('region', { name: 'Child descriptions', exact: true }).getByRole('button').count(), 300);\n  await viewAction('Tree overview');\n  const nodeCount = (await page.evaluate(() => window.stratic.view())).project!.descriptions.length;\n  assert.equal(await page.locator('.tree-node').count(), nodeCount);\n  assert.equal(await page.locator('.tree-canvas path').count(), nodeCount - 1);\n  await page.waitForFunction(() => document.querySelector<HTMLElement>('.tree-canvas')?.style.transform.includes('scale('));\n  const transform = await page.locator('.tree-canvas').getAttribute('style');\n  await page.getByRole('button', { name: 'Zoom in', exact: true }).click();\n  assert.notEqual(await page.locator('.tree-canvas').getAttribute('style'), transform);\n  const zoomed = await page.locator('.tree-canvas').getAttribute('style');\n  await page.locator('.tree-viewport').hover(); await page.mouse.wheel(100, 80);\n  await page.waitForFunction(before => document.querySelector('.tree-canvas')?.getAttribute('style') !== before, zoomed);\n  assert.equal((await requestUI(root, { action: 'current' })).description, 'storage');\n  await page.getByRole('button', { name: 'Current description', exact: true }).click();\n  await page.screenshot({ path: 'artifacts/desktop-tree.png' });\n  await page.locator('.tree-node[data-description=\"storage\"]').click();\n  await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();\n  assert.equal(await parentPane.getAttribute('data-description'), 'engine');"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "  // Invalid ancestry is still readable as a single pane.\n  writeFileSync(join(root, 'stratic/descriptions/pair-a.json'), JSON.stringify({ id: 'pair-a', parent: { description: 'missing-parent', passage: { quote: 'Missing.' } }, realization: 'implemented', links: [] }));\n  await page.waitForFunction(() => !document.querySelector('.parent-description'));\n  assert.equal(await active.getAttribute('data-description'), 'pair-a');\n  assert.equal(await page.locator('.layout.single-pane').count(), 1);\n  await viewAction('Tree overview');\n  assert.equal(await page.locator('.tree-node[data-description=\"pair-a\"]').count(), 1);\n  await page.keyboard.press('Escape');\n  assert.equal(await active.getAttribute('data-description'), 'pair-a');"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "tree-overview",
+      "passage": {
+        "quote": "Unlike the bottom menu’s local neighborhood, the diagram can show the whole description hierarchy. A reader can see which broad responsibilities divide the project and where they have many descendants or deeper explanations. Each branch can be folded independently using a control beside its title; the title itself still opens the description. A depth slider limits the visible levels across the whole diagram, counting the root as level one. Increasing the limit reveals deeper levels while preserving individual folds. Expanding a branch at the depth limit raises that limit by one level. These choices change only presentation and remain in place when returning to the overview for the same project revision."
+      }
+    },
+    {
+      "description": "tree-overview",
+      "passage": {
+        "quote": "The overview opens from View in the reading area and highlights the active description. Panning moves around the diagram and zooming changes its scale. Fit tree fits the currently visible nodes; changing the depth limit refits the diagram, while folding an individual branch keeps its control in place. Current description reveals the active node through any folded ancestors or depth limit and centers it at a readable scale. These movements and folds never change the hierarchy or active selection."
+      }
+    },
+    {
+      "description": "tree-overview",
+      "passage": {
+        "quote": "Selecting a node opens that description and returns to paired reading with its actual parent. For example, selecting a deeply nested storage responsibility shows its immediate parent beside it, without requiring a sequence of clicks through every ancestor. Returning from the overview without selecting a node retains the active description. Both panes’ summary preferences and bottom-menu visibility are retained on return."
+      }
+    },
+    {
+      "description": "tree-overview",
+      "passage": {
+        "quote": "Incomplete drafts remain inspectable. A description without a usable parent appears separately rather than being attached to an invented parent; malformed relationships are still reported as project problems. The overview does not repair project content or require a valid finished tree before it can be opened."
+      }
+    }
+  ]
+}

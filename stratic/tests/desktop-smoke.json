@@ -1,7 +1,7 @@
 {
   "id": "desktop-smoke",
   "name": "Desktop navigation and source browsing",
-  "description": "Launch Electron and check navigation, refresh, comparisons, test results, source rendering, and renderer isolation.",
+  "description": "Exercises the reader as a whole, from opening a project through navigation, source inspection, summaries, the tree and test evidence. More focused entries select its relevant assertions.",
   "code": [
     {
       "path": "scripts/desktop-smoke.ts",
@@ -12,123 +12,9 @@
   ],
   "verifies": [
     {
-      "description": "navigation",
+      "description": "desktop",
       "passage": {
-        "quote": "The bottom menu shows the selected description’s parent, siblings, and children. Their position and selection convey the relationship without repeating the current title, ancestry, or routine status labels. A title-bar button folds or reveals this menu. Arrow keys navigate from the active description throughout the reader, whether the bottom menu is visible or folded. Up and down open adjacent siblings, left opens the parent, and right opens the first child. Navigation leaves the menu’s visibility unchanged and does not require moving keyboard focus into it. At the edge of the hierarchy, a direction with no destination leaves the selection unchanged. Clicking an entry or a title-bar ancestor also opens it immediately. Folding the menu gives the description and source more space without changing the current selection."
-      }
-    },
-    {
-      "description": "source-reading",
-      "passage": {
-        "quote": "The renderer combines syntax colors with passage backgrounds without altering the source text. Tokens that span lines are split for display while original line endings and blank lines are preserved. Source strings that resemble HTML are inserted as text, not executable markup."
-      }
-    },
-    {
-      "description": "change-display",
-      "passage": {
-        "quote": "A changed paragraph receives a green background. Even a one-word edit highlights the whole paragraph so its meaning can be read in context. Removed paragraphs can be expanded as removed text, and descriptions removed entirely are listed from the root. Turning the highlights off does not discard the proposal or change its review state."
-      }
-    },
-    {
-      "description": "reader-content",
-      "passage": {
-        "quote": "The Electron window disables Node integration, enables context isolation and sandboxing, and exposes a small preload API for reading project data, navigating, choosing a project, and copying an identity. The main process checks the sender of those calls, rejects external navigation and new windows, and denies permission requests."
-      }
-    },
-    {
-      "description": "paired-descriptions",
-      "passage": {
-        "quote": "Opening a child keeps its parent on the left and displays the child on the right. Selecting a sibling changes the active child while retaining the same parent. Going deeper promotes the active child to the left and opens its selected child on the right. Moving to a parent makes that parent active and displays it with its own parent, if it has one."
-      }
-    },
-    {
-      "description": "paired-descriptions",
-      "passage": {
-        "quote": "The two descriptions scroll independently. Changing siblings retains the visible parent’s reading position, so comparing their explanations does not repeatedly move the shared context. A description with no usable parent, including the root or a broken draft, is shown on its own. An empty detail pane contributes no placeholder content."
-      }
-    },
-    {
-      "description": "paired-descriptions",
-      "passage": {
-        "quote": "Following implementation temporarily shows the description containing the selected link on the left and its source on the right. That description becomes active; closing source restores it with its own parent. Choosing a different description leaves source view and constructs that description’s parent-and-child pair."
-      }
-    },
-    {
-      "description": "reader-controls",
-      "passage": {
-        "quote": "The reader keeps attention on the program being described. Each reading pane begins with its title and prose. Expected states, such as implemented behavior and a clean working tree, do not occupy separate labels. Partial or unimplemented behavior remains explicit, including any stated work still missing. Problems and a prepared review are surfaced because they change what the reader needs to know."
-      }
-    },
-    {
-      "description": "reader-controls",
-      "passage": {
-        "quote": "The View menu contains revision selection, change highlighting, and the active description’s identity and copy action. Historical content is identified in the title bar when selected. These controls remain accessible without repeating metadata above each description. Escape closes the View menu and returns focus to its button. Controls with their own arrow-key interaction, such as the revision selector, retain that interaction while focused. Text editing and modified keyboard shortcuts also retain their usual behavior; ordinary arrows elsewhere navigate the active description."
-      }
-    },
-    {
-      "description": "reader-controls",
-      "passage": {
-        "quote": "Project selection lives in a collapsible panel on the left. It lists recently opened project folders and offers a native folder picker for another project. The current folder is selected, and full paths distinguish projects with the same name. Opening a project resets reading to its working root description. An invalid choice leaves the current project available and reports the problem."
-      }
-    },
-    {
-      "description": "reader-controls",
-      "passage": {
-        "quote": "Recent folders are stored in the application’s local user data, outside the projects. Only previously opened folders can be selected through the recent-project action; a new folder goes through the native picker. The list is bounded to twelve entries. It remembers locations, not saved reading views, and gives the desktop no editing or acceptance authority."
-      }
-    },
-    {
-      "description": "reader-controls",
-      "passage": {
-        "quote": "Each reading pane offers a compact list-style button in its upper-right corner when that description has a summary. The button switches only that pane between its summary and full account, and its pressed state shows which is selected. The parent and active panes keep independent choices as the reader navigates. A description without a summary shows its full text and needs no summary button. Returning to full text restores its passage links. While source or a passage-destination chooser is open, its owning description uses full text so the implementation remains beside the claim being inspected. Implementation status and relevant problems remain visible in either mode; the active identity, displayed revision, source-reading behavior, and arrow navigation keep their existing meaning."
-      }
-    },
-    {
-      "description": "tree-overview",
-      "passage": {
-        "quote": "The overview opens from View in the reading area and highlights the active description. Panning moves around the diagram and zooming changes its scale. Fit tree fits the currently visible nodes; changing the depth limit refits the diagram, while folding an individual branch keeps its control in place. Current description reveals the active node through any folded ancestors or depth limit and centers it at a readable scale. These movements and folds never change the hierarchy or active selection."
-      }
-    },
-    {
-      "description": "tree-overview",
-      "passage": {
-        "quote": "Selecting a node opens that description and returns to paired reading with its actual parent. For example, selecting a deeply nested storage responsibility shows its immediate parent beside it, without requiring a sequence of clicks through every ancestor. Returning from the overview without selecting a node retains the active description. Both panes’ summary preferences and bottom-menu visibility are retained on return."
-      }
-    },
-    {
-      "description": "formatted-descriptions",
-      "passage": {
-        "quote": "Formatted descriptions let a program’s account contain structured prose, mathematical statements, and visual explanations. CommonMark headings, emphasis, lists, quotations, inline code and code blocks render as their usual elements. GitHub-style tables, strikethrough and task lists add compact structure; task checkboxes are read-only. The stored Markdown remains unchanged, including when read through the CLI."
-      }
-    },
-    {
-      "description": "formatted-descriptions",
-      "passage": {
-        "quote": "The renderer parses Markdown with Remark into a syntax tree carrying original source positions. It creates only the supported elements, with repository text inserted as text. Explicit Stratic passage links retain their exact source ranges across formatting, escapes and character references. Inline code, equations and images are treated as whole objects when a passage selects part of their source. Changed blocks are highlighted against the existing comparison base. A formatted block can contain several source paragraphs; its highlight indicates an intersecting change, not that every displayed word changed."
-      }
-    },
-    {
-      "description": "formatted-descriptions",
-      "passage": {
-        "quote": "Only mathematical rendering is enabled: commands that load resources or add trusted HTML are disabled, and macro expansion and dimensions are bounded. Invalid equations remain visible with their source and an error instead of breaking the description. Styles and fonts ship with the desktop, so rendering needs no network request."
-      }
-    },
-    {
-      "description": "formatted-descriptions",
-      "passage": {
-        "quote": "Images use ordinary Markdown image syntax. A relative path is resolved from the description file’s directory; a path beginning with a slash is relative to the project root. PNG, JPEG, GIF, WebP and SVG images load from the displayed Git revision, or the working content snapshot used by the reader. Paths cannot leave the project, read Git internals or traverse symbolic links. Images share the existing two-megabyte resource limit. Missing, unsupported or blocked images show their alternate text and a compact explanation; remote URLs do not trigger downloads."
-      }
-    },
-    {
-      "description": "formatted-descriptions",
-      "passage": {
-        "quote": "Images are supplied as image data through the main process and displayed only as images, including SVG. Raw HTML stays literal. Ordinary Markdown links retain their labels and destinations for inspection but do not open external pages; Stratic’s metadata links remain the mechanism for navigating descriptions and implementation. This preserves the reader’s authority boundary while allowing richer project content.\n"
-      }
-    },
-    {
-      "description": "reader-evidence",
-      "passage": {
-        "quote": "Tests appear with the descriptions whose behavior they check. The existing test catalog connects a short account of each test to exact description passages and executable source passages. The reader shows only tests directly associated with the description being read; it does not infer coverage from nearby code or collect tests from every descendant. When implementation is open, that description’s tests appear beneath the source, keeping both kinds of evidence together. Otherwise they appear after the description. There is no separate Tests view.\n\nEach test starts as a compact expandable row containing its short description and a small result disk. Expanding it reveals the linked test source, with syntax colors and the selected lines highlighted, plus links back to the claims it checks. Expanding a test keeps the current description and implementation in place. Opening it reads source at the viewed revision; it never executes the test.\n\nA green disk means a recorded individual pass for the viewed content; a red disk means an individual failure. An inconclusive or missing result uses a neutral disk. Earlier evidence uses an outlined disk and a short label such as “Earlier pass”, so an old success cannot be mistaken for a current one. The reader prefers the newest matching result, falling back to the newest earlier result only when none matches. Expanded rows identify the recorded time, environment, method and evidence. An aggregate result supplies no individual outcome unless that test is named explicitly."
+        "quote": "The desktop reader lets a person explore a Stratic project and inspect a proposed change. Its reading area shows a parent description on the left and the active child on the right, so the broader promise and its elaboration can be understood together. Source can take the right-hand pane while the description it implements remains on the left. A foldable menu at the bottom keeps nearby responsibilities within reach."
       }
     }
   ]

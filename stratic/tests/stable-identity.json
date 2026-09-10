@@ -1,7 +1,7 @@
 {
   "id": "stable-identity",
   "name": "Filename and title changes retain identity and incoming links",
-  "description": "Filename and title changes retain identity and incoming links.",
+  "description": "Renames a description file and title while retaining its stable identity and incoming links.",
   "code": [
     {
       "path": "test/project.test.ts",
@@ -14,7 +14,7 @@
     {
       "description": "description-identity",
       "passage": {
-        "quote": "For example, a description can be renamed from \u201cCommands\u201d to \u201cCommand-line interface\u201d without changing its id. Existing incoming links still refer to the same responsibility. Moving it under a different parent instead changes the parent relation and its passage; it does not require inventing a new identity."
+        "quote": "For example, a description can be renamed from “Commands” to “Command-line interface” without changing its id. Existing incoming links still refer to the same responsibility. Moving it under a different parent instead changes the parent relation and its passage; it does not require inventing a new identity."
       }
     }
   ]
