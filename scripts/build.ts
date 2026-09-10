@@ -13,3 +13,5 @@ copyFileSync('node_modules/highlight.js/styles/github.css', 'dist/highlight.css'
 
 copyFileSync('node_modules/katex/dist/katex.min.css', 'dist/katex.css');
 cpSync('node_modules/katex/dist/fonts', 'dist/fonts', { recursive: true });
+
+copyFileSync('src/desktop/assets/stratic-icon.png', 'dist/stratic-icon.png');

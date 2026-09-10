@@ -2,6 +2,8 @@
 
 The reader keeps attention on the program being described. Each reading pane begins with its title and prose. Expected states, such as implemented behavior and a clean working tree, do not occupy separate labels. Partial or unimplemented behavior remains explicit, including any stated work still missing. Problems and a prepared review are surfaced because they change what the reader needs to know.
 
+The application uses the Stratic logo for its window icon and macOS Dock identity.
+
 The title bar combines the window controls with the current description’s ancestry. Ancestors open broader descriptions, and the current title returns from supporting views to the active description. Separate compact buttons reveal the project panel, fold the bottom description menu, and open viewing options. The unused title-bar area moves the window; buttons and menus remain interactive.
 
 The View menu contains revision selection, change highlighting, and the active description’s identity and copy action. Historical content is identified in the title bar when selected. These controls remain accessible without repeating metadata above each description. Escape closes the View menu and returns focus to its button. Controls with their own arrow-key interaction, such as the revision selector, retain that interaction while focused. Text editing and modified keyboard shortcuts also retain their usual behavior; ordinary arrows elsewhere navigate the active description.

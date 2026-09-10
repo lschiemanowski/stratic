@@ -56,12 +56,14 @@ app.on('window-all-closed', () => app.quit());
 app.on('before-quit', () => { stopUI?.(); stopViewWorker(); });
 async function start() {
 await app.whenReady();
+const icon = join(__dirname, 'stratic-icon.png');
+app.dock?.setIcon(icon);
 try {
   const saved: unknown = JSON.parse(readFileSync(join(app.getPath('userData'), 'projects.json'), 'utf8'));
   if (Array.isArray(saved)) projects = [...new Set(saved.filter((path): path is string => typeof path === 'string'))].slice(0, 12);
 } catch { /* A missing or damaged recent list does not prevent opening a project. */ }
 session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
-window = new BrowserWindow({ width: 1280, height: 850, minWidth: 800, minHeight: 550, title: 'Stratic v3', backgroundColor: '#f5f4ef',
+window = new BrowserWindow({ width: 1280, height: 850, minWidth: 800, minHeight: 550, title: 'Stratic v3', icon, backgroundColor: '#f5f4ef',
   titleBarStyle: 'hidden', trafficLightPosition: { x: 16, y: 17 },
   ...(process.platform !== 'darwin' ? { titleBarOverlay: { color: '#f5f4ef', symbolColor: '#25332f', height: 48 } } : {}),
   webPreferences: { preload: join(__dirname, 'preload.cjs'), nodeIntegration: false, contextIsolation: true, sandbox: true } });

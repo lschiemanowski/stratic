@@ -1,0 +1,67 @@
+{
+  "id": "d8fc214d-f54c-406f-a2dd-612106db3fbe",
+  "base": "ebdb946539d6fa544047160758f7cb10617a445f",
+  "contentTree": "1d7dc7f19814acef5909e3cfda3209d306d86611",
+  "reviewer": "codex",
+  "summary": "Reuse the exact Stratic v2 logo for the desktop window and macOS Dock, copying the PNG into the build and retaining the SVG source.",
+  "examined": [
+    {
+      "id": "cli-ui-open",
+      "outcome": "unchanged",
+      "reason": "The main-process icon setup does not alter selection validation, revision pinning or the session channel."
+    },
+    {
+      "id": "formatted-descriptions",
+      "outcome": "unchanged",
+      "reason": "The build adds an app PNG alongside the existing assets. Markdown, KaTeX and project-image behavior and resources are unchanged."
+    },
+    {
+      "id": "navigation",
+      "outcome": "unchanged",
+      "reason": "No navigation or refresh code changes; only window creation and Dock identity use the copied logo."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "The exact main-process source link now includes icon setup. Isolation, IPC sender checks and repository-content rendering are unchanged."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Adds the desktop icon promise and links startup and asset copying. Existing summaries still faithfully cover the main controls; no new control or label is added."
+    },
+    {
+      "id": "desktop",
+      "outcome": "unchanged",
+      "reason": "The existing native app now uses Stratic artwork. Reading, navigation, project selection and authority boundaries are unchanged."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "1d7dc7f19814acef5909e3cfda3209d306d86611",
+      "method": "npm run typecheck; npm run build; isolated Electron startup and native-image inspection; byte comparison with v2; node src/cli.ts validate",
+      "outcome": "pass",
+      "environment": "macOS, Node v24.16.0, Electron 43.2.0",
+      "evidence": "Typecheck and build exited 0. The built app opened its reader, loaded a nonempty 512x512 icon, and had a visible Dock entry. SVG and PNG match v2 byte-for-byte; dist PNG matches the source PNG. Validation found no issues. Logs are /private/tmp/stratic-icon-typecheck.txt, /private/tmp/stratic-icon-build.txt and /private/tmp/stratic-icon-startup.txt. This is a focused startup check, not a claim that the unit or full desktop suite ran.",
+      "tests": [],
+      "id": "5b62b12a-e192-4406-8d08-62902aa0ac2a",
+      "recordedAt": "2026-09-10T11:41:27.693Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T11:41:36.878Z",
+  "unmapped": [
+    {
+      "path": "scripts/build.ts",
+      "reason": "The unmapped changed region is a separating blank line before the linked icon-copy statement."
+    },
+    {
+      "path": "src/desktop/assets/stratic-icon.png",
+      "reason": "Binary app artwork copied byte-for-byte from the v2 desktop asset and loaded by the linked app startup code; it is not a textual source passage."
+    },
+    {
+      "path": "src/desktop/assets/stratic-icon.svg",
+      "reason": "Editable source artwork retained byte-for-byte from the v2 desktop asset. The runtime uses its existing PNG rendition."
+    }
+  ]
+}
