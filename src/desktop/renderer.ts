@@ -366,7 +366,7 @@ async function refresh(force = false) {
     const next = JSON.stringify(v);
     if (next === signature && !force) return;
     const key = JSON.stringify(v.selection);
-    if (current && (v.tree !== current.tree || v.project?.root !== current.project?.root)) expandedTests.clear();
+    if (current && v.project?.root !== current.project?.root) expandedTests.clear();
     if (key !== loadedKey) { clearDetail(); tab = 'description'; loadedKey = key; }
     if (source) {
       const openedSource = source;

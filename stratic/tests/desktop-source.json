@@ -1,7 +1,7 @@
 {
   "id": "desktop-source",
   "name": "Source coloring and passage selection",
-  "description": "Opens implementation beside its description, preserves the complete source and linked-line highlights, and checks multiline colors, CRLF text and plain-text fallback.",
+  "description": "Opens implementation beside its description, preserves the complete source and linked-line highlights, and checks multiline colors, CRLF text and plain-text fallback. Checks the exact 200,000-character highlighting boundary, preserved text and line numbers, and cache invalidation when crossing the limit in both directions.",
   "code": [
     {
       "path": "scripts/desktop-smoke.ts",
@@ -13,6 +13,12 @@
       "path": "scripts/desktop-smoke.ts",
       "passage": {
         "quote": "  const sample = '/* first line\\r\\nsecond line */\\r\\nconst markup = `<img src=x onerror=\"window.injected=true\">`;\\r\\n\\r\\n';\n  writeFileSync(join(root, 'src/syntax-fixture.ts'), sample);\n  writeFileSync(join(root, 'src/syntax-fixture.unknown'), sample);\n  const storageMetadataPath = join(root, 'stratic/descriptions/storage.json');\n  const storageMetadata = JSON.parse(readFileSync(storageMetadataPath, 'utf8'));\n  for (const path of ['src/syntax-fixture.ts', 'src/syntax-fixture.unknown']) storageMetadata.links.push({ kind: 'implementation', from: null, to: { path, passage: { quote: sample } } });\n  writeFileSync(storageMetadataPath, JSON.stringify(storageMetadata));\n  await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n  await page.getByRole('button', { name: 'src/syntax-fixture.ts', exact: true }).click();\n  await page.getByRole('heading', { name: 'src/syntax-fixture.ts', exact: true }).waitFor();\n  assert.equal((await page.locator('.code-line code').allTextContents()).join('\\n'), sample);\n  assert.equal(await page.locator('.source-code img, .source-code script').count(), 0);\n  assert.equal(await page.evaluate(() => (window as any).injected), undefined);\n  assert.equal(await page.locator('.code-line:nth-child(2) .hljs-comment').count(), 1);\n  await page.getByRole('button', { name: 'src/syntax-fixture.unknown', exact: true }).click();\n  await page.getByRole('heading', { name: 'src/syntax-fixture.unknown', exact: true }).waitFor();\n  assert.equal((await page.locator('.code-line code').allTextContents()).join('\\n'), sample);\n  assert.equal(await page.locator('.source-code code span').count(), 0);"
+      }
+    },
+    {
+      "path": "scripts/reader-edge-checks.ts",
+      "passage": {
+        "quote": "export function checkSourceSizeBoundary() {\n  const sample = '// ' + 'x'.repeat(199_996) + '\\n';\n  assert(sample.length === 200_000, 'Fixture is exactly at the highlighting limit.');\n  for (const body of [sample, sample + '\\n', sample]) {\n    const view = sourceView('boundary.ts', body, resolvePassage(body, { quote: '// ' }));\n    assert(Array.from(view.querySelectorAll('code'), code => code.textContent).join('\\n') === body, 'Size fallback preserves every source character.');\n    assert(Boolean(view.querySelector('.hljs-comment')) === (body.length === 200_000), 'Highlight at the limit, use plain text above it, and invalidate the same-path cache in both directions.');\n    assert(view.querySelectorAll('.highlighted').length === 1, 'Plain text keeps passage highlighting.');\n    assert(Array.from(view.querySelectorAll('.line-number'), node => node.textContent).join(',') === (body === sample ? '1,2' : '1,2,3'), 'Line numbers retain trailing empty lines.');\n  }\n}"
       }
     }
   ],

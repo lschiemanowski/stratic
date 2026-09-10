@@ -1,4 +1,5 @@
 import { _electron } from 'playwright-core';
+import { build } from 'esbuild';
 import { createRequire } from 'node:module';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -36,6 +37,8 @@ try {
     }
     throw new Error('Fixture description did not load: ' + id);
   }
+  const edgeChecks = await build({ entryPoints: ['scripts/reader-edge-checks.ts'], bundle: true, write: false, format: 'iife', globalName: 'readerEdgeChecks', platform: 'browser' });
+  await page.evaluate(edgeChecks.outputFiles[0].text + '\nreaderEdgeChecks.checkSourceSizeBoundary(); readerEdgeChecks.checkDetachedTestReads();');
   const active = page.locator('.active-description');
   const parentPane = page.locator('.parent-description');
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
@@ -298,7 +301,31 @@ try {
   await testRow.locator('.result-disk.earlier').waitFor();
   assert.match(await testRow.locator(':scope > summary').innerText(), /Earlier fail/);
   assert.equal(await page.locator('.detail .result-disk.pass, .detail .result-disk.fail').count(), 0, 'Changed content cannot retain solid current pass/fail disks.');
+  recordCheck(root, { tree: workingSnapshot(root), method: 'Newer synthetic desktop result', outcome: 'pass', environment: 'UI test fixture', evidence: 'A newer record for different content must not obscure a matching failure.', tests: [{ id: 'release-by-owner', outcome: 'pass' }] });
+  await testRow.locator('.result-disk.pass').waitFor();
   writeFileSync(changedDescription, beforeEvidenceEdit);
+  await testRow.locator('.result-disk.fail').waitFor();
+  assert.equal(await testRow.locator('.result-disk').getAttribute('aria-label'), 'Current fail', 'An older matching failure wins over a newer stale pass.');
+  assert.equal(await testRow.getAttribute('open'), '', 'Content refresh preserves the expanded test.');
+  await testRow.locator('.source-code').waitFor();
+  assert.match(await testRow.locator('.test-evidence').first().textContent() ?? '', /Synthetic desktop status fixture/);
+  const testSourcePath = join(root, releaseTest.code[0].path), beforeTestEdit = readFileSync(testSourcePath, 'utf8');
+  const refreshMarker = '// Source refreshed while the test stays open.';
+  writeFileSync(testSourcePath, beforeTestEdit + '\n' + refreshMarker + '\n');
+  await testRow.locator('.result-disk.earlier').waitFor();
+  assert.equal(await testRow.getAttribute('open'), '', 'Content refresh preserves the expanded test.');
+  await testRow.locator('.source-code').getByText(refreshMarker, { exact: true }).waitFor();
+  assert.equal(await page.locator('.detail > .source-code').count(), 1, 'Refreshing test code retains the implementation.');
+  writeFileSync(testSourcePath, beforeTestEdit);
+  await testRow.locator('.result-disk.fail').waitFor();
+  await page.waitForFunction(marker => !document.querySelector('.detail .test-row[data-test="release-by-owner"] .source-code')?.textContent?.includes(marker), refreshMarker);
+  assert.equal(await testRow.getAttribute('open'), '', 'Restoring source also keeps the test expanded.');
+  writeFileSync(testSourcePath, beforeTestEdit.replace(releaseTest.code[0].passage.quote, '// Linked test moved in this fixture.'));
+  await testRow.locator('.problem').waitFor();
+  assert.equal(await testRow.getAttribute('open'), '', 'A broken test link remains open for inspection.');
+  assert.equal(await testRow.locator('.source-code').count(), 0, 'A missing passage reports a problem instead of retaining old test code.');
+  writeFileSync(testSourcePath, beforeTestEdit);
+  await testRow.locator('.source-code .highlighted').first().waitFor();
   await testRow.locator('.result-disk.fail').waitFor();
   await page.getByRole('button', { name: 'Close source', exact: true }).click();
   await parentPane.locator('.result-disk.inconclusive').waitFor();
@@ -523,7 +550,7 @@ try {
     await restored.locator('.active-description').getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();
   } finally { await reopened.close(); }
 
-  console.log(JSON.stringify({ passed: true, navigationMs, checked: ['formatted Markdown, equations, local image refresh, source-position links, and inert hostile content', 'optional summaries in both panes, safe bullets, change highlights, navigation persistence, and historical fallback', 'compact spatial overview, individual folds, depth slider, current-node reveal, 300 leaves, zoom/pan, selection return and broken drafts', 'global arrows from prose, toolbar and source, folded menu, hierarchy boundaries, and form-control exceptions', 'quiet title-bar controls, exceptional status, and project switching with remembered folders', 'paired descriptions, sibling/depth navigation, independent scroll, and source from either pane', 'folding and agent navigation synchronization', '300 leaves in a bounded menu', 'direct single-destination links and multiple-destination chooser', 'syntax colors, multiline tokens, exact source text, and safe plain-text fallback', 'copyable identity', 'agent current/open', 'contextual tests, inline source expansion, and current/earlier/pass/fail/inconclusive/unrecorded evidence', 'historical content', 'broken draft browsing', 'inert repository HTML', 'sandboxed renderer API'], screenshot: resolve('artifacts/desktop.png') }, null, 2));
+  console.log(JSON.stringify({ passed: true, navigationMs, checked: ['formatted Markdown, equations, local image refresh, source-position links, and inert hostile content', 'optional summaries in both panes, safe bullets, change highlights, navigation persistence, and historical fallback', 'compact spatial overview, individual folds, depth slider, current-node reveal, 300 leaves, zoom/pan, selection return and broken drafts', 'global arrows from prose, toolbar and source, folded menu, hierarchy boundaries, and form-control exceptions', 'quiet title-bar controls, exceptional status, and project switching with remembered folders', 'paired descriptions, sibling/depth navigation, independent scroll, and source from either pane', 'folding and agent navigation synchronization', '300 leaves in a bounded menu', 'direct single-destination links and multiple-destination chooser', 'syntax colors, multiline tokens, exact source text, and plain-text fallback across the 200,000-character boundary', 'copyable identity', 'agent current/open', 'contextual tests, expanded source refresh, late response isolation, current-result precedence, and current/earlier/pass/fail/inconclusive/unrecorded evidence', 'historical content', 'broken draft browsing', 'inert repository HTML', 'sandboxed renderer API'], screenshot: resolve('artifacts/desktop.png') }, null, 2));
 } catch (error) {
   const page = app.windows()[0];
   if (page) { await page.screenshot({ path: 'artifacts/desktop-failure.png' }); console.error(await page.locator('body').innerText()); }

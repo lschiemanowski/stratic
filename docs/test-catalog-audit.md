@@ -1,6 +1,6 @@
 # Test-link audit
 
-Updated after the catalog review at `3526b4d`, with the CLI checks in this proposal. This is an account of inspected assertions, not a coverage percentage or a promise that every described condition is tested.
+Updated after the catalog review at `3526b4d`, with the accepted CLI checks and the reader edge checks in this proposal. This is an account of inspected assertions, not a coverage percentage or a promise that every described condition is tested.
 
 The catalog contains 39 entries linked directly to 33 descriptions. All 28 top-level unit tests concerning Stratic itself have individual catalog entries. The other top-level unit test checks the worked queue example’s command interface; it is not a test of Stratic’s CLI. The example also maintains its own description and test catalog.
 
@@ -12,7 +12,7 @@ The two tree-layout unit tests now have separate identities, so a result can dis
 
 - Direct CLI tests now exercise `list`, `show`, `source`, `validate`, `impact`, `snapshot`, `check record`, `check list`, `prepare`, `ready`, `discard`, and `accept`. Three scenarios cover working and historical reads, the full selected-file workflow, and 25 rejected mutation requests with unchanged durable state. There are still no focused command-level tests for `ui current`, `ui open`, `version`, or `help`; desktop session tests do not establish those commands' argument parsing and dispatch.
 - Agent workflow guidance has no automated test establishing the quality of an agent's investigation, summaries, or semantic review. That remains a review responsibility.
-- Links identify exercised behavior within a description, not complete coverage of every promise. Examples of narrower coverage: source rendering checks unknown-language fallback but not the 200,000-character threshold; test-evidence rendering checks stale results but not precedence between a newer stale result and an older current one; image tests use SVG and PNG bytes rather than exercising every supported format's decoding.
+- Links identify exercised behavior within a description, not complete coverage of every promise. Examples of narrower coverage: image tests use SVG and PNG bytes rather than exercising every supported format's decoding. The reader checks now exercise both sides of the 200,000-character coloring limit, current-result precedence over newer stale evidence, expanded code refresh after edits, and delayed success or failure after a pane is replaced.
 - The example CLI test in `test/queue-cli.test.ts` has no matching Stratic product responsibility. It remains outside this product catalog instead of being misleadingly linked to Stratic's CLI.
 
 Further tests should address these concrete gaps as those responsibilities are changed. Broad descriptions do not need copies of every descendant's test link merely to make a test row appear.

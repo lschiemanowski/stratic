@@ -1,0 +1,149 @@
+{
+  "id": "e233f497-8643-4952-ba39-a9cccbf2cbba",
+  "base": "40fb4d43a55e0783dff282245efbebcc3f300b17",
+  "contentTree": "0923521f1709683fd8634ad79647ce40ebf657b1",
+  "reviewer": "codex",
+  "summary": "Keep expanded test source open and current during file edits. Add focused reader checks for matching-result precedence, refreshed and broken test links, late source responses after navigation, and the syntax coloring size boundary. Update description and catalog links without adding a test framework.",
+  "examined": [
+    {
+      "id": "change-display",
+      "outcome": "unchanged",
+      "reason": "Only expanded-test state during content refresh changes. Paragraph and summary comparisons, toggle persistence, and comparison bases are unchanged."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "unchanged",
+      "reason": "Passage resolution and direct or multi-destination navigation are unchanged; existing smoke assertions remain intact."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "The refresh implementation now preserves expanded tests on content changes; its exact source selector is refreshed. Identity changes still clear detail state and project changes still clear expansions. The background refresh and hierarchy navigation account remains accurate."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "unchanged",
+      "reason": "Parent-child selection, independent scroll and source ownership are unchanged. The retained state concerns only test rows within the same selection."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "unchanged",
+      "reason": "No title-bar, project-selection, summary, keyboard, or View controls change. Project changes still clear expanded tests."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Describes and links retained expansions and fresh source on edits, broken-link display, and isolation of detached rows. New checks cover content refresh, missing passages, delayed success/failure and current-result precedence."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "unchanged",
+      "reason": "The existing coloring limit, exact text and passage behavior are correct; new assertions exercise exactly 200000 and 200001 characters, same-path cache changes, and retained implementation beside refreshed tests."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "unchanged",
+      "reason": "Production markup construction, IPC and content isolation do not change. The browser test helper imports production renderers only inside the test process."
+    },
+    {
+      "id": "formatted-descriptions",
+      "outcome": "unchanged",
+      "reason": "Markdown, equations and image rendering are untouched; their assertion group remains part of the complete desktop check."
+    },
+    {
+      "id": "relationships",
+      "outcome": "unchanged",
+      "reason": "Description relations, implementation link shapes, statuses and dependency meaning are unchanged."
+    },
+    {
+      "id": "desktop",
+      "outcome": "unchanged",
+      "reason": "The broader promise of background-refreshed descriptions and contextual test evidence is preserved and made more consistent; no new view or authority is introduced."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "unchanged",
+      "reason": "Summary storage, validity and per-description responsibility do not change; existing summary checks remain intact."
+    },
+    {
+      "id": "checks",
+      "outcome": "unchanged",
+      "reason": "No result schema, recording, exact-tree matching or acceptance behavior changes. Synthetic fixture records are explicitly labeled and test the existing reader precedence rule."
+    },
+    {
+      "id": "tree-overview",
+      "outcome": "unchanged",
+      "reason": "Tree layout, folding, revision selection and selection return are unchanged; their existing smoke assertions remain intact."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "unchanged",
+      "reason": "Navigation still relies on the same stable identities, working or historical project reads, and exact passage matches. Retaining an expanded test during refresh changes no hierarchy or link semantics."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "0923521f1709683fd8634ad79647ce40ebf657b1",
+      "method": "npm run typecheck; npm run test:desktop; node src/cli.ts validate",
+      "outcome": "pass",
+      "environment": "macOS, Node v24.16.0, Electron 43.2.0 with Playwright; isolated temporary queue projects",
+      "evidence": "TypeScript check and full Electron smoke both exited 0; validation found no issues. All 11 cataloged desktop assertion groups completed, including current-result precedence over newer stale evidence, retained expanded code after edits, missing-passage error and repair, delayed success and failure after pane replacement, and exact 200000/200001-character highlighting boundary with cache transitions. Before the fix, the expanded-row regression failed with null open state. Logs: /private/tmp/stratic-reader-typecheck.txt and /private/tmp/stratic-reader-desktop.txt. The unit suite was not rerun for this renderer-only production change.",
+      "tests": [
+        {
+          "id": "desktop-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-highlights",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-markdown",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-navigation",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-pairs",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-projects",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-source",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-summaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-test-evidence",
+          "outcome": "pass"
+        },
+        {
+          "id": "desktop-tree",
+          "outcome": "pass"
+        }
+      ],
+      "id": "fb551bcd-78ab-48c2-b120-ff3d8f6b2187",
+      "recordedAt": "2026-09-10T10:52:46.327Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T10:54:55.796Z",
+  "unmapped": [
+    {
+      "path": "scripts/reader-edge-checks.ts",
+      "reason": "Shared imports and the small assertion helper support the two directly linked browser checks. They are test scaffolding, not a separate product responsibility."
+    }
+  ]
+}
