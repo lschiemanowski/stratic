@@ -4,6 +4,6 @@ contextBridge.exposeInMainWorld('stratic', {
   view: () => ipcRenderer.invoke('view'),
   navigate: (request: unknown) => ipcRenderer.invoke('navigate', request),
   source: (path: string) => ipcRenderer.invoke('source', path),
-  chooseProject: () => ipcRenderer.invoke('choose-project'),
+  chooseProject: (path?: string) => ipcRenderer.invoke('choose-project', path),
   onSelection: (callback: () => void) => { ipcRenderer.on('selection', callback); },
 });

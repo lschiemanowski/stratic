@@ -2,7 +2,7 @@
 
 Navigation maintains one active description and displays it together with its immediate parent. The parent is on the left and the active description is on the right; opening a child advances that pair by one level. The pair expresses the hierarchy, while the active identity remains the focus for the bottom menu, revision selection, and agent interface.
 
-The bottom menu shows the selected description’s parent, siblings, and children. With the central list focused, up and down open adjacent siblings, right opens the first child, and left opens the parent. Clicking an entry or breadcrumb also opens it immediately. Folding the menu gives the description and source more space without changing the current selection.
+The bottom menu shows the selected description’s parent, siblings, and children. Their position and selection convey the relationship without repeating the current title, ancestry, or routine status labels. A title-bar button folds or reveals this menu. With the central list focused, up and down open adjacent siblings, right opens the first child, and left opens the parent. Clicking an entry or a title-bar ancestor also opens it immediately. Folding the menu gives the description and source more space without changing the current selection.
 
 This local view avoids requiring the whole project tree on screen. For example, a project can have hundreds of leaf descriptions while the menu shows only the siblings of the active leaf and its parent. Lists scroll within the panel, and the selected entry is kept visible as keyboard navigation moves through it. Broken parent chains are kept reachable at the top rather than trapping a draft in an unusable branch.
 

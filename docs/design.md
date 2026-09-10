@@ -174,3 +174,14 @@ acceptance. Arrow navigation opens the selected description immediately.
 
 Project and Git refreshes run off the UI thread. Description switches use the
 loaded view; the acceptance path always verifies the live candidate independently.
+
+## Reading interface
+
+Show information when it changes the reader's understanding or next action.
+Expected states, such as implemented behavior and a clean working tree, do not
+need labels. Keep unfinished behavior and actual problems visible; place
+secondary controls and identity details in the View menu. Reading panes begin
+with the description itself, without repeating the hierarchy or routine metadata.
+
+Use the title bar for location and navigation. Keep project selection in a
+collapsible left panel, and local description navigation in the bottom panel.

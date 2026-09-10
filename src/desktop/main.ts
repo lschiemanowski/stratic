@@ -1,6 +1,7 @@
 import { viewData, stopViewWorker } from './view-cache.ts';
 import { app, BrowserWindow, clipboard, dialog, ipcMain, session } from 'electron';
 import { join } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { repository, readSource, git } from '../git.ts';
 import { getDescription, targetContent } from '../project.ts';
@@ -13,6 +14,7 @@ let root = projectArgument < 0 ? '' : repository(process.argv[projectArgument + 
 let selection: Selection = { project: root, revision: 'working' };
 let window: BrowserWindow;
 let stopUI: (() => void) | undefined;
+let projects: string[] = [];
 async function navigate(request: UIRequest): Promise<Selection> {
   if (!request || !['current', 'open'].includes(request.action)) throw new Error('Use current or open.');
   if (request.action === 'current') return selection;
@@ -29,17 +31,23 @@ async function navigate(request: UIRequest): Promise<Selection> {
   return selection;
 }
 async function attach(path: string) {
-  const next = repository(path); stopUI?.(); root = next;
-  const { project } = await viewData(root, 'working', true);
+  const next = repository(path);
+  const { project } = await viewData(next, 'working', true);
+  if (!project.config && !project.descriptions.length) throw new Error('This folder has no readable Stratic project.');
+  const nextUI = next === root && stopUI ? stopUI : await serveUI(next, navigate);
+  if (nextUI !== stopUI) stopUI?.();
+  root = next; stopUI = nextUI;
   selection = { project: root, revision: 'working', description: project.descriptions.find(d => d.metadata?.parent === null)?.id ?? project.descriptions[0]?.id };
-  stopUI = await serveUI(root, navigate);
+  projects = [root, ...projects.filter(path => path !== root)].slice(0, 12);
+  try { writeFileSync(join(app.getPath('userData'), 'projects.json'), JSON.stringify(projects)); }
+  catch (error) { console.error('Could not save recent projects:', error); }
 }
 async function view() {
-  if (!root) return { selection, project: null, checks: [], ready: null, history: [], dirty: false, comparison: null };
+  if (!root) return { selection, projects, project: null, checks: [], ready: null, history: [], dirty: false, comparison: null };
   const at = selection;
   const data = await viewData(root, at.revision);
   if (selection !== at) return view();
-  return { ...data, selection: at };
+  return { ...data, selection: at, projects };
 }
 app.setName('Stratic v3');
 if (process.env.STRATIC_USER_DATA) app.setPath('userData', process.env.STRATIC_USER_DATA);
@@ -47,8 +55,14 @@ app.on('window-all-closed', () => app.quit());
 app.on('before-quit', () => { stopUI?.(); stopViewWorker(); });
 async function start() {
 await app.whenReady();
+try {
+  const saved: unknown = JSON.parse(readFileSync(join(app.getPath('userData'), 'projects.json'), 'utf8'));
+  if (Array.isArray(saved)) projects = [...new Set(saved.filter((path): path is string => typeof path === 'string'))].slice(0, 12);
+} catch { /* A missing or damaged recent list does not prevent opening a project. */ }
 session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
 window = new BrowserWindow({ width: 1280, height: 850, minWidth: 800, minHeight: 550, title: 'Stratic v3', backgroundColor: '#f5f4ef',
+  titleBarStyle: 'hidden', trafficLightPosition: { x: 16, y: 17 },
+  ...(process.platform !== 'darwin' ? { titleBarOverlay: { color: '#f5f4ef', symbolColor: '#25332f', height: 48 } } : {}),
   webPreferences: { preload: join(__dirname, 'preload.cjs'), nodeIntegration: false, contextIsolation: true, sandbox: true } });
 window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 window.webContents.on('will-navigate', e => e.preventDefault());
@@ -60,9 +74,16 @@ ipcMain.handle('view', event => { verify(event); return view(); });
 ipcMain.handle('navigate', (event, request) => { verify(event); return navigate(request); });
 ipcMain.handle('copy-id', event => { verify(event); if (!selection.description) throw new Error('Select a description first.'); clipboard.writeText(selection.description); });
 ipcMain.handle('source', (event, path) => { verify(event); if (typeof path !== 'string') throw new Error('Expected a source path.'); return readSource(root, path, selection.revision); });
-ipcMain.handle('choose-project', async event => {
-  verify(event); const choice = await dialog.showOpenDialog(window, { properties: ['openDirectory'] });
-  if (!choice.canceled) await attach(choice.filePaths[0]); return view();
+ipcMain.handle('choose-project', async (event, path?: unknown) => {
+  verify(event);
+  if (path !== undefined) {
+    if (typeof path !== 'string' || !projects.includes(path)) throw new Error('Choose a recent project or use the folder picker.');
+    await attach(path);
+  } else {
+    const choice = await dialog.showOpenDialog(window, { properties: ['openDirectory'] });
+    if (!choice.canceled) await attach(choice.filePaths[0]);
+  }
+  return view();
 });
 if (root) await attach(root);
 await window.loadFile(join(__dirname, 'index.html'));

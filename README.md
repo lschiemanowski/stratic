@@ -42,7 +42,11 @@ The foldable bottom menu shows the current level alongside the selected entry’
 parent and children. Click any description to open it. Focus the central list
 to use ↑/↓ for siblings, → for the first child, and ← for the parent.
 Each selection opens immediately. Escape folds the panel. Breadcrumbs open
-ancestors directly. Partial descriptions show what still needs implementing.
+ancestors directly from the title bar. Partial and unimplemented descriptions
+show their status; implemented descriptions start directly with their prose.
+The title-bar Projects button reveals a collapsible left panel for switching
+between recent folders or opening another project. The View menu contains
+revision selection, tests, change highlighting, and Copy ID.
 The Tests view shows individual recorded outcomes; the revision selector shows
 historical descriptions and source. Editing the project files refreshes the view,
 including visible problems for broken draft links.
@@ -50,7 +54,7 @@ including visible problems for broken draft links.
 Changed paragraphs are highlighted against the prepared review's base, or HEAD
 for an unprepared edit. On an unchanged accepted revision, the comparison shows
 that accepted change. Highlights persist across description navigation; the
-Proposed changes / Accepted changes button toggles them. Expand Removed text
+Proposed changes / Accepted changes button in View toggles them. Expand Removed text
 to inspect deletions. These highlights are separate from the selected passage.
 
 Navigation uses the loaded project. Project files, Git state, and check evidence

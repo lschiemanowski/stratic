@@ -2,7 +2,7 @@
 
 The desktop reader lets a person explore a Stratic project and inspect a proposed change. Its reading area shows a parent description on the left and the active child on the right, so the broader promise and its elaboration can be understood together. Source can take the right-hand pane while the description it implements remains on the left. A foldable menu at the bottom keeps nearby responsibilities within reach.
 
-The bottom menu shows the active description alongside its parent, siblings, and children, so the reader can move between the overall intent and the details without displaying the entire project tree. Selecting an entry opens it immediately. With the central list focused, up and down move between siblings, left opens the parent, and right opens the first child. Breadcrumbs return to broader descriptions; folding the menu leaves more room to read.
+The bottom menu shows the active description alongside its parent, siblings, and children, so the reader can move between the overall intent and the details without displaying the entire project tree. Selecting an entry opens it immediately. With the central list focused, up and down move between siblings, left opens the parent, and right opens the first child. The title bar locates the active description in its ancestry; folding the menu leaves more room to read.
 
 Underlined passages connect the explanation to more detail. Opening a child makes it active on the right while retaining its parent on the left. A single destination opens directly; overlapping destinations are offered as a choice before navigation. Following an implementation link places the description containing that link beside the selected source.
 
@@ -11,6 +11,8 @@ Linked source is read-only and opens at the passage that implements the selected
 Change highlighting shows how the descriptions differ from the proposal’s starting point. A changed paragraph is highlighted as a whole, and removed text can be expanded. The highlights stay available as the reader moves between descriptions and can be toggled off. The revision selector lets the reader inspect earlier committed descriptions and their source.
 
 The Tests view shows the project’s registered checks, their recorded outcomes, and whether those results apply to the content being viewed. It can open a test’s code or the behavior it checks; it does not run the test. Problems lists malformed metadata and broken links. Draft descriptions remain readable while those problems are being repaired.
+
+The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, tests, and identity controls are available in the View menu.
 
 The reader does not edit project files or accept changes. Edits made by an agent or editor appear through background refresh, which may take a few seconds. A description marked partial shows what remains to implement, separately from the highlighting of a proposed change.
 

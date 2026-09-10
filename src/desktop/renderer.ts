@@ -5,10 +5,10 @@ import { sourceView } from './source-view.ts';
 import { textChanges } from './text-changes.ts';
 import { resolvePassage } from '../passages.ts';
 
-type View = Omit<ViewData, 'project'> & { project: Project | null; selection: Selection };
+type View = Omit<ViewData, 'project'> & { project: Project | null; selection: Selection; projects: string[] };
 declare global { interface Window { stratic: {
   copyId(): Promise<void>; view(): Promise<View>; navigate(request: UIRequest): Promise<Selection>; source(path: string): Promise<string>;
-  chooseProject(): Promise<View>; onSelection(callback: () => void): void;
+  chooseProject(path?: string): Promise<View>; onSelection(callback: () => void): void;
 } } }
 const app = document.querySelector('#app')!;
 let current: View, signature = '', selectedConnections: Connection[] = [], source: { path: string; body: string; passage: Passage; range?: Range; problem?: string } | null = null;
@@ -18,6 +18,8 @@ let menuOpen = true, menuParent: string | null = null, menuCursor = '', menuCont
 let focusMenu = true;
 let connectionOwner: string | undefined, detailSequence = 0;
 let highlightChanges = true;
+let projectsOpen: boolean | undefined;
+let optionsOpen = false;
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e;
 }
@@ -25,7 +27,7 @@ function button(label: string, action: () => void, className = '') {
   const e = el('button', label, className); e.addEventListener('click', action); return e;
 }
 function error(e: unknown) {
-  let banner = document.querySelector('#error'); if (!banner) { banner = el('div', '', 'error'); banner.id = 'error'; app.prepend(banner); }
+  let banner = document.querySelector('#error'); if (!banner) { banner = el('div', '', 'error'); banner.id = 'error'; banner.setAttribute('role', 'alert'); document.querySelector('.titlebar')?.after(banner); }
   banner.textContent = (e as Error).message;
 }
 function clearDetail() {
@@ -118,22 +120,8 @@ function descriptionMenu(p: Project) {
     focusMenu = true; render();
   };
   const dock = el('section', undefined, 'description-menu'); dock.setAttribute('aria-label', 'Description navigation');
-  const bar = el('div', undefined, 'menu-bar');
-  const toggle = button(`${menuOpen ? '▾' : '▴'} Descriptions`, () => { menuOpen = !menuOpen; focusMenu = menuOpen; render(); if (!menuOpen) document.querySelector<HTMLButtonElement>('#menu-toggle')?.focus(); }, 'subtle');
-  toggle.id = 'menu-toggle'; toggle.setAttribute('aria-expanded', String(menuOpen)); toggle.setAttribute('aria-controls', 'menu-body');
-  bar.append(toggle, el('span', byId.get(current.selection.description ?? '')?.title ?? '', 'menu-current muted'));
-  bar.append(button(`Tests · ${p.tests.length}`, () => { tab = 'tests'; render(); }, 'subtle'), button(`Problems · ${p.issues.length}`, () => { tab = 'issues'; render(); }, 'subtle'));
-  if (current.ready) bar.append(el('span', 'Review prepared', 'badge'));
-  dock.append(bar);
   if (!menuOpen) return dock;
   const body = el('div', undefined, 'menu-body'); body.id = 'menu-body';
-  const path = el('nav', undefined, 'menu-path'); path.setAttribute('aria-label', 'Menu location');
-  path.append(button('Top', () => { menuCursor = children(null)[0]?.id ?? ''; move('open'); }, 'subtle'));
-  const ancestors: string[] = []; let ancestor = menuParent;
-  while (ancestor) { ancestors.unshift(ancestor); ancestor = parentOf(ancestor); }
-  for (const id of ancestors) {
-    path.append(el('span', '›', 'muted'), button(byId.get(id)!.title, () => void open({ description: id }), 'subtle'));
-  }
   const list = el('div', undefined, 'menu-list'); list.id = 'description-options'; list.tabIndex = 0;
   list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'Descriptions at this level');
   if (index >= 0) list.setAttribute('aria-activedescendant', `description-option-${index}`);
@@ -142,7 +130,7 @@ function descriptionMenu(p: Project) {
     row.id = `description-option-${i}`; row.setAttribute('role', 'option'); row.setAttribute('aria-selected', String(d.id === menuCursor));
     row.append(el('span', d.title));
     const count = children(d.id).length;
-    row.append(el('span', [d.id === current.selection.description && tab === 'description' ? 'Open' : '', count ? `${count} ${count === 1 ? 'child' : 'children'}  ›` : ''].filter(Boolean).join(' · '), 'menu-count'));
+    if (count) row.append(el('span', '›', 'menu-count'));
     row.onclick = () => { menuCursor = d.id; move('open'); };
     list.append(row);
   });
@@ -153,31 +141,34 @@ function descriptionMenu(p: Project) {
     else if (e.key === 'Escape') { e.preventDefault(); menuOpen = false; render(); document.querySelector<HTMLButtonElement>('#menu-toggle')?.focus(); }
     else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); menuCursor = rows[e.key === 'Home' ? 0 : rows.length - 1]?.id ?? ''; move('open'); }
   };
-  const column = (label: string, name: string) => {
+  const column = (name: string) => {
     const section = el('section', undefined, 'menu-column'); section.setAttribute('aria-label', name);
-    section.append(el('div', label, 'eyebrow')); return section;
+    return section;
   };
-  const parentColumn = column('PARENT', 'Parent description');
+  const parentColumn = column('Parent description');
   const parent = parentOf(menuCursor);
   if (parent) parentColumn.append(button(byId.get(parent)!.title, () => void open({ description: parent }), 'menu-neighbor'));
-  else parentColumn.append(el('p', 'At the top', 'muted small'));
-  const currentColumn = column('THIS LEVEL', 'Current level'); currentColumn.append(list);
-  const childColumn = column('CHILDREN', 'Child descriptions');
+
+  const currentColumn = column('Current level'); currentColumn.append(list);
+  const childColumn = column('Child descriptions');
   const childList = el('div', undefined, 'menu-neighbors');
   for (const child of children(menuCursor)) childList.append(button(child.title, () => void open({ description: child.id }), 'menu-neighbor'));
-  if (!childList.childElementCount) childList.append(el('p', 'No children', 'muted small'));
+
   childColumn.append(childList);
-  body.append(path, parentColumn, currentColumn, childColumn); dock.append(body); return dock;
+  body.append(parentColumn, currentColumn, childColumn); dock.append(body); return dock;
 }
 function descriptionPane(p: Project, d: Description, active: boolean, passage?: Passage) {
   const reading = el('section', undefined, 'reading description-pane' + (active ? ' active-description' : ' parent-description'));
   reading.setAttribute('aria-label', active ? 'Active reading pane' : 'Parent reading pane');
   reading.dataset.description = d.id;
   reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id]);
-  reading.append(el('div', active ? 'ACTIVE DESCRIPTION' : 'PARENT', 'eyebrow'));
-  const meta = el('div', undefined, 'description-meta'); meta.append(el('span', d.metadata?.realization ?? 'Incomplete metadata', 'badge'), el('span', d.id, 'muted small')); if (active) meta.append(button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); reading.append(meta);
-  if (d.metadata?.remaining) reading.append(el('p', 'Still to implement: ' + d.metadata.remaining, 'muted small'));
-  if (d.metadata?.parent) reading.append(button('↑ ' + (p.descriptions.find(c => c.id === d.metadata!.parent!.description)?.title ?? 'Parent'), () => void open(d.metadata!.parent!), 'parent'));
+  const realization = d.metadata?.realization;
+  if (realization !== 'implemented') {
+    const notice = el('div', undefined, 'implementation-notice');
+    notice.append(el('span', realization === 'partial' ? 'Partly implemented' : realization === 'unimplemented' ? 'Unimplemented' : 'Incomplete metadata', 'badge'));
+    if (d.metadata?.remaining) notice.append(el('p', d.metadata.remaining));
+    reading.append(notice);
+  }
   let selected: Range | undefined;
   try { if (passage) selected = resolvePassage(d.body, passage); } catch { /* Retain the edited description with its problem. */ }
   const outgoing = links(p, d.id);
@@ -193,30 +184,91 @@ function descriptionPane(p: Project, d: Description, active: boolean, passage?: 
     reading.append(el('h2', 'Related responsibilities'));
     for (const l of contextual) { const b = button(l.label, () => follow([l], d.id), 'relation'); reading.append(b); }
   }
-  reading.append(el('p', 'Select an underlined passage to follow its explanation or implementation.', 'hint'));
   return reading;
+}
+function iconButton(label: string, icon: string, action: () => void) {
+  const control = button('', action, 'subtle icon-button');
+  control.setAttribute('aria-label', label); control.title = label;
+  const glyph = el('span', undefined, 'icon icon-' + icon); glyph.setAttribute('aria-hidden', 'true'); control.append(glyph);
+  return control;
+}
+async function chooseProject(path?: string) {
+  try {
+    const v = await window.stratic.chooseProject(path);
+    current = v; signature = ''; clearDetail(); tab = 'description'; optionsOpen = false; render();
+  } catch (e) { error(e); }
+}
+function projectPanel() {
+  const panel = el('aside', undefined, 'project-panel'); panel.id = 'project-panel'; panel.setAttribute('aria-label', 'Projects');
+  const heading = el('div', undefined, 'panel-heading');
+  heading.append(el('h2', 'Projects'), iconButton('Hide projects', 'close', () => { projectsOpen = false; render(); document.querySelector<HTMLButtonElement>('#projects-toggle')?.focus(); }));
+  panel.append(heading);
+  for (const path of current.projects) {
+    const item = button('', () => void chooseProject(path), 'project-option'); item.title = path;
+    item.setAttribute('aria-current', String(path === current.project?.root));
+    item.append(el('span', path.split('/').pop()), el('span', path, 'muted small'));
+    panel.append(item);
+  }
+  panel.append(button('Open project…', () => void chooseProject(), 'subtle open-project'));
+  return panel;
+}
+function titleBar(p: Project | null) {
+  const header = el('header', undefined, 'titlebar');
+  const projects = iconButton('Projects', 'sidebar', () => { projectsOpen = !(projectsOpen ?? !p); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#projects-toggle')?.focus(); });
+  projects.id = 'projects-toggle'; projects.setAttribute('aria-expanded', String(projectsOpen ?? !p)); projects.setAttribute('aria-controls', 'project-panel'); header.append(projects);
+  const path = el('nav', undefined, 'title-path'); path.setAttribute('aria-label', 'Location');
+  if (p) {
+    const byId = new Map(p.descriptions.map(d => [d.id, d]));
+    const ancestors: Description[] = [], seen = new Set<string>(); let d = byId.get(current.selection.description ?? '');
+    while (d && !seen.has(d.id)) { ancestors.unshift(d); seen.add(d.id); d = byId.get(d.metadata?.parent?.description ?? ''); }
+    for (const [index, item] of ancestors.entries()) {
+      if (index) path.append(el('span', '›', 'path-separator'));
+      const entry = button(item.title, () => void open({ description: item.id }), 'subtle'); entry.title = item.title;
+      if (item.id === current.selection.description) entry.setAttribute('aria-current', 'page'); path.append(entry);
+    }
+  }
+  header.append(path);
+  if (!p) return header;
+  if (current.selection.revision !== 'working') header.append(el('span', 'History · ' + current.selection.revision.slice(0, 7), 'badge'));
+  else if (current.ready) header.append(el('span', 'Review prepared', 'badge'));
+  else if (current.dirty) { const changed = el('span', '•', 'working-changes'); changed.title = 'Uncommitted changes'; changed.setAttribute('aria-label', 'Uncommitted changes'); header.append(changed); }
+  if (p.issues.length) header.append(button(`Problems · ${p.issues.length}`, () => { optionsOpen = false; tab = 'issues'; render(); }, 'subtle problems-button'));
+  const navigation = iconButton('Descriptions', 'navigation', () => { menuOpen = !menuOpen; focusMenu = menuOpen; optionsOpen = false; render(); if (!menuOpen) document.querySelector<HTMLButtonElement>('#menu-toggle')?.focus(); });
+  navigation.id = 'menu-toggle'; navigation.setAttribute('aria-expanded', String(menuOpen)); navigation.setAttribute('aria-controls', 'menu-body'); header.append(navigation);
+  const options = el('div', undefined, 'view-options');
+  const toggle = button('View', () => { optionsOpen = !optionsOpen; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); }, 'subtle');
+  toggle.id = 'view-toggle'; toggle.setAttribute('aria-expanded', String(optionsOpen)); toggle.setAttribute('aria-controls', 'view-options'); options.append(toggle);
+  if (optionsOpen) {
+    const panel = el('div', undefined, 'view-popover'); panel.id = 'view-options'; panel.setAttribute('aria-label', 'View options'); panel.setAttribute('role', 'region');
+    const label = el('label', 'Revision'); label.htmlFor = 'revision';
+    const versions = el('select'); versions.id = 'revision'; versions.setAttribute('aria-label', 'Revision');
+    for (const item of [{ id: 'working', title: 'Working files' }, ...current.history]) { const o = el('option', item.id === 'working' ? item.title : `${item.id.slice(0, 7)} · ${item.title}`); o.value = item.id; versions.append(o); }
+    versions.value = current.selection.revision;
+    versions.onchange = () => { if (current.selection.description) { optionsOpen = false; clearDetail(); void window.stratic.navigate({ action: 'open', description: current.selection.description, revision: versions.value }).then(() => refresh(true)).catch(error); } };
+    panel.append(label, versions);
+    if (current.comparison) {
+      const highlight = button(current.comparison.label, () => { highlightChanges = !highlightChanges; render(); }, 'subtle change-toggle');
+      highlight.setAttribute('aria-pressed', String(highlightChanges)); highlight.title = 'Highlight changes compared with ' + current.comparison.base.slice(0, 7); panel.append(highlight);
+    }
+    panel.append(button('Tests', () => { optionsOpen = false; tab = 'tests'; render(); }, 'subtle'));
+    if (current.selection.description) {
+      const identity = el('div', undefined, 'identity'); identity.append(el('span', current.selection.description, 'muted small'), button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); panel.append(identity);
+    }
+    options.append(panel);
+  }
+  header.append(options); return header;
 }
 function render() {
   const p = current.project;
   const menuHadFocus = document.activeElement?.id === 'description-options';
   const scrolls = new Map(Array.from(document.querySelectorAll<HTMLElement>('[data-reading-key]'), pane => [pane.dataset.readingKey!, pane.scrollTop]));
   app.replaceChildren();
-  const header = el('header'); const brand = el('div', 'stratic', 'brand'); brand.append(el('span', ' / v3', 'muted')); header.append(brand);
-  header.append(button('Open project…', () => window.stratic.chooseProject().then(v => { current = v; signature = ''; clearDetail(); tab = 'description'; render(); }).catch(error), 'subtle'));
-  if (p) {
-    header.append(el('span', p.root.split('/').pop(), 'project-name'));
-    const versions = el('select'); versions.setAttribute('aria-label', 'Revision');
-    for (const item of [{ id: 'working', title: 'Working files' }, ...current.history]) { const o = el('option', item.id === 'working' ? item.title : `${item.id.slice(0, 7)} · ${item.title}`); o.value = item.id; versions.append(o); }
-    versions.value = current.selection.revision;
-    versions.onchange = () => { if (current.selection.description) { clearDetail(); void window.stratic.navigate({ action: 'open', description: current.selection.description, revision: versions.value }).then(() => refresh(true)).catch(error); } };
-    header.append(versions, el('span', current.selection.revision !== 'working' ? 'History' : current.dirty ? 'Uncommitted changes' : 'Committed', 'badge'));
-  }
-  if (current.comparison) {
-    const toggle = button(current.comparison.label, () => { highlightChanges = !highlightChanges; render(); }, 'subtle change-toggle');
-    toggle.setAttribute('aria-pressed', String(highlightChanges)); toggle.title = 'Highlight changed paragraphs compared with ' + current.comparison.base.slice(0, 7); header.append(toggle);
-  }
-  app.append(header);
-  if (!p) { app.append(el('section', 'Open a Git project containing a stratic folder to explore its descriptions.', 'empty')); return; }
+  app.append(titleBar(p));
+  const location = document.querySelector('.title-path'); if (location) location.scrollLeft = location.scrollWidth;
+  const workspace = el('div', undefined, 'workspace');
+  if (projectsOpen ?? !p) workspace.append(projectPanel());
+  const reader = el('div', undefined, 'reader'); workspace.append(reader); app.append(workspace);
+  if (!p) { reader.append(el('section', 'Choose a project to start reading.', 'empty')); return; }
   const layout = el('main', undefined, 'layout');
   const reading = el('section', undefined, 'reading');
   reading.dataset.readingKey = JSON.stringify([p.root, p.revision, tab]);
@@ -252,16 +304,18 @@ function render() {
   if (tab !== 'description' || !layout.childElementCount) layout.append(reading);
   const detail = el('aside', undefined, 'detail');
   if (source) {
-    detail.append(el('div', 'SOURCE', 'eyebrow'), el('h2', source.path), button('Close source', () => { clearDetail(); render(); }, 'subtle'));
+    const heading = el('div', undefined, 'detail-heading');
+    heading.append(el('h2', source.path), iconButton('Close source', 'close', () => { clearDetail(); render(); })); detail.append(heading);
     if (source.problem) detail.append(el('p', source.problem, 'problem'));
     detail.append(sourceView(source.path, source.body, source.range));
   } else if (selectedConnections.length) {
-    detail.append(el('div', 'THIS PASSAGE', 'eyebrow'), el('h2', 'Follow the connection'), button('Close connections', () => { clearDetail(); render(); }, 'subtle'));
+    const heading = el('div', undefined, 'detail-heading');
+    heading.append(el('h2', 'Follow this passage'), iconButton('Close connections', 'close', () => { clearDetail(); render(); })); detail.append(heading);
     for (const l of selectedConnections) { const card = el('div', undefined, 'connection-card'); card.append(el('span', l.kind, 'badge'), button(l.label + ' →', () => void open(l.to, connectionOwner), 'connection-target')); if (l.reason) card.append(el('p', l.reason)); if (l.problem) card.append(el('p', l.problem, 'error')); detail.append(card); }
   }
   if (source || selectedConnections.length) layout.append(detail);
   layout.classList.toggle('single-pane', layout.childElementCount === 1);
-  app.append(layout, descriptionMenu(p));
+  reader.append(layout, descriptionMenu(p));
   for (const pane of Array.from(layout.querySelectorAll<HTMLElement>('[data-reading-key]'))) pane.scrollTop = scrolls.get(pane.dataset.readingKey!) ?? 0;
   if (focusMenu || menuHadFocus) {
     document.querySelector<HTMLElement>('#description-options')?.focus({ preventScroll: true }); focusMenu = false;
@@ -294,3 +348,12 @@ async function refresh(force = false) {
 }
 window.stratic.onSelection(() => { tab = 'description'; clearDetail(); menuContext = ''; focusMenu = menuOpen; void refresh(true); });
 void refresh(); setInterval(() => void refresh(), 2000);
+
+document.addEventListener('click', event => {
+  // Use the original event path: an action may have rebuilt the controls during this click.
+  const inside = event.composedPath().some(node => node instanceof Element && node.classList.contains('view-options'));
+  if (optionsOpen && !inside) { optionsOpen = false; render(); }
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && optionsOpen) { event.preventDefault(); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); }
+});

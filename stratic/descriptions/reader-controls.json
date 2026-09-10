@@ -1,0 +1,60 @@
+{
+  "id": "reader-controls",
+  "parent": {
+    "description": "desktop",
+    "passage": {
+      "quote": "The title bar carries the current location and compact controls for navigation, project selection, and viewing options. A collapsible left panel lists recently opened projects and opens another folder. Reading panes start with their titles and prose; normal implementation and committed states are not announced. Unfinished behavior and actual problems remain visible, while revision, highlighting, tests, and identity controls are available in the View menu."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The reader keeps attention on the program being described. Each reading pane begins with its title and prose. Expected states, such as implemented behavior and a clean working tree, do not occupy separate labels. Partial or unimplemented behavior remains explicit, including any stated work still missing. Problems and a prepared review are surfaced because they change what the reader needs to know."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "function descriptionPane(p: Project, d: Description, active: boolean, passage?: Passage) {\n  const reading = el('section', undefined, 'reading description-pane' + (active ? ' active-description' : ' parent-description'));\n  reading.setAttribute('aria-label', active ? 'Active reading pane' : 'Parent reading pane');\n  reading.dataset.description = d.id;\n  reading.dataset.readingKey = JSON.stringify([p.root, p.revision, d.id]);\n  const realization = d.metadata?.realization;\n  if (realization !== 'implemented') {\n    const notice = el('div', undefined, 'implementation-notice');\n    notice.append(el('span', realization === 'partial' ? 'Partly implemented' : realization === 'unimplemented' ? 'Unimplemented' : 'Incomplete metadata', 'badge'));\n    if (d.metadata?.remaining) notice.append(el('p', d.metadata.remaining));\n    reading.append(notice);\n  }\n  let selected: Range | undefined;\n  try { if (passage) selected = resolvePassage(d.body, passage); } catch { /* Retain the edited description with its problem. */ }\n  const outgoing = links(p, d.id);\n  const before = current.comparison?.before[d.id];\n  const changes = highlightChanges && before !== undefined ? textChanges(before, d.body) : { additions: [], removed: [] };\n  reading.append(prose(d.body, outgoing, d.id, selected, changes.additions));\n  if (changes.removed.length) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed text'), el('pre', changes.removed.join('\\n\\n'))); reading.append(removed); }\n  if (highlightChanges && d.metadata?.parent === null) for (const old of current.comparison?.removed ?? []) { const removed = el('details', undefined, 'removed-text'); removed.append(el('summary', 'Removed description: ' + old.title), el('pre', old.body)); reading.append(removed); }\n  const issues = p.issues.filter(i => i.description === d.id);\n  if (issues.length) reading.append(button(`${issues.length} connection problem${issues.length === 1 ? '' : 's'} — inspect`, () => { tab = 'issues'; render(); }, 'problem-link'));\n  const contextual = outgoing.filter(l => !l.from || l.problem);\n  if (contextual.length) {\n    reading.append(el('h2', 'Related responsibilities'));\n    for (const l of contextual) { const b = button(l.label, () => follow([l], d.id), 'relation'); reading.append(b); }\n  }\n  return reading;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The title bar combines the window controls with the current description’s ancestry. Ancestors open broader descriptions, and the current title returns from supporting views to the active description. Separate compact buttons reveal the project panel, fold the bottom description menu, and open viewing options. The unused title-bar area moves the window; buttons and menus remain interactive."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "function titleBar(p: Project | null) {\n  const header = el('header', undefined, 'titlebar');\n  const projects = iconButton('Projects', 'sidebar', () => { projectsOpen = !(projectsOpen ?? !p); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#projects-toggle')?.focus(); });\n  projects.id = 'projects-toggle'; projects.setAttribute('aria-expanded', String(projectsOpen ?? !p)); projects.setAttribute('aria-controls', 'project-panel'); header.append(projects);\n  const path = el('nav', undefined, 'title-path'); path.setAttribute('aria-label', 'Location');\n  if (p) {\n    const byId = new Map(p.descriptions.map(d => [d.id, d]));\n    const ancestors: Description[] = [], seen = new Set<string>(); let d = byId.get(current.selection.description ?? '');\n    while (d && !seen.has(d.id)) { ancestors.unshift(d); seen.add(d.id); d = byId.get(d.metadata?.parent?.description ?? ''); }\n    for (const [index, item] of ancestors.entries()) {\n      if (index) path.append(el('span', '›', 'path-separator'));\n      const entry = button(item.title, () => void open({ description: item.id }), 'subtle'); entry.title = item.title;\n      if (item.id === current.selection.description) entry.setAttribute('aria-current', 'page'); path.append(entry);\n    }\n  }\n  header.append(path);\n  if (!p) return header;\n  if (current.selection.revision !== 'working') header.append(el('span', 'History · ' + current.selection.revision.slice(0, 7), 'badge'));\n  else if (current.ready) header.append(el('span', 'Review prepared', 'badge'));\n  else if (current.dirty) { const changed = el('span', '•', 'working-changes'); changed.title = 'Uncommitted changes'; changed.setAttribute('aria-label', 'Uncommitted changes'); header.append(changed); }\n  if (p.issues.length) header.append(button(`Problems · ${p.issues.length}`, () => { optionsOpen = false; tab = 'issues'; render(); }, 'subtle problems-button'));\n  const navigation = iconButton('Descriptions', 'navigation', () => { menuOpen = !menuOpen; focusMenu = menuOpen; optionsOpen = false; render(); if (!menuOpen) document.querySelector<HTMLButtonElement>('#menu-toggle')?.focus(); });\n  navigation.id = 'menu-toggle'; navigation.setAttribute('aria-expanded', String(menuOpen)); navigation.setAttribute('aria-controls', 'menu-body'); header.append(navigation);\n  const options = el('div', undefined, 'view-options');\n  const toggle = button('View', () => { optionsOpen = !optionsOpen; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); }, 'subtle');\n  toggle.id = 'view-toggle'; toggle.setAttribute('aria-expanded', String(optionsOpen)); toggle.setAttribute('aria-controls', 'view-options'); options.append(toggle);\n  if (optionsOpen) {\n    const panel = el('div', undefined, 'view-popover'); panel.id = 'view-options'; panel.setAttribute('aria-label', 'View options'); panel.setAttribute('role', 'region');\n    const label = el('label', 'Revision'); label.htmlFor = 'revision';\n    const versions = el('select'); versions.id = 'revision'; versions.setAttribute('aria-label', 'Revision');\n    for (const item of [{ id: 'working', title: 'Working files' }, ...current.history]) { const o = el('option', item.id === 'working' ? item.title : `${item.id.slice(0, 7)} · ${item.title}`); o.value = item.id; versions.append(o); }\n    versions.value = current.selection.revision;\n    versions.onchange = () => { if (current.selection.description) { optionsOpen = false; clearDetail(); void window.stratic.navigate({ action: 'open', description: current.selection.description, revision: versions.value }).then(() => refresh(true)).catch(error); } };\n    panel.append(label, versions);\n    if (current.comparison) {\n      const highlight = button(current.comparison.label, () => { highlightChanges = !highlightChanges; render(); }, 'subtle change-toggle');\n      highlight.setAttribute('aria-pressed', String(highlightChanges)); highlight.title = 'Highlight changes compared with ' + current.comparison.base.slice(0, 7); panel.append(highlight);\n    }\n    panel.append(button('Tests', () => { optionsOpen = false; tab = 'tests'; render(); }, 'subtle'));\n    if (current.selection.description) {\n      const identity = el('div', undefined, 'identity'); identity.append(el('span', current.selection.description, 'muted small'), button('Copy ID', () => window.stratic.copyId().catch(error), 'subtle')); panel.append(identity);\n    }\n    options.append(panel);\n  }\n  header.append(options); return header;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Project selection lives in a collapsible panel on the left. It lists recently opened project folders and offers a native folder picker for another project. The current folder is selected, and full paths distinguish projects with the same name. Opening a project resets reading to its working root description. An invalid choice leaves the current project available and reports the problem."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "async function chooseProject(path?: string) {\n  try {\n    const v = await window.stratic.chooseProject(path);\n    current = v; signature = ''; clearDetail(); tab = 'description'; optionsOpen = false; render();\n  } catch (e) { error(e); }\n}\nfunction projectPanel() {\n  const panel = el('aside', undefined, 'project-panel'); panel.id = 'project-panel'; panel.setAttribute('aria-label', 'Projects');\n  const heading = el('div', undefined, 'panel-heading');\n  heading.append(el('h2', 'Projects'), iconButton('Hide projects', 'close', () => { projectsOpen = false; render(); document.querySelector<HTMLButtonElement>('#projects-toggle')?.focus(); }));\n  panel.append(heading);\n  for (const path of current.projects) {\n    const item = button('', () => void chooseProject(path), 'project-option'); item.title = path;\n    item.setAttribute('aria-current', String(path === current.project?.root));\n    item.append(el('span', path.split('/').pop()), el('span', path, 'muted small'));\n    panel.append(item);\n  }\n  panel.append(button('Open project…', () => void chooseProject(), 'subtle open-project'));\n  return panel;\n}"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Recent folders are stored in the application’s local user data, outside the projects. Only previously opened folders can be selected through the recent-project action; a new folder goes through the native picker. The list is bounded to twelve entries. It remembers locations, not saved reading views, and gives the desktop no editing or acceptance authority."
+      },
+      "to": {
+        "path": "src/desktop/main.ts",
+        "passage": {
+          "quote": "async function attach(path: string) {\n  const next = repository(path);\n  const { project } = await viewData(next, 'working', true);\n  if (!project.config && !project.descriptions.length) throw new Error('This folder has no readable Stratic project.');\n  const nextUI = next === root && stopUI ? stopUI : await serveUI(next, navigate);\n  if (nextUI !== stopUI) stopUI?.();\n  root = next; stopUI = nextUI;\n  selection = { project: root, revision: 'working', description: project.descriptions.find(d => d.metadata?.parent === null)?.id ?? project.descriptions[0]?.id };\n  projects = [root, ...projects.filter(path => path !== root)].slice(0, 12);\n  try { writeFileSync(join(app.getPath('userData'), 'projects.json'), JSON.stringify(projects)); }\n  catch (error) { console.error('Could not save recent projects:', error); }\n}"
+        }
+      }
+    }
+  ]
+}

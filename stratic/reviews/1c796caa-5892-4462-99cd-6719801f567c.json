@@ -1,0 +1,108 @@
+{
+  "id": "1c796caa-5892-4462-99cd-6719801f567c",
+  "base": "138d451ec35c85f85b448de106f6b6015e6ce50a",
+  "contentTree": "6ff959ab4ee7136b2960e4490a1b6e14248f49da",
+  "reviewer": "Codex",
+  "summary": "Simplify reader controls and move navigation into the title bar",
+  "examined": [
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "The reader now puts location and compact controls in the native title bar, hides routine metadata, and moves project selection to a collapsible left panel. Paired descriptions and source reading remain the central content."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "The bottom menu retains parent, siblings, children and immediate arrow navigation, while ancestry and the folding control move to the title bar. The new layout retains scroll restoration and the existing loaded-view navigation path."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Added a coherent description of conditional status, title-bar navigation, the View menu, and local recent-project selection. Linked the visible controls and project attachment mechanism to implementation."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "The Electron title bar preserves native window buttons and defines drag regions. Preload exposes the same methods, with a restricted optional recent-folder argument; text rendering, sandboxing and IPC sender checks stay in place."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Tests move into View; Problems receives a shortcut only for nonzero issues. Individual test outcomes, freshness and description links keep their existing meaning."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The product still connects hierarchical descriptions to implementation and checks; simplifying the reader presentation does not change its broader purpose."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "revised",
+      "reason": "Updated implementation links; the behavior described remains valid. Parent/child selection, independent scrolling, source transitions and draft fallback retain their contracts. Updated exact implementation selectors after removing metadata and moving shell composition."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "revised",
+      "reason": "Updated implementation links; the behavior described remains valid. The CLI still requests the same validated singular selection. Narrowed the implementation selector to navigate itself; project selection remains a separate desktop action."
+    },
+    {
+      "id": "change-display",
+      "outcome": "unchanged",
+      "reason": "Paragraph comparison, removed text and persistent toggling are unchanged. The toggle is now in View, which the parent desktop description explains."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "unchanged",
+      "reason": "Passage resolution and single/multiple destination behavior are unchanged; only the chooser heading and close control are quieter."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "unchanged",
+      "reason": "Source retrieval, syntax colors, exact content and owner pairing are unchanged. The close action is an accessible compact button."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "unchanged",
+      "reason": "The existing metadata already distinguishes implemented, partial and unimplemented behavior. No project schema or status semantics changed."
+    },
+    {
+      "id": "passages",
+      "outcome": "unchanged",
+      "reason": "Exact selectors and invalid-link reporting retain their rules; this proposal updates selectors to the reorganized code."
+    },
+    {
+      "id": "agents",
+      "outcome": "unchanged",
+      "reason": "The CLI contract and command set are unchanged. The ui open implementation reference was narrowed after desktop project attachment grew; it still points to the same validated singular selection operation."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "6ff959ab4ee7136b2960e4490a1b6e14248f49da",
+      "method": "npm run typecheck; npm run test:desktop; node src/cli.ts --project . validate; implementation and impact review",
+      "outcome": "pass",
+      "environment": "macOS; Node.js 24.16.0; Electron 43.2.0",
+      "evidence": "TypeScript and link validation pass. Desktop smoke passes on equal before/after content trees: compact title bar and hidden routine metadata; project panel switching, cancellation, invalid folders, persistence and restart; partial/unimplemented notices; repeated View-menu highlighting toggles; history; paired navigation and source from either pane; independent scroll; 300 leaves; minimum window; source syntax and sandbox checks. Output: /private/tmp/stratic-quiet-verified.txt. One earlier intermittent menu click failure was preserved; dismissal now checks the original composed event path and the final run includes eight repeated toggles.",
+      "tests": [
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        }
+      ],
+      "id": "ad819ffe-bcda-491d-8c6c-4a968c843255",
+      "recordedAt": "2026-09-09T18:15:45.514Z"
+    }
+  ],
+  "recordedAt": "2026-09-09T18:17:50.325Z",
+  "unmapped": [
+    {
+      "path": "src/desktop/renderer.ts",
+      "reason": "Inspected the local project-panel/View-menu state, extended view data, icon helpers and document event handlers. They control presentation and dismissal; project edits and acceptance remain outside the renderer."
+    },
+    {
+      "path": "src/desktop/main.ts",
+      "reason": "Inspected the filesystem import and in-memory recent folders. This supports the twelve-entry local user-data list; new folder selection still goes through the native picker, recent selection is restricted to that list, and failed attachment preserves the active project."
+    }
+  ]
+}
