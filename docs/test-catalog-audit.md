@@ -1,12 +1,14 @@
 # Test-link audit
 
-Updated after the catalog review at `3526b4d`, with the accepted CLI checks and the reader edge checks in this proposal. This is an account of inspected assertions, not a coverage percentage or a promise that every described condition is tested.
+Updated after the catalog review at `3526b4d`, with the accepted CLI and reader checks and the repository-skill checks in this proposal. This is an account of inspected assertions, not a coverage percentage or a promise that every described condition is tested.
 
-The catalog contains 39 entries linked directly to 33 descriptions. All 28 top-level unit tests concerning Stratic itself have individual catalog entries. The other top-level unit test checks the worked queue example’s command interface; it is not a test of Stratic’s CLI. The example also maintains its own description and test catalog.
+The catalog contains 42 entries linked directly to 37 descriptions. All 31 top-level unit tests concerning Stratic itself have individual catalog entries. The other top-level unit test checks the worked queue example’s command interface; it is not a test of Stratic’s CLI. The example also maintains its own description and test catalog.
 
 The complete desktop smoke remains associated with Desktop reader. Ten focused entries select the parts of that same script which check project selection, summaries, navigation, highlights, source, paired descriptions, the tree, test evidence, formatted content, and renderer boundaries. These entries are assertion groups within one sequential integration run, not new independently executable tests. Their source links retain the surrounding file for shared setup and context. Record all their outcomes only when the complete run succeeds; an interrupted run does not establish an outcome for every group.
 
 The two tree-layout unit tests now have separate identities, so a result can distinguish malformed-hierarchy layout from depth limits and individual folds. Existing tests also gained links for stable hierarchy identities, implementation passage resolution, exact-content check requirements, and the CLI's prepared identity response. Test explanations state what the assertions examine. The desktop description and summary no longer place Tests in View.
+
+Three skill scenarios now cover optional installation, local customization and explicit updates, and rejected arguments and redirected filesystem paths. They verify installation behavior, not the quality of an agent following the core or TDD guidance.
 
 ## Remaining gaps
 

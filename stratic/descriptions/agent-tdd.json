@@ -1,0 +1,24 @@
+{
+  "id": "agent-tdd",
+  "parent": {
+    "description": "agent-skills",
+    "passage": {
+      "quote": "Skills are ordinary reviewable files installed in the managed repository, so its working conventions can travel with its descriptions and code. The core skill supplies the shared responsibilities; optional workflow skills add an approach such as test-first development. Making a workflow available does not make it mandatory. The user can select it for one task, or the project can name a default in its ordinary agent instructions. A task-specific choice takes precedence over that default."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The TDD skill adds an optional test-first approach to Stratic’s description-led work. It applies when the user selects TDD for a task or the project’s instructions choose it as the applicable default. Installation alone does not select it. A task-specific choice can use another approach without changing the project default or Stratic’s acceptance rules.\n\nThe agent first understands a coherent behavior and refines its description, then writes tests for its important outcomes and conditions. The tests must fail against the incomplete implementation for the intended reason. Broken imports, fixture errors, or unrelated failures do not establish that the desired behavior is absent. Useful failure output identifies the content examined and remains distinguishable from later passing evidence.\n\nImplementation and refactoring proceed with the relevant tests, followed by additional checks appropriate to the affected responsibilities and boundaries. The workflow allows a coherent set of tests before implementation; it does not require artificial one-test microcycles or every available check on every task. Tests link to the description claims they actually check, and implementation links identify the code supporting those claims.\n\nThe core skill still governs description and summary accuracy, affected-responsibility review, evidence recording, preparation, and separately authorized acceptance. The test-first supplement changes how a behavior is developed, not who may accept it. An earlier meaningful failure is useful history, not passing evidence for the final proposal."
+      },
+      "to": {
+        "path": "skills/stratic-v3-tdd/SKILL.md",
+        "passage": {
+          "quote": "---\nname: stratic-v3-tdd\ndescription: Develop a Stratic v3 behavior change test-first when the user or project selects TDD. Supplements the core Stratic skill; installation alone does not select this workflow.\n---\n\n# Stratic TDD\n\nUse this workflow when the user requests TDD or the project's agent instructions select it for the task. A task-specific choice takes precedence over the project default. If neither selects TDD, use the core workflow without imposing a test-first order.\n\nRead the adjacent [core Stratic skill](../stratic-v3/SKILL.md) for description maintenance, evidence recording, preparation, and acceptance. Project instructions supply the relevant tools and test commands; this skill adds the test-first approach, not another review process.\n\nChoose a coherent behavior to implement. Read its descriptions and source, then refine the intended behavior and important conditions before writing tests. Keep deliberate unimplemented behavior explicit.\n\nWrite behavior-focused tests using the project's existing tools. Run them against the current implementation and establish that they fail for the intended missing behavior. An import error, broken fixture, or unrelated failure is not that evidence. Preserve the useful failure output and identify the content tested. A coherent set of tests can precede implementation; one-test microcycles are not required.\n\nImplement the behavior and refactor while the relevant tests pass. Run further checks appropriate to the affected responsibilities and boundaries. Test-first development does not imply running every available check for every change.\n\nReconcile the descriptions and any summaries with the completed behavior. Link tests to the description claims they actually check, just as implementation links identify the code supporting a claim. Keep the earlier failing evidence distinct from the final passing evidence; each describes the content actually examined. A meaningful earlier failure is useful history, not a passing result for the final proposal.\n\nComplete the core workflow's investigation and preparation. TDD does not authorize acceptance or a commit, and does not change Stratic's acceptance rules."
+        }
+      }
+    }
+  ]
+}

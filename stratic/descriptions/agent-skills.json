@@ -9,8 +9,8 @@
   "realization": "implemented",
   "links": [],
   "summary": [
-    "Agent skills guide investigation and judgment around Stratic’s mechanical tools.",
-    "The bundled workflow keeps descriptions, implementation, and evidence consistent before user-authorized acceptance.",
-    "The skill is a reviewable checkout file that must be made available to the agent; its presence does not prove semantic accuracy."
+    "The core skill guides description maintenance, investigation, evidence and separately authorized acceptance.",
+    "Repository-local skills travel with the project; explicit updates preserve local edits and project instructions.",
+    "Optional workflows such as TDD apply when selected by the user or project. Installation alone does not select them."
   ]
 }

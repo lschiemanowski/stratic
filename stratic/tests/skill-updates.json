@@ -1,0 +1,33 @@
+{
+  "id": "skill-updates",
+  "name": "Local customization during skill updates",
+  "description": "Distinguishes older installed content from local edits, stops all planned updates on conflict, updates clean files, and preserves local deletions.",
+  "code": [
+    {
+      "path": "test/skills.test.ts",
+      "passage": {
+        "quote": "test('skill updates distinguish upstream changes from local edits and preflight all selected files', t => {\n  const root = fixture(t), directory = join(root, '.agents/skills');\n  command(root, ['install', '--with', 'tdd']);\n  const core = join(directory, 'stratic-v3/SKILL.md'), tdd = join(directory, 'stratic-v3-tdd/SKILL.md'), manifest = join(directory, '.stratic-v3.json');\n  // An installed older bundle remains unmodified; the other installed skill has a local edit.\n  const record = JSON.parse(readFileSync(manifest, 'utf8'));\n  writeFileSync(core, 'Earlier core release'); record['stratic-v3'] = createHash('sha256').update('Earlier core release').digest('hex');\n  writeFileSync(manifest, JSON.stringify(record)); writeFileSync(tdd, bundled('stratic-v3-tdd') + '\\nLocal TDD convention\\n');\n  const before = [core, tdd, manifest].map(path => readFileSync(path, 'utf8'));\n  assert.deepEqual(command(root, ['status']).map((item: { status: string }) => item.status), ['outdated', 'modified']);\n  assert.match(command(root, ['update'], 1).error, /Skills were not changed/);\n  assert.deepEqual([core, tdd, manifest].map(path => readFileSync(path, 'utf8')), before, 'A conflict must not partially update other skills or the record.');\n  command(root, ['install'], 1);\n  writeFileSync(tdd, bundled('stratic-v3-tdd'));\n  assert.deepEqual(command(root, ['update']).written, ['.agents/skills/stratic-v3/SKILL.md']);\n  assert.equal(readFileSync(core, 'utf8'), bundled('stratic-v3'));\n  assert.ok(command(root, ['status']).every((item: { status: string }) => item.status === 'current'));\n  rmSync(tdd); command(root, ['update'], 1); command(root, ['install', '--with', 'tdd'], 1);\n  assert.equal(existsSync(tdd), false, 'A locally deleted skill must not be silently restored.');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "skill-installation",
+      "passage": {
+        "quote": "A small installation record stores the content hash of each installed SKILL.md. Status compares the local contents, that record, and the current bundle. It distinguishes absent skills, deleted recorded files, unrecorded custom files, locally modified files, unchanged older versions, and current contents. Status does not create files. The record is installation bookkeeping, not evidence that an agent used or correctly followed the skill."
+      }
+    },
+    {
+      "description": "skill-installation",
+      "passage": {
+        "quote": "Update considers only recorded skills and compares all selected files before writing. A file unchanged since installation can receive the bundled version. A local edit or deletion stops the operation with the affected paths and the location of the bundled versions, allowing an explicit manual merge. For example, a clean older core is left untouched when an edited TDD skill conflicts in the same update. A manually reconciled file matching the current bundle can be recorded without replacing it. Additional files in skill folders and unrelated skills remain untouched; the installer has no force-overwrite or pruning operation."
+      }
+    },
+    {
+      "description": "cli-skill-update",
+      "passage": {
+        "quote": "Skill update explicitly refreshes the skills recorded as installed in the selected repository. It does not install unselected optional workflows. An unchanged older installed file can receive its bundled replacement; local edits or deletions stop the operation for manual inspection and merging. Other local files remain untouched."
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "cli-skill-update",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Skill update explicitly refreshes unmodified installed skills while preserving local customizations."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Skill update explicitly refreshes the skills recorded as installed in the selected repository. It does not install unselected optional workflows. An unchanged older installed file can receive its bundled replacement; local edits or deletions stop the operation for manual inspection and merging. Other local files remain untouched.\n\nArguments are validated before the installer acts, and historical revisions are rejected. The JSON response lists written paths and resulting states. Without an installation record the command reports that installation is needed first. Updated skills and their bookkeeping remain ordinary working changes for review; this command does not stage or commit them."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'skill': {\n      const action = args.shift();\n      if (ref !== 'working') throw new Error('Skills are installed in working files; omit --revision.');\n      if (action === 'status') { done(); output = skillStatus(root); }\n      else if (action === 'install') {\n        const workflow = option('with');\n        if (workflow !== undefined && workflow !== 'tdd') throw new Error('The optional bundled workflow is tdd.');\n        done(); output = installSkills(root, 'install', workflow === 'tdd');\n      } else if (action === 'update') { done(); output = installSkills(root, 'update'); }\n      else throw new Error('Use skill install, skill status, or skill update.');\n      break;\n    }"
+        }
+      }
+    }
+  ]
+}

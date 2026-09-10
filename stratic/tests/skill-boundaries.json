@@ -1,0 +1,39 @@
+{
+  "id": "skill-boundaries",
+  "name": "Skill installation arguments and paths",
+  "description": "Rejects invalid requests before mutation, preserves unmanaged skills, and refuses redirected directories, files and records.",
+  "code": [
+    {
+      "path": "test/skills.test.ts",
+      "passage": {
+        "quote": "test('skill CLI rejects invalid requests and unsafe installation boundaries without overwriting files', t => {\n  const root = fixture(t), directory = join(root, '.agents/skills');\n  for (const args of [[], ['bogus'], ['install', '--with', 'unknown'], ['install', '--with'], ['install', 'extra'], ['install', '--with', 'tdd', '--with', 'tdd'], ['install', '--revision', 'HEAD'], ['update', '--with', 'tdd'], ['update'], ['status', 'extra']]) {\n    command(root, args, 1); assert.equal(existsSync(join(root, '.agents')), false);\n  }\n  const outside = join(root, 'outside'); mkdirSync(outside); writeFileSync(join(outside, 'sentinel'), 'Keep');\n  symlinkSync(outside, join(root, '.agents'));\n  command(root, ['install'], 1); command(root, ['status'], 1); rmSync(join(root, '.agents'));\n  mkdirSync(join(directory, 'stratic-v3'), { recursive: true });\n  mkdirSync(join(directory, 'stratic-v3-tdd'));\n  symlinkSync(join(outside, 'sentinel'), join(directory, 'stratic-v3-tdd/SKILL.md'));\n  command(root, ['install'], 1);\n  assert.equal(existsSync(join(directory, 'stratic-v3/SKILL.md')), false, 'Even an unselected workflow must not cause the final status read to fail after core installation.');\n  assert.equal(existsSync(join(directory, '.stratic-v3.json')), false);\n  rmSync(join(directory, 'stratic-v3-tdd'), { recursive: true });\n\n  symlinkSync(join(outside, 'sentinel'), join(directory, 'stratic-v3/SKILL.md'));\n  command(root, ['install'], 1); assert.equal(readFileSync(join(outside, 'sentinel'), 'utf8'), 'Keep');\n  rmSync(join(directory, 'stratic-v3/SKILL.md')); writeFileSync(join(directory, 'stratic-v3/SKILL.md'), 'Existing custom skill');\n  command(root, ['install', '--with', 'tdd'], 1); assert.equal(existsSync(join(directory, 'stratic-v3-tdd')), false);\n  assert.equal(readFileSync(join(directory, 'stratic-v3/SKILL.md'), 'utf8'), 'Existing custom skill');\n  assert.equal(command(root, ['status'])[0].status, 'unmanaged');\n  writeFileSync(join(directory, '.stratic-v3.json'), JSON.stringify({ '../outside': 'f'.repeat(64) }));\n  command(root, ['install'], 1); command(root, ['status'], 1);\n  rmSync(join(directory, '.stratic-v3.json')); symlinkSync(join(outside, 'sentinel'), join(directory, '.stratic-v3.json'));\n  command(root, ['install'], 1); assert.equal(readFileSync(join(outside, 'sentinel'), 'utf8'), 'Keep');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "skill-installation",
+      "passage": {
+        "quote": "Installation accepts only the bundled skill identities and record keys. Symbolic links and unexpected file types at installation directories, skill files, or the record are rejected. These checks keep ordinary installation from following a redirected path outside the selected repository. Files remain ordinary working changes: installation neither stages nor commits them. The installer reports known conflicts before writing; it is not a transaction against concurrent filesystem edits or disk failures."
+      }
+    },
+    {
+      "description": "cli-skill-install",
+      "passage": {
+        "quote": "The command validates its arguments before installing and rejects historical revisions. It returns JSON listing written skill paths and the resulting skill states. Existing different files are preserved; a conflict produces an error before the planned skill writes. Repeating an identical installation is harmless. The repository-local installer supplies the file comparison and path checks; the CLI neither stages nor commits the result."
+      }
+    },
+    {
+      "description": "cli-skill-status",
+      "passage": {
+        "quote": "The command reads working files and installation bookkeeping without creating either. It rejects unexpected arguments and historical revisions. A missing installation is a normal status; an invalid record or redirected installation path is an error. Status reports content differences, not whether an agent has loaded or followed a skill."
+      }
+    },
+    {
+      "description": "cli-skill-update",
+      "passage": {
+        "quote": "Arguments are validated before the installer acts, and historical revisions are rejected. The JSON response lists written paths and resulting states. Without an installation record the command reports that installation is needed first. Updated skills and their bookkeeping remain ordinary working changes for review; this command does not stage or commit them."
+      }
+    }
+  ]
+}

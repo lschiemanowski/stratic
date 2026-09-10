@@ -1,0 +1,288 @@
+{
+  "id": "527463a1-5758-4d61-bd6a-81d198afa06e",
+  "base": "f755381e74a0b269d1e96c4e632342018375ef04",
+  "contentTree": "4db4cc518d03a69beff6d3363c844fb1e8b1f664",
+  "reviewer": "codex",
+  "summary": "Install repository-local core and optional TDD skills, with explicit updates that preserve local edits and project instructions. Add CLI install/status/update commands, self-install both skills without making TDD the default, and describe and test the installation behavior.",
+  "examined": [
+    {
+      "id": "agent-skills",
+      "outcome": "revised",
+      "reason": "Replaces the checkout-only availability limitation with repository-local installation, explicit updates and optional workflow selection. Summary now reflects those promises."
+    },
+    {
+      "id": "agent-workflow",
+      "outcome": "revised",
+      "reason": "Core skill routes to project instructions and a chosen optional TDD supplement while preserving description, evidence and acceptance responsibilities. Exact links include that guidance."
+    },
+    {
+      "id": "agents",
+      "outcome": "revised",
+      "reason": "Adds separate discoverable install, status and update operations, each with a child anchored to its own sentence. The CLI remains structured and does not choose the development approach."
+    },
+    {
+      "id": "cli-help",
+      "outcome": "revised",
+      "reason": "Help now lists the three implemented skill commands and optional tdd argument. Its exact text link is refreshed."
+    },
+    {
+      "id": "agent-tdd",
+      "outcome": "revised",
+      "reason": "New supplement describes meaningful test-first evidence and appropriate checks without imposing TDD or fixed levels. It defers review and acceptance to the core skill."
+    },
+    {
+      "id": "cli-skill-install",
+      "outcome": "revised",
+      "reason": "New command validates options before installation and returns written paths and states; default installation includes only core."
+    },
+    {
+      "id": "cli-skill-status",
+      "outcome": "revised",
+      "reason": "New read-only command reports installed, local and bundled differences and rejects invalid records and paths."
+    },
+    {
+      "id": "cli-skill-update",
+      "outcome": "revised",
+      "reason": "New explicit update command considers recorded skills only, preserves local modifications and deletions, and leaves changes uncommitted."
+    },
+    {
+      "id": "skill-installation",
+      "outcome": "revised",
+      "reason": "New implementation and description account for exact content comparison, installed hashes, all-file conflict preflight, preserved custom files, path checks and the limit of ordinary filesystem writes."
+    },
+    {
+      "id": "cli-accept",
+      "outcome": "unchanged",
+      "reason": "Acceptance dispatch and exact ready identity checks are unchanged. Importing the installer has no filesystem side effects."
+    },
+    {
+      "id": "cli-check-list",
+      "outcome": "unchanged",
+      "reason": "Check-result retrieval still reads the same local result store; skill installation bookkeeping is separate."
+    },
+    {
+      "id": "cli-check-record",
+      "outcome": "unchanged",
+      "reason": "Check-result validation and recording dispatch are unchanged; new installer status does not claim verification evidence."
+    },
+    {
+      "id": "cli-discard",
+      "outcome": "unchanged",
+      "reason": "Readiness withdrawal and retained edits are unchanged; skill installation is an ordinary worktree change."
+    },
+    {
+      "id": "cli-impact",
+      "outcome": "unchanged",
+      "reason": "Snapshot construction, supplied decisions and impact calculation are unchanged; new descriptions use the existing model."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "unchanged",
+      "reason": "The same projection now naturally lists the five new descriptions; no new hierarchy representation is introduced."
+    },
+    {
+      "id": "cli-prepare",
+      "outcome": "unchanged",
+      "reason": "Explicit file selection, evidence matching and review preparation dispatch are unchanged; installed skills are ordinary proposed files."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "unchanged",
+      "reason": "The saved ready-record read is unchanged; installation has no separate acceptance authority."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "unchanged",
+      "reason": "Description inspection and its neighborhood are unchanged; the new skill descriptions use the existing shape."
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "unchanged",
+      "reason": "Snapshot selection still captures eligible working files, including repository-local skills, without moving HEAD or staging."
+    },
+    {
+      "id": "cli-source",
+      "outcome": "unchanged",
+      "reason": "Working and historical source reads are unchanged; bundled skills are ordinary source content."
+    },
+    {
+      "id": "cli-ui-current",
+      "outcome": "unchanged",
+      "reason": "The semantic-selection request and session channel are untouched by the new command branch."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "unchanged",
+      "reason": "Navigation validation and optional revision/passage request are unchanged; skills do not add a UI workflow mode."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "unchanged",
+      "reason": "The same structural and passage validation applies to the new descriptions and test links."
+    },
+    {
+      "id": "cli-version",
+      "outcome": "unchanged",
+      "reason": "Product and format identification remain the same; skill installation adds commands without changing the project format."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "unchanged",
+      "reason": "The core still requires summaries to agree with full descriptions. Workflow choice and skill installation do not change summary storage or meaning."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The existing agent-skills responsibility already covers guidance around investigation and changes. Local installation and optional TDD elaborate that responsibility without expanding review authority."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "4db4cc518d03a69beff6d3363c844fb1e8b1f664",
+      "method": "npm run typecheck; npm test; node src/cli.ts validate; skill-creator quick_validate.py for both skills; installed/bundled byte comparison",
+      "outcome": "pass",
+      "environment": "macOS, Node v24.16.0, TypeScript; Python 3.13 for the skill frontmatter validator",
+      "evidence": "Final unchanged proposal: full unit/CLI suite passed 32 tests, 0 failures; all 31 cataloged unit-test names matched successful output. Typecheck, project validation, both skill validators, and installed/bundled comparisons passed. Installer scenarios include an invalid unselected workflow being rejected before core or record writes, as well as selected-file conflicts, local deletions, optional TDD and preserved project instructions. The added unselected-file regression reproduced an initial partial-installation error; that is fixed, and an ensuing fixture-cleanup mistake was corrected before this full successful run. Logs: /private/tmp/stratic-skills-suite-verified.txt and /private/tmp/stratic-skills-typecheck.txt; earlier failed runs are retained separately. No desktop suite was run because desktop implementation is unchanged. Skill validation establishes structure, not future agent judgment.",
+      "tests": [
+        {
+          "id": "bounded-diff",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-mutation-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-workflow",
+          "outcome": "pass"
+        },
+        {
+          "id": "draft-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "drift-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "exact-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "explicit-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "graph-history",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-failure",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-message",
+          "outcome": "pass"
+        },
+        {
+          "id": "impact-baseline",
+          "outcome": "pass"
+        },
+        {
+          "id": "independent-checks",
+          "outcome": "pass"
+        },
+        {
+          "id": "interruption",
+          "outcome": "pass"
+        },
+        {
+          "id": "markdown-positions",
+          "outcome": "pass"
+        },
+        {
+          "id": "paragraph-changes",
+          "outcome": "pass"
+        },
+        {
+          "id": "project-images",
+          "outcome": "pass"
+        },
+        {
+          "id": "review-completeness",
+          "outcome": "pass"
+        },
+        {
+          "id": "selectors",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-installation",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-updates",
+          "outcome": "pass"
+        },
+        {
+          "id": "source-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "stable-identity",
+          "outcome": "pass"
+        },
+        {
+          "id": "summary-metadata",
+          "outcome": "pass"
+        },
+        {
+          "id": "terminated-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-folds",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-layout",
+          "outcome": "pass"
+        },
+        {
+          "id": "unexpected-arguments",
+          "outcome": "pass"
+        },
+        {
+          "id": "withdraw-readiness",
+          "outcome": "pass"
+        },
+        {
+          "id": "worktree-acceptance",
+          "outcome": "pass"
+        }
+      ],
+      "id": "3d81ebba-1721-464a-97e9-f0fc7539729f",
+      "recordedAt": "2026-09-10T13:01:24.291Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T13:01:46.537Z",
+  "unmapped": [
+    {
+      "path": "src/cli.ts",
+      "reason": "The new import connects the linked skill command branch to the installer. Importing the module computes constants only; it performs no installation or project mutation."
+    },
+    {
+      "path": "test/skills.test.ts",
+      "reason": "Imports, fixture setup and the subprocess helper support the three individually linked installer scenarios. They are test scaffolding, not another product responsibility."
+    }
+  ]
+}

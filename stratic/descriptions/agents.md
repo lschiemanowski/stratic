@@ -12,6 +12,8 @@ Checks run through the project’s existing tools. Snapshot captures selected fi
 
 Preparation and acceptance are separate steps. Prepare combines the investigation and matching check results into a concrete proposal for the user to inspect. Ready retrieves that prepared proposal and its identity without accepting it. Accept commits the prepared content only when given the explicit review identity. Discard withdraws readiness while retaining the project edits and recorded checks.
 
+Skill install makes the core guidance and selected optional workflows available in the managed repository. Skill status reports how the local skill files compare with the installed and bundled versions. Skill update explicitly refreshes unmodified installed skills while preserving local customizations. Installation preserves project instructions and does not select a workflow for the user.
+
 The desktop connection gives the person and agent a shared focus. UI current reports which description and passage the person is reading. UI open directs the desktop to the description or passage being discussed. Neither operation edits the project or grants permission to commit.
 
 Command responses are structured JSON, except for human-readable help. Errors produce a JSON error and a nonzero exit status; validation also returns a nonzero status when project issues are present. Commands that mutate review state reject unexpected arguments before dispatching the operation. The interface neither generates descriptions nor executes the checks whose results it imports.

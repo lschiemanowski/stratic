@@ -2,7 +2,7 @@
 
 Stratic helps people and AI coding agents understand and change software through
 plain-language descriptions connected to implementation. This first working
-version contains a desktop browser, a CLI, and one agent skill in a single
+version contains a desktop browser, a CLI, and agent skills in a single
 TypeScript codebase.
 
 ## Run the example
@@ -90,9 +90,24 @@ separate descriptions.
 
 ## Work with an agent
 
-The bundled [Stratic v3 skill](skills/stratic-v3/SKILL.md) explains the workflow.
-Keep its explicit v3 executable path when working alongside v1 or v2. It is a
-reviewable skill file in this checkout, not automatically installed globally.
+Install the [core skill](skills/stratic-v3/SKILL.md) into the managed repository:
+
+```sh
+node /path/to/stratic_v3/src/cli.ts --project /path/to/project skill install
+```
+
+Add `--with tdd` to include the optional [TDD workflow](skills/stratic-v3-tdd/SKILL.md).
+Installation makes it available; select TDD in the task or the project's agent
+instructions to use it. Those instructions can also name other project workflows,
+test commands, and the v3 executable location. The installer does not rewrite them.
+
+Skills live under `.agents/skills/` and can be committed with the project.
+`skill status` compares them with this Stratic checkout; `skill update` updates
+recorded skills only when they have not been locally edited. Conflicts stop the
+operation before any skill is changed. Inspect the installed and bundled versions
+and merge local customizations explicitly. Local additions are left alone.
+The small `.agents/skills/.stratic-v3.json` file records installed content hashes;
+keep it with the skills. No global skill installation or workflow engine is needed.
 
 ```sh
 npm run stratic -- help

@@ -1,0 +1,39 @@
+{
+  "id": "skill-installation",
+  "name": "Core and optional workflow installation",
+  "description": "Installs core alone or with TDD, repeats without changing contents, and preserves project instructions and local additions.",
+  "code": [
+    {
+      "path": "test/skills.test.ts",
+      "passage": {
+        "quote": "test('skill CLI installs core and optional TDD without changing project conventions or local additions', t => {\n  const root = fixture(t), directory = join(root, '.agents/skills');\n  writeFileSync(join(root, 'AGENTS.md'), 'Use the project workflow chosen for this task.');\n  assert.ok(command(root, ['status']).every((item: { status: string }) => item.status === 'not-installed'));\n  assert.equal(existsSync(directory), false, 'Status must not create installation state.');\n  assert.deepEqual(command(root, ['install']).written, ['.agents/skills/stratic-v3/SKILL.md']);\n  assert.equal(existsSync(join(directory, 'stratic-v3-tdd')), false);\n  assert.equal(readFileSync(join(directory, 'stratic-v3/SKILL.md'), 'utf8'), bundled('stratic-v3'));\n  writeFileSync(join(directory, 'stratic-v3/project-notes.md'), 'Local workflow notes');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, ['.agents/skills/stratic-v3-tdd/SKILL.md']);\n  const record = readFileSync(join(directory, '.stratic-v3.json'), 'utf8');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, []);\n  assert.deepEqual(command(root, ['update']).written, []);\n  assert.equal(readFileSync(join(directory, '.stratic-v3.json'), 'utf8'), record);\n  assert.equal(readFileSync(join(root, 'AGENTS.md'), 'utf8'), 'Use the project workflow chosen for this task.');\n  assert.equal(readFileSync(join(directory, 'stratic-v3/project-notes.md'), 'utf8'), 'Local workflow notes');\n  assert.equal(readFileSync(join(directory, 'stratic-v3-tdd/SKILL.md'), 'utf8'), bundled('stratic-v3-tdd'));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "skill-installation",
+      "passage": {
+        "quote": "Repository-local installation makes Stratic’s guidance available alongside the program it describes. Skills are ordinary files under .agents/skills, suitable for committing with the project. The installed core skill is named stratic-v3; the optional test-first workflow is stratic-v3-tdd. The bundled copies remain the source for later updates. Installation does not rewrite project instructions, configure a global agent, or choose a workflow on the user’s behalf."
+      }
+    },
+    {
+      "description": "skill-installation",
+      "passage": {
+        "quote": "Installing without optional workflows adds only the core. Selecting TDD adds both the core and its supplement. Repeating installation with identical contents leaves the files unchanged. Existing different files are preserved, including previously installed versions; an explicit update is the operation for bringing recorded installations forward."
+      }
+    },
+    {
+      "description": "cli-skill-install",
+      "passage": {
+        "quote": "Skill install exposes repository-local installation through the CLI. The selected Git repository receives the bundled core skill. The optional with argument accepts tdd and adds the test-first supplement alongside the core. Making that supplement available does not select it as the project’s workflow or rewrite project instructions."
+      }
+    },
+    {
+      "description": "cli-skill-status",
+      "passage": {
+        "quote": "The command reads working files and installation bookkeeping without creating either. It rejects unexpected arguments and historical revisions. A missing installation is a normal status; an invalid record or redirected installation path is an error. Status reports content differences, not whether an agent has loaded or followed a skill."
+      }
+    }
+  ]
+}

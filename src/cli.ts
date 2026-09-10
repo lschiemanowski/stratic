@@ -5,6 +5,7 @@ import { loadProject, inspect } from './project.ts';
 import { impact } from './impact.ts';
 import { accept, prepare, ready, recordCheck, results, discard } from './review.ts';
 import { requestUI } from './ui-channel.ts';
+import { installSkills, skillStatus } from './skills.ts';
 
 const help = `Stratic — descriptions, links, and reviewed changes
 
@@ -23,6 +24,9 @@ const help = `Stratic — descriptions, links, and reviewed changes
   ready                             Inspect the current handoff
   discard --id REVIEW_ID            Withdraw readiness; keep project edits and checks
   accept --id REVIEW_ID              Authorize and commit exactly that ready proposal
+  skill install [--with tdd]        Install repository-local core and optional TDD skills
+  skill status                      Compare installed skills with bundled versions
+  skill update                      Update recorded skills, preserving local edits
   ui current                        Read the desktop's current semantic selection
   ui open ID [--revision COMMIT] [--quote TEXT]
                                     Open a description, optionally at a passage
@@ -84,6 +88,18 @@ async function main() {
     case 'ready': output = ready(root); break;
     case 'discard': { const id = option('id'); if (!id) throw new Error('Provide --id REVIEW_ID.'); done(); output = discard(root, id); break; }
     case 'accept': { const id = option('id'); if (!id) throw new Error('Acceptance needs --id REVIEW_ID.'); done(); output = accept(root, id); break; }
+    case 'skill': {
+      const action = args.shift();
+      if (ref !== 'working') throw new Error('Skills are installed in working files; omit --revision.');
+      if (action === 'status') { done(); output = skillStatus(root); }
+      else if (action === 'install') {
+        const workflow = option('with');
+        if (workflow !== undefined && workflow !== 'tdd') throw new Error('The optional bundled workflow is tdd.');
+        done(); output = installSkills(root, 'install', workflow === 'tdd');
+      } else if (action === 'update') { done(); output = installSkills(root, 'update'); }
+      else throw new Error('Use skill install, skill status, or skill update.');
+      break;
+    }
     case 'ui': {
       const action = args.shift();
       if (action === 'current') output = await requestUI(root, { action: 'current' });

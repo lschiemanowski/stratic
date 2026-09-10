@@ -1,0 +1,24 @@
+{
+  "id": "cli-skill-status",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Skill status reports how the local skill files compare with the installed and bundled versions."
+    }
+  },
+  "realization": "implemented",
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Skill status reports how the repository’s local Stratic skills compare with this executable’s bundled guidance. Each JSON entry names a bundled skill, its repository-relative path, and whether it is current, outdated, locally modified, missing, not installed, or present without an installation record.\n\nThe command reads working files and installation bookkeeping without creating either. It rejects unexpected arguments and historical revisions. A missing installation is a normal status; an invalid record or redirected installation path is an error. Status reports content differences, not whether an agent has loaded or followed a skill."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "    case 'skill': {\n      const action = args.shift();\n      if (ref !== 'working') throw new Error('Skills are installed in working files; omit --revision.');\n      if (action === 'status') { done(); output = skillStatus(root); }\n      else if (action === 'install') {\n        const workflow = option('with');\n        if (workflow !== undefined && workflow !== 'tdd') throw new Error('The optional bundled workflow is tdd.');\n        done(); output = installSkills(root, 'install', workflow === 'tdd');\n      } else if (action === 'update') { done(); output = installSkills(root, 'update'); }\n      else throw new Error('Use skill install, skill status, or skill update.');\n      break;\n    }"
+        }
+      }
+    }
+  ]
+}

@@ -11,3 +11,5 @@ The agent runs appropriate checks, captures the content examined, and records wh
 The skill also asks for an explicit v3 executable path when several Stratic versions are available. It is guidance for agent behavior, not an automated proof that the agent followed the workflow. Its own instructions remain reviewable as a file in the checkout.
 
 When a description has a summary, the agent checks its bullets against the full account during the same investigation. Changes to promises, conditions, or limitations must be reflected in both. A useful new summary can be added as optional metadata, but the workflow does not require summaries for every description. The summary condenses the responsibility’s behavior rather than listing its children or introducing separate implementation links.
+
+The core workflow leaves the implementation method open. Project instructions supply conventions, check commands and the v3 executable location. Optional skills can add a chosen approach while retaining the shared description, evidence and acceptance responsibilities. Installing the TDD skill alone does not select test-first development; the user or project must choose it.
