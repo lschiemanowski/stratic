@@ -14,7 +14,7 @@ const app = document.querySelector('#app')!;
 let current: View, signature = '', selectedConnections: Connection[] = [], source: { path: string; body: string; passage: Passage; range?: Range; problem?: string } | null = null;
 let tab: 'description' | 'tests' | 'issues' = 'description';
 let sequence = 0, loadedKey = '';
-let menuOpen = true, menuParent: string | null = null, menuCursor = '', menuContext = '';
+let menuOpen = true;
 let focusMenu = true;
 let connectionOwner: string | undefined, detailSequence = 0;
 let highlightChanges = true;
@@ -99,26 +99,26 @@ function prose(body: string, connections: Connection[], owner: string, selected?
   }
   return container;
 }
-function descriptionMenu(p: Project) {
+function neighborhood(p: Project, id: string) {
   const byId = new Map(p.descriptions.map(d => [d.id, d]));
   const parentOf = (id: string) => parentDescription(p, id, byId)?.id ?? null;
   const children = (id: string | null) => p.descriptions.filter(d => parentOf(d.id) === id);
-  const context = JSON.stringify([p.root, current.selection]);
-  if (menuContext !== context) {
-    menuContext = context; menuCursor = current.selection.description ?? '';
-    menuParent = parentOf(menuCursor);
-  }
-  if (menuParent && !byId.has(menuParent)) menuParent = null;
-  const rows = children(menuParent);
-  if (!rows.some(d => d.id === menuCursor)) menuCursor = rows[0]?.id ?? '';
+  const parent = parentOf(id), rows = children(parent);
+  return { byId, children, parent, rows };
+}
+function moveDescription(action: 'up' | 'down' | 'back' | 'enter') {
+  const p = current.project, id = current.selection.description;
+  if (!p || !id) return;
+  const { parent, rows, children } = neighborhood(p, id);
+  const index = rows.findIndex(d => d.id === id);
+  const destination = action === 'back' ? parent : action === 'enter' ? children(id)[0]?.id :
+    index < 0 ? undefined : rows[index + (action === 'up' ? -1 : 1)]?.id;
+  if (destination && destination !== id) { optionsOpen = false; void open({ description: destination }); }
+}
+function descriptionMenu(p: Project) {
+  const menuCursor = current.selection.description ?? '';
+  const { byId, children, parent, rows } = neighborhood(p, menuCursor);
   const index = rows.findIndex(d => d.id === menuCursor);
-  const move = (action: string) => {
-    if (action === 'up' || action === 'down') menuCursor = rows[Math.max(0, Math.min(rows.length - 1, index + (action === 'up' ? -1 : 1)))]?.id ?? '';
-    if (action === 'back' && menuParent) { menuCursor = menuParent; menuParent = parentOf(menuParent); }
-    if (action === 'enter' && children(menuCursor).length) { menuParent = menuCursor; menuCursor = children(menuCursor)[0].id; }
-    if (menuCursor) { focusMenu = true; void open({ description: menuCursor }); return; }
-    focusMenu = true; render();
-  };
   const dock = el('section', undefined, 'description-menu'); dock.setAttribute('aria-label', 'Description navigation');
   if (!menuOpen) return dock;
   const body = el('div', undefined, 'menu-body'); body.id = 'menu-body';
@@ -131,22 +131,23 @@ function descriptionMenu(p: Project) {
     row.append(el('span', d.title));
     const count = children(d.id).length;
     if (count) row.append(el('span', '›', 'menu-count'));
-    row.onclick = () => { menuCursor = d.id; move('open'); };
+    row.onclick = () => { focusMenu = true; void open({ description: d.id }); };
     list.append(row);
   });
   list.onkeydown = e => {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    const action = ({ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'back', ArrowRight: 'enter', Enter: 'open' } as Record<string, string>)[e.key];
-    if (action) { e.preventDefault(); move(action); }
+    if (e.key === 'Enter' && menuCursor) { e.preventDefault(); void open({ description: menuCursor }); }
     else if (e.key === 'Escape') { e.preventDefault(); menuOpen = false; render(); document.querySelector<HTMLButtonElement>('#menu-toggle')?.focus(); }
-    else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); menuCursor = rows[e.key === 'Home' ? 0 : rows.length - 1]?.id ?? ''; move('open'); }
+    else if (e.key === 'Home' || e.key === 'End') {
+      e.preventDefault(); const target = rows[e.key === 'Home' ? 0 : rows.length - 1];
+      if (target) void open({ description: target.id });
+    }
   };
   const column = (name: string) => {
     const section = el('section', undefined, 'menu-column'); section.setAttribute('aria-label', name);
     return section;
   };
   const parentColumn = column('Parent description');
-  const parent = parentOf(menuCursor);
   if (parent) parentColumn.append(button(byId.get(parent)!.title, () => void open({ description: parent }), 'menu-neighbor'));
 
   const currentColumn = column('Current level'); currentColumn.append(list);
@@ -346,7 +347,7 @@ async function refresh(force = false) {
     if (v.selection.passage) document.querySelector('.active-description .selected')?.scrollIntoView({ block: 'center' });
   } catch (e) { error(e); }
 }
-window.stratic.onSelection(() => { tab = 'description'; clearDetail(); menuContext = ''; focusMenu = menuOpen; void refresh(true); });
+window.stratic.onSelection(() => { tab = 'description'; clearDetail(); focusMenu = document.activeElement?.id === 'description-options'; void refresh(true); });
 void refresh(); setInterval(() => void refresh(), 2000);
 
 document.addEventListener('click', event => {
@@ -355,5 +356,10 @@ document.addEventListener('click', event => {
   if (optionsOpen && !inside) { optionsOpen = false; render(); }
 });
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && optionsOpen) { event.preventDefault(); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); }
+  if (event.key === 'Escape' && optionsOpen) { event.preventDefault(); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); return; }
+  if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  const target = event.target;
+  if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;
+  const action = ({ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'back', ArrowRight: 'enter' } as Record<string, 'up' | 'down' | 'back' | 'enter'>)[event.key];
+  if (action && current?.project && current.selection.description) { event.preventDefault(); moveDescription(action); }
 });

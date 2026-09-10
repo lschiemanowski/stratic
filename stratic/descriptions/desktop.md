@@ -2,7 +2,7 @@
 
 The desktop reader lets a person explore a Stratic project and inspect a proposed change. Its reading area shows a parent description on the left and the active child on the right, so the broader promise and its elaboration can be understood together. Source can take the right-hand pane while the description it implements remains on the left. A foldable menu at the bottom keeps nearby responsibilities within reach.
 
-The bottom menu shows the active description alongside its parent, siblings, and children, so the reader can move between the overall intent and the details without displaying the entire project tree. Selecting an entry opens it immediately. With the central list focused, up and down move between siblings, left opens the parent, and right opens the first child. The title bar locates the active description in its ancestry; folding the menu leaves more room to read.
+The bottom menu shows the active description alongside its parent, siblings, and children, so the reader can move between the overall intent and the details without displaying the entire project tree. Selecting an entry opens it immediately. Arrow keys navigate throughout the reader, even with the bottom menu folded: up and down move between siblings, left opens the parent, and right opens the first child. The title bar locates the active description in its ancestry; folding the menu leaves more room to read.
 
 Underlined passages connect the explanation to more detail. Opening a child makes it active on the right while retaining its parent on the left. A single destination opens directly; overlapping destinations are offered as a choice before navigation. Following an implementation link places the description containing that link beside the selected source.
 

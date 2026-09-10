@@ -1,0 +1,94 @@
+{
+  "id": "67daaed6-83e3-473b-bc49-52266a919715",
+  "base": "bf241cf1dedce4cced320c1c9596cfd94586ba54",
+  "contentTree": "6d2485066c1721c3ec82322507814be0e1dee6c6",
+  "reviewer": "Codex",
+  "summary": "Navigate descriptions with arrow keys throughout the reader",
+  "examined": [
+    {
+      "id": "desktop",
+      "outcome": "revised",
+      "reason": "Arrow navigation is now a reader-wide interaction, including with the bottom menu folded. The broader reading and source behavior is unchanged."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "Replaced the menu-focus condition with window-wide ordinary arrow navigation. Extracted shared neighborhood lookup and movement from menu rendering, preserved folded state, removed duplicate arrow handling, and retained hierarchy boundaries and existing selection validation."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Documented and implemented arrow priority for focused form controls, text editing, composing input and modified shortcuts. The keyboard handler ignores events already handled by a control."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The root promises navigation between intent, detail and implementation without prescribing focus requirements."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "unchanged",
+      "reason": "Stable identities and parent relationships already supply the neighborhood used by both keyboard and menu navigation. No model change is needed."
+    },
+    {
+      "id": "passages",
+      "outcome": "unchanged",
+      "reason": "Exact quote resolution is unaffected; updated the selectors for revised prose and moved code."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "unchanged",
+      "reason": "An opened target still constructs the same parent/active-child pair and preserves the common parent scroll position. The trigger for opening changed, not the pairing rules."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "unchanged",
+      "reason": "The same sandboxed renderer and restricted API process navigation. No IPC, project selection, permissions, source parsing or styling changes are necessary."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "unchanged",
+      "reason": "Tests and Problems retain their display behavior. Ordinary arrows can return from these supporting views to the adjacent active description via existing navigation."
+    },
+    {
+      "id": "change-display",
+      "outcome": "unchanged",
+      "reason": "Highlighting remains independent of navigation focus and menu visibility; the smoke retains repeated-toggle and navigation checks."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "unchanged",
+      "reason": "Arrow navigation from source uses the same description-open operation as a clicked destination; source closes and the target parent/child pair is shown."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "unchanged",
+      "reason": "Passage follow behavior is unchanged. The current active identity remains the starting point for keyboard navigation even after source is opened from the parent."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "6d2485066c1721c3ec82322507814be0e1dee6c6",
+      "method": "npm run typecheck; npm run test:desktop; node src/cli.ts --project . validate; bounded implementation review",
+      "outcome": "pass",
+      "environment": "macOS, Node.js 24, Electron 43",
+      "evidence": "Typecheck and description/link validation pass. Desktop smoke passes with equal before/after snapshots. It covers arrows from prose, toolbar and source; continued navigation with a folded menu; no forced menu focus; root/leaf boundaries; modified arrows; native revision-selector event handling; text editing; existing paired scrolling, menu-focused arrows, 300 leaves, source syntax, history, project selection, highlighting and sandbox behavior. Output: /private/tmp/stratic-arrows-smoke.txt.",
+      "tests": [
+        {
+          "id": "desktop-smoke",
+          "outcome": "pass"
+        }
+      ],
+      "id": "7fb040a6-3e57-4791-90bb-a872022bdf2d",
+      "recordedAt": "2026-09-10T06:56:06.816Z"
+    }
+  ],
+  "recordedAt": "2026-09-10T06:56:29.042Z",
+  "unmapped": [
+    {
+      "path": "src/desktop/renderer.ts",
+      "reason": "Inspected removal of separate mutable menu cursor/context state and the new document key handler. Neighborhood is derived from the active selection; global keys use the existing open operation, preserve panel visibility, and defer to native editing controls and modified shortcuts."
+    }
+  ]
+}

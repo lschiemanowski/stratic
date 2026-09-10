@@ -64,11 +64,17 @@ try {
   assert.equal(await projectPanel.count(), 0);
   assert.equal(await page.locator('.detail').count(), 0, 'A root has no empty detail placeholder.');
   const menu = page.getByRole('listbox', { name: 'Descriptions at this level' });
-  await menu.focus();
+  // A plain click in prose must not require a subsequent click in the tree menu.
+  await active.getByRole('heading').click();
+  assert.notEqual(await page.evaluate(() => document.activeElement?.id), 'description-options');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal((await requestUI(root, { action: 'current' })).description, 'queue', 'The root has no parent.');
   await page.keyboard.press('ArrowRight');
   await active.getByRole('heading', { name: 'Command interface', exact: true }).waitFor();
   assert.equal(await menu.getByRole('option').count(), 2);
   assert.equal(await parentPane.getAttribute('data-description'), 'queue');
+  assert.notEqual(await page.evaluate(() => document.activeElement?.id), 'description-options', 'Global navigation should not move focus into the menu.');
+  await page.getByRole('button', { name: 'Projects', exact: true }).focus();
   await page.keyboard.press('ArrowDown');
   await active.getByRole('heading', { name: 'Queue engine', exact: true }).waitFor();
   assert.equal(await parentPane.getAttribute('data-description'), 'queue');
@@ -92,8 +98,20 @@ try {
   await page.screenshot({ path: 'artifacts/desktop-navigation.png' });
   await page.keyboard.press('ArrowDown');
   await active.getByRole('heading', { name: 'Persistent storage', exact: true }).waitFor();
+  await menu.focus();
   await page.keyboard.press('Escape');
   assert.equal(await menu.count(), 0);
+  await page.keyboard.press('ArrowUp');
+  await active.getByRole('heading', { name: 'Job lifecycle', exact: true }).waitFor();
+  await page.keyboard.press('ArrowRight');
+  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();
+  await page.keyboard.press('ArrowRight');
+  assert.equal((await requestUI(root, { action: 'current' })).description, 'lease-transitions', 'A leaf has no child.');
+  await page.keyboard.press('ArrowLeft');
+  await active.getByRole('heading', { name: 'Job lifecycle', exact: true }).waitFor();
+  assert.equal(await menu.count(), 0, 'Navigation keeps the folded menu folded.');
+  await page.keyboard.press('Shift+ArrowDown');
+  assert.equal((await requestUI(root, { action: 'current' })).description, 'job-lifecycle');
   await page.getByRole('button', { name: 'Descriptions', exact: true }).click();
   const navigationMs: number[] = [];
   for (const [id, title] of [['lease-transitions', 'Lease transitions'], ['storage', 'Persistent storage'], ['lease-transitions', 'Lease transitions']]) {
@@ -149,7 +167,28 @@ try {
   await page.getByRole('button', { name: 'Close source', exact: true }).click();
   assert.equal(await parentPane.getAttribute('data-description'), 'job-lifecycle');
   assert.equal(await active.getAttribute('data-description'), 'lease-transitions');
+  await releasePassage.click();
+  await page.locator('.highlighted').first().waitFor();
+  await page.locator('.source-code').click();
+  await page.keyboard.press('ArrowLeft');
+  await active.getByRole('heading', { name: 'Job lifecycle', exact: true }).waitFor();
+  assert.equal(await page.locator('.detail').count(), 0, 'Arrow navigation from source returns to the selected description pair.');
+  await requestUI(root, { action: 'open', description: 'lease-transitions' });
+  await active.getByRole('heading', { name: 'Lease transitions', exact: true }).waitFor();
 
+  // Form controls keep their own key behavior; exercise the real revision selector.
+  await page.getByRole('button', { name: 'View', exact: true }).click();
+  const revisionControl = page.getByRole('combobox', { name: 'Revision' });
+  await revisionControl.focus();
+  const intercepted = await revisionControl.evaluate(e => !e.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })));
+  assert.equal(intercepted, false, 'Description navigation must not cancel the revision selector arrow.');
+  assert.equal((await requestUI(root, { action: 'current' })).description, 'lease-transitions');
+  await page.keyboard.press('Escape');
+  // Editable text receives ordinary arrows without changing the reader selection.
+  await page.evaluate(() => { const field = document.createElement('textarea'); field.id = 'editing-fixture'; field.value = 'one\ntwo'; document.body.append(field); field.focus(); });
+  await page.keyboard.press('ArrowLeft');
+  assert.equal((await requestUI(root, { action: 'current' })).description, 'lease-transitions');
+  await page.locator('#editing-fixture').evaluate(e => e.remove());
 
   assert.equal(await page.evaluate(() => typeof (window as any).require), 'undefined');
   assert.deepEqual(await page.evaluate(() => Object.keys((window as any).stratic).sort()), ['chooseProject', 'copyId', 'navigate', 'onSelection', 'source', 'view']);
@@ -308,7 +347,7 @@ try {
     await restored.locator('.active-description').getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();
   } finally { await reopened.close(); }
 
-  console.log(JSON.stringify({ passed: true, navigationMs, checked: ['quiet title-bar controls, exceptional status, and project switching with remembered folders', 'paired descriptions, sibling/depth navigation, independent scroll, and source from either pane', 'folding and agent navigation synchronization', '300 leaves in a bounded menu', 'direct single-destination links and multiple-destination chooser', 'syntax colors, multiline tokens, exact source text, and safe plain-text fallback', 'copyable identity', 'agent current/open', 'individual test results', 'historical content', 'broken draft browsing', 'inert repository HTML', 'sandboxed renderer API'], screenshot: resolve('artifacts/desktop.png') }, null, 2));
+  console.log(JSON.stringify({ passed: true, navigationMs, checked: ['global arrows from prose, toolbar and source, folded menu, hierarchy boundaries, and form-control exceptions', 'quiet title-bar controls, exceptional status, and project switching with remembered folders', 'paired descriptions, sibling/depth navigation, independent scroll, and source from either pane', 'folding and agent navigation synchronization', '300 leaves in a bounded menu', 'direct single-destination links and multiple-destination chooser', 'syntax colors, multiline tokens, exact source text, and safe plain-text fallback', 'copyable identity', 'agent current/open', 'individual test results', 'historical content', 'broken draft browsing', 'inert repository HTML', 'sandboxed renderer API'], screenshot: resolve('artifacts/desktop.png') }, null, 2));
 } catch (error) {
   const page = app.windows()[0];
   if (page) { await page.screenshot({ path: 'artifacts/desktop-failure.png' }); console.error(await page.locator('body').innerText()); }

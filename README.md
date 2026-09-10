@@ -39,8 +39,9 @@ common languages are selected by filename. Line numbers and linked-passage
 backgrounds remain visible. Unknown languages and files above 200,000 characters
 use plain text to keep opening source predictable.
 The foldable bottom menu shows the current level alongside the selected entry’s
-parent and children. Click any description to open it. Focus the central list
-to use ↑/↓ for siblings, → for the first child, and ← for the parent.
+parent and children. Click any description to open it. Use ↑/↓ for siblings, → for the first child, and ← for the parent
+throughout the reader, even with the menu folded. Focused form controls retain
+their own arrow-key behavior.
 Each selection opens immediately. Escape folds the panel. Breadcrumbs open
 ancestors directly from the title bar. Partial and unimplemented descriptions
 show their status; implemented descriptions start directly with their prose.

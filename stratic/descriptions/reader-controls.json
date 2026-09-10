@@ -55,6 +55,18 @@
           "quote": "async function attach(path: string) {\n  const next = repository(path);\n  const { project } = await viewData(next, 'working', true);\n  if (!project.config && !project.descriptions.length) throw new Error('This folder has no readable Stratic project.');\n  const nextUI = next === root && stopUI ? stopUI : await serveUI(next, navigate);\n  if (nextUI !== stopUI) stopUI?.();\n  root = next; stopUI = nextUI;\n  selection = { project: root, revision: 'working', description: project.descriptions.find(d => d.metadata?.parent === null)?.id ?? project.descriptions[0]?.id };\n  projects = [root, ...projects.filter(path => path !== root)].slice(0, 12);\n  try { writeFileSync(join(app.getPath('userData'), 'projects.json'), JSON.stringify(projects)); }\n  catch (error) { console.error('Could not save recent projects:', error); }\n}"
         }
       }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The View menu contains revision selection, change highlighting, tests, and the active description’s identity and copy action. Historical content is identified in the title bar when selected. These controls remain accessible without repeating metadata above each description. Escape closes the View menu and returns focus to its button. Controls with their own arrow-key interaction, such as the revision selector, retain that interaction while focused. Text editing and modified keyboard shortcuts also retain their usual behavior; ordinary arrows elsewhere navigate the active description."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "document.addEventListener('keydown', event => {\n  if (event.key === 'Escape' && optionsOpen) { event.preventDefault(); optionsOpen = false; render(); document.querySelector<HTMLButtonElement>('#view-toggle')?.focus(); return; }\n  if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;\n  const target = event.target;\n  if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;\n  const action = ({ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'back', ArrowRight: 'enter' } as Record<string, 'up' | 'down' | 'back' | 'enter'>)[event.key];\n  if (action && current?.project && current.selection.description) { event.preventDefault(); moveDescription(action); }\n});"
+        }
+      }
     }
   ]
 }
