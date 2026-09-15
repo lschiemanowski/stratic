@@ -6,7 +6,7 @@
     {
       "path": "test/skills.test.ts",
       "passage": {
-        "quote": "test('skill CLI installs core and optional TDD without changing project conventions or local additions', t => {\n  const root = fixture(t), directory = join(root, '.agents/skills');\n  writeFileSync(join(root, 'AGENTS.md'), 'Use the project workflow chosen for this task.');\n  assert.ok(command(root, ['status']).every((item: { status: string }) => item.status === 'not-installed'));\n  assert.equal(existsSync(directory), false, 'Status must not create installation state.');\n  assert.deepEqual(command(root, ['install']).written, ['.agents/skills/stratic-v3/SKILL.md']);\n  assert.equal(existsSync(join(directory, 'stratic-v3-tdd')), false);\n  assert.equal(readFileSync(join(directory, 'stratic-v3/SKILL.md'), 'utf8'), bundled('stratic-v3'));\n  writeFileSync(join(directory, 'stratic-v3/project-notes.md'), 'Local workflow notes');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, ['.agents/skills/stratic-v3-tdd/SKILL.md']);\n  const record = readFileSync(join(directory, '.stratic-v3.json'), 'utf8');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, []);\n  assert.deepEqual(command(root, ['update']).written, []);\n  assert.equal(readFileSync(join(directory, '.stratic-v3.json'), 'utf8'), record);\n  assert.equal(readFileSync(join(root, 'AGENTS.md'), 'utf8'), 'Use the project workflow chosen for this task.');\n  assert.equal(readFileSync(join(directory, 'stratic-v3/project-notes.md'), 'utf8'), 'Local workflow notes');\n  assert.equal(readFileSync(join(directory, 'stratic-v3-tdd/SKILL.md'), 'utf8'), bundled('stratic-v3-tdd'));\n});"
+        "quote": "test('skill CLI installs core and optional TDD without changing project conventions or local additions', t => {\n  const root = fixture(t), directory = join(root, '.agents/skills');\n  writeFileSync(join(root, 'AGENTS.md'), 'Use the project workflow chosen for this task.');\n  assert.ok(command(root, ['status']).every((item: { status: string }) => item.status === 'not-installed'));\n  assert.equal(existsSync(directory), false, 'Status must not create installation state.');\n  assert.deepEqual(command(root, ['install']).written, ['.agents/skills/stratic/SKILL.md']);\n  assert.equal(existsSync(join(directory, 'stratic-tdd')), false);\n  assert.equal(readFileSync(join(directory, 'stratic/SKILL.md'), 'utf8'), bundled('stratic'));\n  writeFileSync(join(directory, 'stratic/project-notes.md'), 'Local workflow notes');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, ['.agents/skills/stratic-tdd/SKILL.md']);\n  const record = readFileSync(join(directory, '.stratic.json'), 'utf8');\n  assert.deepEqual(command(root, ['install', '--with', 'tdd']).written, []);\n  assert.deepEqual(command(root, ['update']).written, []);\n  assert.equal(readFileSync(join(directory, '.stratic.json'), 'utf8'), record);\n  assert.equal(readFileSync(join(root, 'AGENTS.md'), 'utf8'), 'Use the project workflow chosen for this task.');\n  assert.equal(readFileSync(join(directory, 'stratic/project-notes.md'), 'utf8'), 'Local workflow notes');\n  assert.equal(readFileSync(join(directory, 'stratic-tdd/SKILL.md'), 'utf8'), bundled('stratic-tdd'));\n});"
       }
     }
   ],
@@ -14,7 +14,7 @@
     {
       "description": "skill-installation",
       "passage": {
-        "quote": "Repository-local installation makes Stratic’s guidance available alongside the program it describes. Skills are ordinary files under .agents/skills, suitable for committing with the project. The installed core skill is named stratic-v3; the optional test-first workflow is stratic-v3-tdd. The bundled copies remain the source for later updates. Installation does not rewrite project instructions, configure a global agent, or choose a workflow on the user’s behalf."
+        "quote": "Repository-local installation makes Stratic\u2019s guidance available alongside the program it describes. Skills are ordinary files under .agents/skills, suitable for committing with the project. The core skill is named stratic; the optional test-first workflow is stratic-tdd. The npm package includes the bundled copies used for installation and later updates, and their guidance uses the installed CLI. Installation does not rewrite project instructions, configure a global agent, or choose a workflow on the user\u2019s behalf."
       }
     },
     {
@@ -26,7 +26,7 @@
     {
       "description": "cli-skill-install",
       "passage": {
-        "quote": "Skill install exposes repository-local installation through the CLI. The selected Git repository receives the bundled core skill. The optional with argument accepts tdd and adds the test-first supplement alongside the core. Making that supplement available does not select it as the project’s workflow or rewrite project instructions."
+        "quote": "Skill install exposes repository-local installation through the CLI. The selected Git repository receives the bundled core skill. The optional with argument accepts tdd and adds the test-first supplement alongside the core. Making that supplement available does not select it as the project\u2019s workflow or rewrite project instructions."
       }
     },
     {

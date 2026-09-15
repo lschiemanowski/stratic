@@ -1,13 +1,13 @@
 ---
-name: stratic-v3-tdd
-description: Develop a Stratic v3 behavior change test-first when the user or project selects TDD. Supplements the core Stratic skill; installation alone does not select this workflow.
+name: stratic-tdd
+description: Develop a Stratic behavior change test-first when the user or project selects TDD. Supplements the core Stratic skill; installation alone does not select this workflow.
 ---
 
 # Stratic TDD
 
 Use this workflow when the user requests TDD or the project's agent instructions select it for the task. A task-specific choice takes precedence over the project default. If neither selects TDD, use the core workflow without imposing a test-first order.
 
-Read the adjacent [core Stratic skill](../stratic-v3/SKILL.md) for description maintenance, evidence recording, preparation, and acceptance. Project instructions supply the relevant tools and test commands; this skill adds the test-first approach, not another review process.
+Read the adjacent [core Stratic skill](../stratic/SKILL.md) for description maintenance, evidence recording, preparation, and acceptance. Project instructions supply the relevant tools and test commands; this skill adds the test-first approach, not another review process.
 
 Choose a coherent behavior to implement. Read its descriptions and source, then refine the intended behavior and important conditions before writing tests. Keep deliberate unimplemented behavior explicit.
 

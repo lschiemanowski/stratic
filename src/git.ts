@@ -43,7 +43,7 @@ export function pathInside(root: string, path: string, allowLeafSymlink = false)
   return full;
 }
 export function localDirectory(root: string): string {
-  const path = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'stratic-v3']).trim();
+  const path = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'stratic']).trim();
   mkdirSync(path, { recursive: true });
   return path;
 }

@@ -1,0 +1,41 @@
+{
+  "id": "cli-open",
+  "parent": {
+    "description": "agents",
+    "passage": {
+      "quote": "Open starts the desktop from the installed Stratic package, optionally selecting a project."
+    }
+  },
+  "realization": "implemented",
+  "summary": [
+    "Launches the installed desktop with an explicit Git project or the project chooser.",
+    "Uses packaged assets and Electron without building or downloading at launch; reports missing runtime files.",
+    "Keeps the desktop attached to the terminal and forwards shutdown signals."
+  ],
+  "links": [
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Open starts the desktop supplied with Stratic. An explicit directory, provided as the command argument or project option, is resolved as a Git repository before launch. Without either, the desktop starts at project selection. Invalid or conflicting arguments are rejected before starting a process. This operation opens a reader; it does not create descriptions or accept a change."
+      },
+      "to": {
+        "path": "src/cli.ts",
+        "passage": {
+          "quote": "  if (args[0] === 'open') {\n    args.shift();\n    if (args.length > 1 || args.some(arg => arg.startsWith('--')) || (args.length && projectPath)) throw new Error('Use open [DIR] or --project DIR open.');\n    const selected = args[0] ?? projectPath;\n    process.exitCode = await openDesktop(selected ? repository(selected) : undefined); return;\n  }"
+        }
+      }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "The launcher resolves the built desktop and Electron runtime from its own installation, independently of the caller\u2019s working directory. The package includes JavaScript, styling, fonts, the logo, and skills; installation obtains Electron through its runtime dependency. A missing build or unavailable Electron runtime produces an actionable error instead of trying to compile or download during launch."
+      },
+      "to": {
+        "path": "src/launch.ts",
+        "passage": {
+          "quote": "import { spawn } from 'node:child_process';\nimport { existsSync } from 'node:fs';\nimport { fileURLToPath } from 'node:url';\n\n/** Launch the installed desktop; keep its lifetime and exit status attached to the terminal. */\nexport async function openDesktop(project?: string): Promise<number> {\n  const directory = fileURLToPath(new URL('../', import.meta.url));\n  if (!existsSync(new URL('../dist/main.cjs', import.meta.url))) throw new Error('Desktop build is missing. From a checkout, run npm run build; for an installed package, reinstall Stratic.');\n  let executable: string;\n  try { executable = (await import('electron')).default as unknown as string; }\n  catch { throw new Error('Electron is unavailable. Reinstall Stratic with npm install scripts enabled so Electron can download its runtime.'); }\n  const env = { ...process.env };\n  delete env.ELECTRON_RUN_AS_NODE;\n  const child = spawn(executable, [directory, ...(project ? ['--project', project] : [])], { stdio: 'inherit', env });\n  return await new Promise<number>((resolve, reject) => {\n    const interrupt = () => child.kill('SIGINT'), terminate = () => child.kill('SIGTERM');\n    process.on('SIGINT', interrupt); process.on('SIGTERM', terminate);\n    const cleanup = () => { process.off('SIGINT', interrupt); process.off('SIGTERM', terminate); };\n    child.once('error', error => { cleanup(); reject(error); });\n    child.once('exit', (code, signal) => { cleanup(); resolve(code ?? (signal ? 1 : 0)); });\n  });\n}"
+        }
+      }
+    }
+  ]
+}

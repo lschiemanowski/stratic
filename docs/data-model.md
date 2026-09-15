@@ -2,7 +2,7 @@
 
 This document describes the model used by the first working version. It supports
 the workflow in [the agreed design](design.md) with ordinary files and Git
-snapshots. The [README](../README.md) records current implementation limits.
+snapshots. See [development](development.md) for build and check commands.
 
 ## Files in a managed project
 
@@ -107,7 +107,7 @@ The corresponding metadata could be:
 
 This is a small illustrative responsibility, not the complete release contract.
 The full hierarchy also needs to account for ownership, expiry, missing jobs,
-and persistence. The code quoted here is illustrative rather than existing v3 code.
+and persistence. The code quoted here is illustrative rather than existing Stratic code.
 
 The same connection shape covers three kinds:
 
@@ -283,4 +283,4 @@ application, concurrent edits, or overlapping merge conflicts.
 The first executable workflow now opens a described project, navigates passages
 to code, makes the example change, records checks, and prepares and accepts the
 unchanged result. Automated tests also exercise stale proposals, hooks, preserved
-staged changes, and interruption recovery. See the README for repeatable commands.
+staged changes, and interruption recovery. See [development](development.md) for repeatable commands.

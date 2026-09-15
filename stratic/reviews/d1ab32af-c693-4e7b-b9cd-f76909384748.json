@@ -1,0 +1,296 @@
+{
+  "id": "d1ab32af-c693-4e7b-b9cd-f76909384748",
+  "base": "c20d11a17683bb9d2f13cfec065b86a697247680",
+  "contentTree": "f8bc9fc538b7baa047b77004b1e5358f46caa3bc",
+  "reviewer": "Codex",
+  "summary": "Prepare Stratic for npm with unversioned names and a minimal setup-first README",
+  "examined": [
+    {
+      "id": "passages",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "navigation",
+      "outcome": "unchanged",
+      "reason": "The main-process change is public naming and relocation of reader preferences and worktree state. Description selection and authenticated navigation retain their behavior; the restarted reader reconnected successfully."
+    },
+    {
+      "id": "cli-skill-install",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "commit-safeguards",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "preparation",
+      "outcome": "revised",
+      "reason": "The quoted Git helper now locates local worktree state in the unversioned stratic directory. Prepared trees, exact check binding and review contracts are unchanged; this checkout’s existing ready and checks records were moved intact."
+    },
+    {
+      "id": "agent-tdd",
+      "outcome": "revised",
+      "reason": "Renamed the optional skill and its core reference; installation does not select TDD and its workflow remains optional."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-open",
+      "outcome": "revised",
+      "reason": "New launcher resolves its runtime and assets from its installation, validates invocation before launch, forwards shutdown signals and preserves the child exit result. Verified through the actual globally installed tarball in a temporary prefix with spaces."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "revised",
+      "reason": "Updated implementation target paths and skill references to the unversioned names. Summary generation and maintenance requirements remain unchanged."
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "agent-workflow",
+      "outcome": "revised",
+      "reason": "Renamed the core skill to stratic and its optional sibling to stratic-tdd, including links and executable wording. The description-led change and summary-maintenance workflow is unchanged."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "cli-source",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "project-model",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "tree-overview",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "acceptance",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "acceptance-recovery",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-check-record",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "skill-installation",
+      "outcome": "revised",
+      "reason": "Installer, bundled folders, repository-local copies, hashes, status and updates use stratic, stratic-tdd and .stratic.json. Existing collision/customization/symlink tests use the new names and the actual package setup/install/update rehearsal passes."
+    },
+    {
+      "id": "cli-check-list",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "agent-skills",
+      "outcome": "revised",
+      "reason": "Guidance and executable identification now use the Stratic name and format identity. Readme setup prompts install the renamed core skill before program discussion."
+    },
+    {
+      "id": "agents",
+      "outcome": "revised",
+      "reason": "Adds a packaged desktop launch operation and identifies the help/version behavior outside repositories. Existing model operations remain explicit JSON interfaces."
+    },
+    {
+      "id": "cli-ui-current",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "cli-prepare",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "checks",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-accept",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "revised",
+      "reason": "Reader uses Stratic/reader for local preferences, avoiding the original application settings format. This checkout’s prior recent-project list was preserved in that directory and its reader restarted successfully."
+    },
+    {
+      "id": "change-display",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "relationships",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "impact",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-impact",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "changes",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "project-loading",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-discard",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "description-identity",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-skill-update",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "cli-version",
+      "outcome": "revised",
+      "reason": "Reads the package release version and reports Stratic, format 1, before Git resolution. New command regression verifies outside-repository identity and argument rejection."
+    },
+    {
+      "id": "formatted-descriptions",
+      "outcome": "revised",
+      "reason": "Reconciled build and application implementation links after packaging changes. Existing Markdown, equations, images, font and syntax assets remain bundled and are exercised by desktop checks."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    },
+    {
+      "id": "cli-help",
+      "outcome": "revised",
+      "reason": "Help adds the desktop launcher and accurately distinguishes JSON data commands from terminal-attached open. Its implementation passage reflects the new dispatch boundary."
+    },
+    {
+      "id": "cli-skill-status",
+      "outcome": "unchanged",
+      "reason": "Reviewed dispatch: project commands still resolve the selected or current repository, preserve their argument rules, and use the same operation implementations. New launch and version paths return before this common dispatch."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "Updated the linked document/bootstrap passages for public app naming. Paired reading, source display, refresh and renderer isolation are unchanged."
+    },
+    {
+      "id": "desktop",
+      "outcome": "unchanged",
+      "reason": "The existing description remains accurate: distributing the same model and desktop through npm adds an entry point without changing this responsibility."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "f8bc9fc538b7baa047b77004b1e5358f46caa3bc",
+      "method": "Inspect README diff against previously tested content; node src/cli.ts validate; git diff --check",
+      "outcome": "pass",
+      "environment": "Repository checkout; documentation-only follow-up",
+      "evidence": "Both agent prompts use the current working directory. Removed directory creation and placeholder substitution instructions. Fresh setup still defers program requirements and implementation. Only README.md differs from previously tested tree 9e9c3628b59949a8791f201145e37090263c286d, which passed 49 unit tests, desktop and installed-package checks. No code tests rerun for this wording edit. Structural validation and whitespace checks pass; before and after snapshots match.",
+      "tests": [],
+      "id": "f3d6548d-b3c2-4830-ab62-b7d6e01b2c93",
+      "recordedAt": "2026-09-15T11:59:05.490Z"
+    }
+  ],
+  "recordedAt": "2026-09-15T11:59:40.542Z",
+  "unmapped": [
+    {
+      "path": "package.json",
+      "reason": "Reviewed scoped npm identity, version, GPL license, GitHub metadata, public publish setting, explicit file allowlist, compiled bin entry, prepack build and Electron runtime dependency. The rehearsal verifies actual tarball contents and installation; publishing was not run."
+    },
+    {
+      "path": "scripts/build.ts",
+      "reason": "Reviewed CLI ESM bundling, removal of stale output, complete desktop assets and extraction of bundled dependency licenses. Existing prose links cover reader assets; the remaining build steps implement distribution documented in README."
+    },
+    {
+      "path": "src/cli.ts",
+      "reason": "Reviewed the added launcher import and relocation of identity dispatch before repository resolution. Linked descriptions cover the command bodies; unchanged project command dispatch is exercised by existing and installed-package tests."
+    },
+    {
+      "path": "test/cli.test.ts",
+      "reason": "Reviewed test boundaries and shared command helpers; the new outside-repository identity and invalid-launch test is linked to the executable identity description."
+    }
+  ]
+}

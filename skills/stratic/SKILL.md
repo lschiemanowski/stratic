@@ -1,17 +1,17 @@
 ---
-name: stratic-v3
-description: Maintain a Stratic v3 project's hierarchical descriptions and passage links while changing code, and prepare or accept an exact reviewed change. Use for projects with stratic/project.json in format version 1.
+name: stratic
+description: Maintain a Stratic project's hierarchical descriptions and passage links while changing code, and prepare or accept an exact reviewed change. Use for projects with stratic/project.json in format version 1.
 ---
 
-# Stratic v3
+# Stratic
 
-Use the v3 CLI from its checkout: `node /path/to/stratic_v3/src/cli.ts --project /path/to/project COMMAND`. Confirm the executable with `version`; another installed `stratic` may be v1 or v2. `help` documents the commands. The CLI supplies structure and snapshots; your investigation supplies semantic judgment.
+Use the installed CLI: `stratic --project /path/to/project COMMAND`. When working on Stratic itself, follow its repository instructions to use `node src/cli.ts` from the checkout. Confirm the executable with `version`: this product reports Stratic and formatVersion 1. `help` documents the commands. The CLI supplies structure and snapshots; your investigation supplies semantic judgment.
 
 ## Choose the workflow
 
-Read the repository's agent instructions for project conventions, the v3 executable location, and check commands. A task-specific choice takes precedence over project defaults. Keep those conventions in ordinary project instructions; installing or updating Stratic skills does not rewrite them.
+Read the repository's agent instructions for project conventions, the executable location, and check commands. A task-specific choice takes precedence over project defaults. Keep those conventions in ordinary project instructions; installing or updating Stratic skills does not rewrite them.
 
-This core workflow does not require test-first implementation. When the user or project selects TDD, use the adjacent optional [Stratic TDD skill](../stratic-v3-tdd/SKILL.md) if installed. If it is absent, report that and use the user's requested approach with the core guidance; the workflow choice does not depend on installing a file. Additional repository skills can supply other approaches without replacing the shared description, evidence, and acceptance responsibilities.
+This core workflow does not require test-first implementation. When the user or project selects TDD, use the adjacent optional [Stratic TDD skill](../stratic-tdd/SKILL.md) if installed. If it is absent, report that and use the user's requested approach with the core guidance; the workflow choice does not depend on installing a file. Additional repository skills can supply other approaches without replacing the shared description, evidence, and acceptance responsibilities.
 
 ## Understand and change
 

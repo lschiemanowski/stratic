@@ -1,0 +1,21 @@
+{
+  "id": "cli-package-entry",
+  "name": "CLI identity and launch validation",
+  "description": "Executable identity and help work outside Git, and malformed launch requests fail before starting the desktop.",
+  "code": [
+    {
+      "path": "test/cli.test.ts",
+      "passage": {
+        "quote": "test('CLI identity and help work outside Git and reject invalid launch arguments before starting the desktop', t => {\n  const outside = dirname(fixture(t));\n  const invoke = (args: string[]) => spawnSync(process.execPath, [executable, ...args], { cwd: outside, encoding: 'utf8', timeout: 10000 });\n  const version = invoke(['version']);\n  assert.equal(version.status, 0); assert.equal(version.stderr, '');\n  assert.deepEqual(JSON.parse(version.stdout), { product: 'Stratic', version: '0.1.0', formatVersion: 1 });\n  assert.match(invoke(['help']).stdout, /open \\[DIR\\]/);\n  for (const args of [['version', 'extra'], ['open', '--revision', 'HEAD'], ['open', 'one', 'two'], ['--project', outside, 'open', outside]]) {\n    const rejected = invoke(args);\n    assert.equal(rejected.status, 1); assert.equal(rejected.stdout, ''); assert.ok(JSON.parse(rejected.stderr).error);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-version",
+      "passage": {
+        "quote": "Version returns before repository resolution and rejects unexpected arguments. It does not establish that a project uses the format correctly, has valid links, or contains a prepared proposal. Those are separate properties checked by other operations."
+      }
+    }
+  ]
+}

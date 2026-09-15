@@ -11,18 +11,18 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "The response is a JSON object containing product, version, and formatVersion. These values are constants supplied by the executable; the current implementation reports Stratic v3, version 0.1.0, and project format 1."
+        "quote": "The response is a JSON object containing product, version, and formatVersion. It reports the product as Stratic, reads its release version from the package metadata, and identifies project format 1. These describe the executable even when no project is selected."
       },
       "to": {
         "path": "src/cli.ts",
         "passage": {
-          "quote": "    case 'version': output = { product: 'Stratic v3', version: '0.1.0', formatVersion: 1 }; break;"
+          "quote": "  if (args[0] === 'version') {\n    if (args.length !== 1) throw new Error(`Unexpected arguments: ${args.slice(1).join(' ')}`);\n    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));\n    console.log(JSON.stringify({ product: 'Stratic', version, formatVersion: 1 }, null, 2)); return;\n  }"
         }
       }
     }
   ],
   "summary": [
-    "Identifies the executable as Stratic v3, version 0.1.0, implementing project format 1.",
-    "Repository resolution still applies, but the response does not establish project validity, link accuracy, or readiness to accept a change."
+    "Reports Stratic, the installed package version, and project format 1.",
+    "Works outside Git without loading a project; it does not establish project validity, link accuracy, or readiness."
   ]
 }

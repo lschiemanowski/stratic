@@ -1,6 +1,6 @@
 # Repository-local skills
 
-Repository-local installation makes Stratic’s guidance available alongside the program it describes. Skills are ordinary files under .agents/skills, suitable for committing with the project. The installed core skill is named stratic-v3; the optional test-first workflow is stratic-v3-tdd. The bundled copies remain the source for later updates. Installation does not rewrite project instructions, configure a global agent, or choose a workflow on the user’s behalf.
+Repository-local installation makes Stratic’s guidance available alongside the program it describes. Skills are ordinary files under .agents/skills, suitable for committing with the project. The core skill is named stratic; the optional test-first workflow is stratic-tdd. The npm package includes the bundled copies used for installation and later updates, and their guidance uses the installed CLI. Installation does not rewrite project instructions, configure a global agent, or choose a workflow on the user’s behalf.
 
 Installing without optional workflows adds only the core. Selecting TDD adds both the core and its supplement. Repeating installation with identical contents leaves the files unchanged. Existing different files are preserved, including previously installed versions; an explicit update is the operation for bringing recorded installations forward.
 

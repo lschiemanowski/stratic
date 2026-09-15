@@ -52,7 +52,7 @@
       "to": {
         "path": "src/git.ts",
         "passage": {
-          "quote": "export function localDirectory(root: string): string {\n  const path = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'stratic-v3']).trim();\n  mkdirSync(path, { recursive: true });\n  return path;\n}\nexport function writeJson(path: string, value: unknown): void {\n  mkdirSync(dirname(path), { recursive: true });\n  const temporary = `${path}.${process.pid}.tmp`;\n  writeFileSync(temporary, JSON.stringify(value, null, 2) + '\\n');\n  renameSync(temporary, path);\n}\nexport function readJson<T>(path: string): T { return JSON.parse(readFileSync(path, 'utf8')) as T; }"
+          "quote": "export function localDirectory(root: string): string {\n  const path = git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'stratic']).trim();\n  mkdirSync(path, { recursive: true });\n  return path;\n}\nexport function writeJson(path: string, value: unknown): void {\n  mkdirSync(dirname(path), { recursive: true });\n  const temporary = `${path}.${process.pid}.tmp`;\n  writeFileSync(temporary, JSON.stringify(value, null, 2) + '\\n');\n  renameSync(temporary, path);\n}\nexport function readJson<T>(path: string): T { return JSON.parse(readFileSync(path, 'utf8')) as T; }"
         }
       }
     }

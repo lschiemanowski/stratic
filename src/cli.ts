@@ -5,11 +5,13 @@ import { loadProject, inspect } from './project.ts';
 import { impact } from './impact.ts';
 import { accept, prepare, ready, recordCheck, results, discard } from './review.ts';
 import { requestUI } from './ui-channel.ts';
+import { openDesktop } from './launch.ts';
 import { installSkills, skillStatus } from './skills.ts';
 
 const help = `Stratic — descriptions, links, and reviewed changes
 
-  version                           Identify the v3 executable and file format
+  open [DIR]                        Open the desktop, optionally selecting a project
+  version                           Identify the executable and file format
   list                              List descriptions
   show ID [--revision COMMIT]        Read one description and its neighborhood
   source PATH [--revision COMMIT]    Read exact project source
@@ -32,7 +34,7 @@ const help = `Stratic — descriptions, links, and reviewed changes
                                     Open a description, optionally at a passage
 
 Use --project DIR on every command to select a repository; defaults to cwd.
-All output is JSON. --paths selects whole files, including deletions. Put review
+Data commands return JSON; help prints usage and open runs the desktop. --paths selects whole files, including deletions. Put review
 and result input files outside the worktree (for example in /tmp). Tests and
 semantic investigation are performed by your tools and agent before prepare.
 `;
@@ -44,9 +46,20 @@ async function main() {
     if (!args[at + 1] || args[at + 1].startsWith('--')) throw new Error(`--${name} needs a value.`);
     const value = args[at + 1]; args.splice(at, 2); return value;
   };
-  const projectPath = option('project', process.cwd())!;
+  const projectPath = option('project');
   if (!args.length || args[0] === 'help' || args.includes('--help')) { console.log(help); return; }
-  const root = repository(projectPath), ref = option('revision', 'working')!;
+  if (args[0] === 'version') {
+    if (args.length !== 1) throw new Error(`Unexpected arguments: ${args.slice(1).join(' ')}`);
+    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    console.log(JSON.stringify({ product: 'Stratic', version, formatVersion: 1 }, null, 2)); return;
+  }
+  if (args[0] === 'open') {
+    args.shift();
+    if (args.length > 1 || args.some(arg => arg.startsWith('--')) || (args.length && projectPath)) throw new Error('Use open [DIR] or --project DIR open.');
+    const selected = args[0] ?? projectPath;
+    process.exitCode = await openDesktop(selected ? repository(selected) : undefined); return;
+  }
+  const root = repository(projectPath ?? process.cwd()), ref = option('revision', 'working')!;
   const jsonFile = (name: string) => {
     const path = option(name); if (!path) throw new Error(`--${name} FILE is required.`);
     return JSON.parse(readFileSync(path, 'utf8'));
@@ -62,7 +75,6 @@ async function main() {
   const command = args.shift();
   let output: unknown;
   switch (command) {
-    case 'version': output = { product: 'Stratic v3', version: '0.1.0', formatVersion: 1 }; break;
     case 'list': {
       const p = loadProject(root, ref);
       output = { project: root, revision: p.revision, descriptions: p.descriptions.map(d => ({ id: d.id, title: d.title, parent: d.metadata?.parent?.description, realization: d.metadata?.realization })), issues: p.issues }; break;

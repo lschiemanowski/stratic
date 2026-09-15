@@ -16,4 +16,6 @@ Skill install makes the core guidance and selected optional workflows available 
 
 The desktop connection gives the person and agent a shared focus. UI current reports which description and passage the person is reading. UI open directs the desktop to the description or passage being discussed. Neither operation edits the project or grants permission to commit.
 
-Command responses are structured JSON, except for human-readable help. Errors produce a JSON error and a nonzero exit status; validation also returns a nonzero status when project issues are present. Commands that mutate review state reject unexpected arguments before dispatching the operation. The interface neither generates descriptions nor executes the checks whose results it imports.
+Data commands return structured JSON, while help prints human-readable text and open runs the desktop attached to the terminal. Errors produce a JSON error and a nonzero exit status; validation also returns a nonzero status when project issues are present. Commands that mutate review state reject unexpected arguments before dispatching the operation. The interface neither generates descriptions nor executes the checks whose results it imports.
+
+Open starts the desktop from the installed Stratic package, optionally selecting a project. Help and version remain available outside a Git repository. The npm package supplies a compiled CLI and desktop assets, so an installed command does not build from source.

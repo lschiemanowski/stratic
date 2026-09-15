@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const bundled = fileURLToPath(new URL('../skills/', import.meta.url));
-const names = ['stratic-v3', 'stratic-v3-tdd'] as const;
+const names = ['stratic', 'stratic-tdd'] as const;
 type Name = typeof names[number];
 type Record = Partial<{ [name in Name]: string }>;
 const hash = (text: string) => createHash('sha256').update(text).digest('hex');
@@ -27,7 +27,7 @@ function installation(root: string) {
     const type = kind(path);
     if (type && type !== 'directory') throw new Error(`Expected a skill directory: ${path}`);
   }
-  const manifest = join(directory, '.stratic-v3.json');
+  const manifest = join(directory, '.stratic.json');
   const text = file(manifest);
   const record: Record = text === undefined ? {} : JSON.parse(text);
   if (!record || Array.isArray(record) || typeof record !== 'object' || Object.entries(record).some(([name, value]) => !names.includes(name as Name) || typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value))) throw new Error('Invalid Stratic skill installation record.');
@@ -50,7 +50,7 @@ export function installSkills(root: string, action: 'install' | 'update', withTd
   const { directory, manifest, record } = installation(root);
   // Validate the status response for unselected workflows before any installation writes.
   skillStatus(root);
-  const selected: Name[] = action === 'install' ? ['stratic-v3', ...(withTdd ? ['stratic-v3-tdd' as const] : [])] : names.filter(name => record[name]);
+  const selected: Name[] = action === 'install' ? ['stratic', ...(withTdd ? ['stratic-tdd' as const] : [])] : names.filter(name => record[name]);
   if (!selected.length) throw new Error('No recorded skills to update. Use skill install first.');
   const planned = selected.map(name => {
     const path = join(directory, name, 'SKILL.md');

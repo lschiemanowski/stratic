@@ -1,8 +1,8 @@
-# Stratic v3 design direction
+# Stratic design direction
 
 This document records the direction agreed on 7 September 2026. It guides the
-reimplementation. The [README](../README.md) describes the first working subset
-and how to run it.
+reimplementation. The [README](../README.md) gives a short introduction and
+installation instructions.
 
 The [data model and file layout](data-model.md) develops these choices.
 
@@ -17,7 +17,7 @@ system. A local change should require local investigation, expanding when its
 effects cross a responsibility or dependency boundary. The agent explains where
 investigation stops and what remains uncertain.
 
-Stratic v3 is one TypeScript product with a desktop application, an agent-facing
+Stratic is one TypeScript product with a desktop application, an agent-facing
 CLI, and skills that guide the work. New features need a concrete place in the
 everyday workflow before they earn a place in the product.
 

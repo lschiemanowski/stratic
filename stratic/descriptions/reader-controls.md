@@ -2,7 +2,7 @@
 
 The reader keeps attention on the program being described. Each reading pane begins with its title and prose. Expected states, such as implemented behavior and a clean working tree, do not occupy separate labels. Partial or unimplemented behavior remains explicit, including any stated work still missing. Problems and a prepared review are surfaced because they change what the reader needs to know.
 
-The application uses the Stratic logo for its window icon and macOS Dock identity.
+The application is named Stratic and uses the Stratic logo for its window icon and macOS Dock identity. Its own reader directory within the local Stratic application-data folder stores preferences, keeping reader settings separate from other tools that use that folder.
 
 The title bar combines the window controls with the current description’s ancestry. Ancestors open broader descriptions, and the current title returns from supporting views to the active description. Separate compact buttons reveal the project panel, fold the bottom description menu, and open viewing options. The unused title-bar area moves the window; buttons and menus remain interactive.
 

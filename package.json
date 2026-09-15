@@ -1,13 +1,12 @@
 {
-  "name": "stratic-v3",
+  "name": "@lschiemanowski/stratic",
   "version": "0.1.0",
-  "private": true,
   "description": "Hierarchical program descriptions for people and coding agents",
   "license": "GPL-3.0-only",
   "type": "module",
   "main": "dist/main.cjs",
   "bin": {
-    "stratic": "src/cli.ts"
+    "stratic": "dist/cli.mjs"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -19,11 +18,12 @@
     "test": "node --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "demo": "node scripts/demo.ts",
-    "test:desktop": "npm run build && node scripts/desktop-smoke.ts"
+    "test:desktop": "npm run build && node scripts/desktop-smoke.ts",
+    "prepack": "npm run build",
+    "test:package": "node scripts/package-smoke.ts"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
-    "electron": "43.2.0",
     "esbuild": "0.28.2",
     "playwright-core": "1.62.1",
     "typescript": "5.9.3"
@@ -35,6 +35,26 @@
     "remark-gfm": "4.0.1",
     "remark-math": "6.0.0",
     "remark-parse": "11.0.0",
-    "unified": "11.0.5"
-  }
+    "unified": "11.0.5",
+    "electron": "43.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lschiemanowski/stratic.git"
+  },
+  "homepage": "https://github.com/lschiemanowski/stratic#readme",
+  "bugs": {
+    "url": "https://github.com/lschiemanowski/stratic/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "skills/",
+    "src/",
+    "scripts/build.ts",
+    "tsconfig.json",
+    "docs/"
+  ]
 }

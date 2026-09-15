@@ -38,7 +38,7 @@
         "quote": "The full description supplies the complete account. Its summary preserves the qualifications that matter to understanding its promises, while leaving detailed explanations to the full text. A summary must not introduce a different promise or conceal an important limitation. Whenever the coding agent creates or changes a description or its metadata, it creates a missing summary and reviews existing bullets for accuracy. Changed promises, conditions, and limitations are reflected in both; accurate bullets need not be rewritten."
       },
       "to": {
-        "path": "skills/stratic-v3/SKILL.md",
+        "path": "skills/stratic/SKILL.md",
         "passage": {
           "quote": "Whenever creating or changing a description or its metadata, create a nonempty `summary` array if missing and review any existing summary against the full description. Update the bullets in the same change when promises, conditions, or limitations change; retain accurate bullets when they still apply. Use concise, self-contained strings that summarize the responsibility’s behavior, not a list of topics, children, or code files. Keep implementation passage links in the full description. The file format permits absent summaries for older content and drafts, but that compatibility is not a reason to omit a summary from newly created or changed descriptions."
         }

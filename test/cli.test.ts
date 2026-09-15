@@ -141,3 +141,17 @@ test('CLI rejects invalid mutation requests without changing files, staging, evi
     assert.deepEqual(durableState(root), before, `Rejected command changed durable state: ${args.join(' ')}`);
   }
 });
+
+
+test('CLI identity and help work outside Git and reject invalid launch arguments before starting the desktop', t => {
+  const outside = dirname(fixture(t));
+  const invoke = (args: string[]) => spawnSync(process.execPath, [executable, ...args], { cwd: outside, encoding: 'utf8', timeout: 10000 });
+  const version = invoke(['version']);
+  assert.equal(version.status, 0); assert.equal(version.stderr, '');
+  assert.deepEqual(JSON.parse(version.stdout), { product: 'Stratic', version: '0.1.0', formatVersion: 1 });
+  assert.match(invoke(['help']).stdout, /open \[DIR\]/);
+  for (const args of [['version', 'extra'], ['open', '--revision', 'HEAD'], ['open', 'one', 'two'], ['--project', outside, 'open', outside]]) {
+    const rejected = invoke(args);
+    assert.equal(rejected.status, 1); assert.equal(rejected.stdout, ''); assert.ok(JSON.parse(rejected.stderr).error);
+  }
+});
