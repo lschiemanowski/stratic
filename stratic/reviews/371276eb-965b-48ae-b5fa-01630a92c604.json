@@ -1,0 +1,23 @@
+{
+  "id": "371276eb-965b-48ae-b5fa-01630a92c604",
+  "base": "f967994356631e1127cb877815933f901e760faa",
+  "contentTree": "b15c6840f8c170bc7734857cd923b57910f4bebd",
+  "reviewer": "Codex",
+  "summary": "Introduce the CLI, skill and desktop UI and illustrate the README with a screenshot",
+  "examined": [],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "b15c6840f8c170bc7734857cd923b57910f4bebd",
+      "method": "Inspect README introduction and image link; compare copied PNG with user attachment; node src/cli.ts impact; node src/cli.ts validate; git diff --check",
+      "outcome": "pass",
+      "environment": "Documentation-only checkout edit",
+      "evidence": "README introduces the CLI, coding-agent skill and desktop UI, followed by the supplied screenshot with descriptive alt text. Relative image path resolves to docs/images/stratic-reader.png. PNG is byte-for-byte identical to the attachment, 3403 by 2000 pixels. No affected descriptions or unmapped paths. Structural validation and whitespace checks pass. Before and after snapshots match. No runtime changes or code tests.",
+      "tests": [],
+      "id": "01a95fca-8f14-4200-9e83-be75f0ef9957",
+      "recordedAt": "2026-09-15T12:10:45.895Z"
+    }
+  ],
+  "recordedAt": "2026-09-15T12:11:03.397Z",
+  "unmapped": []
+}

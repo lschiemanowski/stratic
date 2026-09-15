@@ -2,6 +2,9 @@ Stratic gives people and coding agents a shared description of a program: what
 it should do, how its parts fit together, and which code and tests realize it.
 Descriptions form a hierarchy you can explore in a desktop reader. As the program
 changes, the agent keeps the descriptions and their links accurate.
+Stratic consists of a CLI, a skill for coding agents, and a desktop UI.
+
+![Stratic showing a parent description and its child side by side](docs/images/stratic-reader.png)
 
 Stratic is an early alpha release, provided “as is”, without warranty. Expect bugs
 and changes as it develops.
