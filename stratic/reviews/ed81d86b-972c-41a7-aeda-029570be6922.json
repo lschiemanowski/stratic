@@ -1,0 +1,23 @@
+{
+  "id": "ed81d86b-972c-41a7-aeda-029570be6922",
+  "base": "85decd09e4dc2f43bb3ffd58c971124dad54c71d",
+  "contentTree": "5e9904e25f6e67a44bef3321d1d275dd324dcc24",
+  "reviewer": "Codex",
+  "summary": "Clarify README setup prompts and Linux sandbox troubleshooting guidance",
+  "examined": [],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "5e9904e25f6e67a44bef3321d1d275dd324dcc24",
+      "method": "Inspect final README diff; git diff --check; node src/cli.ts validate; node src/cli.ts impact --paths README.md",
+      "outcome": "pass",
+      "environment": "Documentation-only checkout change",
+      "evidence": "Reviewed the user-edited Linux sandbox guidance, separate copyable clone/open commands and clearer prompt introductions. Applied the approved administrator-privileges wording, Stratic capitalization and blank-line cleanup. No privileged commands are included. No affected descriptions or unmapped paths; structural validation and whitespace checks pass. Before and after snapshots match. No runtime changes or code tests.",
+      "tests": [],
+      "id": "621080ca-3a7e-42ea-bd35-5043f1080ae9",
+      "recordedAt": "2026-09-15T14:56:15.975Z"
+    }
+  ],
+  "recordedAt": "2026-09-15T14:56:29.842Z",
+  "unmapped": []
+}

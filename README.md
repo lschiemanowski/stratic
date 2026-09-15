@@ -19,15 +19,18 @@ Stratic describes itself. Download this repository and open it in the reader:
 
 ```sh
 git clone https://github.com/lschiemanowski/stratic.git
+```
+
+```sh
 stratic open ./stratic
 ```
+
+On Linux, you may encounter an Electron sandboxing issue, due to AppArmor or similar. Fixing this may require administrator privileges. Ask your coding agent to diagnose the issue and explain a suitable fix.
 
 Follow linked passages to read more detail or inspect the code and tests alongside
 an explanation. Use the arrow keys to move through the descriptions.
 
-Give your coding agent one of these prompts.
-
-For a new project:
+To work with Stratic on a new project, give your coding agent this prompt:
 
 ```text
 Set up Stratic in the current working directory for our work together.
@@ -39,7 +42,7 @@ Do not design or implement the program, or ask about its requirements yet.
 Confirm that setup is ready, then wait for me to start that discussion.
 ```
 
-For an existing codebase:
+To work in an existing codebase, you can use this prompt:
 
 ```text
 Set up Stratic in the current working directory. Run `stratic skill install`,
