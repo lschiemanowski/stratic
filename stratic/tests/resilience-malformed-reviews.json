@@ -1,0 +1,21 @@
+{
+  "id": "resilience-malformed-reviews",
+  "name": "Malformed review recovery",
+  "description": "Invalid record shapes and broken JSON become reported problems without supplying evidence or hiding descriptions.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Malformed reviews become problems without hiding readable descriptions', t => {\n  const root = fixture(t), proposal = preparedRelease(root);\n  const path = join(root, proposal.reviewPath), original = JSON.parse(readFileSync(path, 'utf8'));\n  const malformed = [null, [], {}, { ...original, examined: [null] }, { ...original, results: [null] },\n    { ...original, recordedAt: null }, { ...original, id: 'wrong-name' },\n    { ...original, results: [{ ...original.results[0], tests: [null] }] },\n    { ...original, results: [{ ...original.results[0], tree: '0'.repeat(40) }] }];\n  for (const value of malformed) {\n    writeFileSync(path, JSON.stringify(value));\n    assert.deepEqual(reviewHistory(root), []);\n    const project = loadProject(root);\n    assert.equal(project.descriptions.length, 6);\n    assert.ok(project.issues.some(i => i.path === proposal.reviewPath && /Malformed review/.test(i.message)));\n    assert.doesNotThrow(() => comparison(root, project, null, reviewHistory(root), workingSnapshot(root)));\n  }\n  writeFileSync(path, '{');\n  assert.deepEqual(reviewHistory(root), []);\n  assert.ok(loadProject(root).issues.some(i => i.path === proposal.reviewPath));\n  writeFileSync(path, JSON.stringify(original));\n  assert.equal(reviewHistory(root).length, 1);\n  assert.deepEqual(loadProject(root).issues, []);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "project-loading",
+      "passage": {
+        "quote": "Review files are also checked before they can supply a comparison baseline or test evidence. A record needs a matching file identity, valid content hashes and timestamps, examined decisions with reasons, and well-formed passing results tied to its content. Malformed JSON and invalid record shapes become project problems; they supply no evidence and do not hide otherwise readable descriptions. Examined descriptions may use either stable identities or the loader\u2019s draft identities when repairing committed malformed metadata. Review-file identities retain their stricter record-name rules. Result validation is shared with check recording and preparation, including support for nonempty runner test identities that need not be cataloged."
+      }
+    }
+  ]
+}

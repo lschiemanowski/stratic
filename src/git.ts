@@ -22,15 +22,23 @@ export function repository(path: string): string {
   return realpathSync(git(resolve(path), ['rev-parse', '--show-toplevel']).trim());
 }
 export function head(root: string): string { return git(root, ['rev-parse', '--verify', 'HEAD']).trim(); }
-export function pathInside(root: string, path: string): string {
+function validatePath(path: string): void {
   if (!path || isAbsolute(path) || path.includes('\\') || path.includes('\0') || path.split('/').some(p => !p || p === '..' || p === '.' || p.toLowerCase() === '.git')) {
     throw new Error(`Invalid repository path: ${path}`);
   }
+}
+export function pathInside(root: string, path: string, allowLeafSymlink = false): string {
+  validatePath(path);
   const full = join(root, path);
   let current = root;
   for (const part of path.split('/')) {
     current = join(current, part);
-    if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error(`Symbolic links are not read or edited: ${path}`);
+    let stat;
+    try { stat = lstatSync(current); } catch (error) {
+      if (['ENOENT', 'ENOTDIR'].includes((error as NodeJS.ErrnoException).code ?? '')) continue;
+      throw error;
+    }
+    if (stat.isSymbolicLink() && !(allowLeafSymlink && current === full)) throw new Error(`Symbolic links are not read or edited: ${path}`);
   }
   return full;
 }
@@ -54,10 +62,12 @@ export function readSource(root: string, path: string, view = 'working'): string
   return readBinarySource(root, path, view).toString('utf8');
 }
 export function readBinarySource(root: string, path: string, view = 'working'): Buffer {
-  pathInside(root, path);
+  validatePath(path);
   if (view === 'working') {
     const full = pathInside(root, path);
-    if (lstatSync(full).size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);
+    const stat = lstatSync(full);
+    if (!stat.isFile()) throw new Error(`Not a regular file: ${path}`);
+    if (stat.size > 2_000_000) throw new Error(`File exceeds the 2 MB display limit: ${path}`);
     return readFileSync(full);
   }
   const tree = /^[0-9a-f]{40,64}$/.test(view) ? view : revision(root, view);
@@ -74,17 +84,35 @@ export function files(root: string, view = 'working'): string[] {
   return [...new Set(output.split('\0').filter(Boolean))].sort();
 }
 export function snapshot(root: string, paths: string[], base = head(root)): string {
+  for (const path of paths) validatePath(path);
+  const selected = new Set(paths);
+  // A selected parent captures the whole replacement, including former descendants.
+  paths = [...selected].filter(path => {
+    const parts = path.split('/');
+    return !parts.some((_, index) => index > 0 && selected.has(parts.slice(0, index).join('/')));
+  });
   const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));
   const env = { GIT_INDEX_FILE: join(dir, 'index') };
   try {
     git(root, ['read-tree', revision(root, base)], undefined, env);
-    for (const path of paths) pathInside(root, path);
+    for (const path of paths) pathInside(root, path, true);
     if (paths.length) git(root, ['add', '-A', '--', ...paths], undefined, env);
     return git(root, ['write-tree'], undefined, env).trim();
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 export function workingSnapshot(root: string): string {
   return snapshot(root, files(root));
+}
+/** Rebuild content from retained Git entries, without consulting working files. */
+export function treeWithoutPath(root: string, tree: string, path: string): string {
+  validatePath(path);
+  const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));
+  const env = { GIT_INDEX_FILE: join(dir, 'index') };
+  try {
+    git(root, ['read-tree', tree], undefined, env);
+    git(root, ['update-index', '--force-remove', '--', path], undefined, env);
+    return git(root, ['write-tree'], undefined, env).trim();
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 export function changedPaths(root: string, base: string, tree: string): string[] {
   return git(root, ['diff', '--name-only', '--no-renames', '-z', base, tree]).split('\0').filter(Boolean);

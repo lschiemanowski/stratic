@@ -32,5 +32,9 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Returns the saved prepared identity, base, content trees, selected paths, and review location, or null when none exists.",
+    "Readiness is saved state, not fresh validation; later edits may invalidate it. Acceptance checks the live proposal and handles recorded recovery state."
   ]
 }

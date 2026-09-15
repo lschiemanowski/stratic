@@ -1,0 +1,21 @@
+{
+  "id": "resilience-review-directories",
+  "name": "Historical review protection",
+  "description": "Directory selections cannot prepare modifications or deletions of historical reviews, even with matching check evidence.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Preparation rejects review changes selected through an ancestor directory', t => {\n  const root = fixture(t), proposal = preparedRelease(root);\n  accept(root, proposal.id);\n  const path = join(root, proposal.reviewPath), original = readFileSync(path, 'utf8');\n  const input = releaseReview(root);\n  const committed = head(root);\n  const attempt = (directory: string) => {\n    const result = recordCheck(root, { tree: snapshot(root, [directory]), method: 'Inspect changed fixture', outcome: 'pass', environment: 'Isolated test repository', evidence: 'Fixture changes only a historical review.', tests: [] });\n    assert.throws(() => prepare(root, [directory], { ...input, resultIds: [result.id] }), /Historical reviews/);\n  };\n  for (const directory of ['stratic', 'stratic/reviews']) {\n    writeFileSync(path, original.replace('Allow a worker', 'Altered: allow a worker'));\n    attempt(directory);\n    rmSync(path);\n    attempt(directory);\n    writeFileSync(path, original);\n  }\n  assert.equal(head(root), committed);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "preparation",
+      "passage": {
+        "quote": "Selection of a directory is expanded into its changed files before preparation proceeds. Existing review records cannot be changed or removed through a parent directory; the only review written by preparation is its own generated record. Selecting a parent covers its descendants, so a tracked directory replaced by a symlink is captured as one replacement. Selecting a descendant through that symlink alone remains invalid."
+      }
+    }
+  ]
+}

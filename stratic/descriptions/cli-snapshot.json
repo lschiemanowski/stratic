@@ -28,9 +28,14 @@
       "to": {
         "path": "src/git.ts",
         "passage": {
-          "quote": "export function snapshot(root: string, paths: string[], base = head(root)): string {\n  const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));\n  const env = { GIT_INDEX_FILE: join(dir, 'index') };\n  try {\n    git(root, ['read-tree', revision(root, base)], undefined, env);\n    for (const path of paths) pathInside(root, path);\n    if (paths.length) git(root, ['add', '-A', '--', ...paths], undefined, env);\n    return git(root, ['write-tree'], undefined, env).trim();\n  } finally { rmSync(dir, { recursive: true, force: true }); }\n}"
+          "quote": "export function snapshot(root: string, paths: string[], base = head(root)): string {\n  for (const path of paths) validatePath(path);\n  const selected = new Set(paths);\n  // A selected parent captures the whole replacement, including former descendants.\n  paths = [...selected].filter(path => {\n    const parts = path.split('/');\n    return !parts.some((_, index) => index > 0 && selected.has(parts.slice(0, index).join('/')));\n  });\n  const dir = mkdtempSync(join(tmpdir(), 'stratic-index-'));\n  const env = { GIT_INDEX_FILE: join(dir, 'index') };\n  try {\n    git(root, ['read-tree', revision(root, base)], undefined, env);\n    for (const path of paths) pathInside(root, path, true);\n    if (paths.length) git(root, ['add', '-A', '--', ...paths], undefined, env);\n    return git(root, ['write-tree'], undefined, env).trim();\n  } finally { rmSync(dir, { recursive: true, force: true }); }\n}"
         }
       }
     }
+  ],
+  "summary": [
+    "Captures selected whole working files, including deletions, over HEAD and returns their tree identity, base, and paths.",
+    "A temporary index preserves the user\u2019s staging area and branch. Review files are handled separately by preparation.",
+    "A snapshot identifies content but does not isolate test execution; omitted working edits may still affect checks."
   ]
 }

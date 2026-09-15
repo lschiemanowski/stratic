@@ -16,5 +16,11 @@
       },
       "reason": "Acceptance must use the base, selected files, review, and final tree that preparation pinned."
     }
+  ],
+  "summary": [
+    "User-authorized acceptance commits the exact prepared proposal after checking its identity, base, live contents, branch state, and structural validity.",
+    "Hooks may inspect the proposal and amend its message; failures or content changes stop acceptance before the branch moves. Unrelated staged and working edits are preserved.",
+    "Interrupted acceptance can resume under the same identity. Completed tests are reused, and acceptance never pushes.",
+    "Index reconciliation changes only exact accepted paths and preserves other staged descendants. Conflicting staged ancestors or descendants stop acceptance before a commit is created."
   ]
 }

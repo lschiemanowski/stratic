@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Compares local skill contents, installation records, and bundled guidance, reporting each skill’s path and state as JSON.",
+    "Reading status creates no files. Absent skills are normal; invalid records, redirected paths, unexpected arguments, and historical requests are errors.",
+    "Content status does not establish that an agent loaded or followed a skill."
   ]
 }

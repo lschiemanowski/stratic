@@ -1,0 +1,21 @@
+{
+  "id": "acceptance-descendant-recovery",
+  "name": "Recovering without losing staged descendants",
+  "description": "Both interruption before index publication and interruption after publication preserve unrelated staged descendants without a second commit.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Recovery preserves unrelated descendants before and after index reconciliation', t => {\n  for (const reconciled of [false, true]) {\n    const root = fixture(t), prepared = stagedDescendant(root);\n    assert.throws(() => accept(root, prepared.id, { afterCommit: () => {\n      if (reconciled) {\n        // Model termination after publishing the reconciled index but before clearing readiness.\n        const temporary = join(localDirectory(root), 'test-reconciled-index');\n        const env = { GIT_INDEX_FILE: temporary };\n        const extra = git(root, ['rev-parse', ':resource/extra']).trim();\n        const unrelated = git(root, ['rev-parse', ':unrelated']).trim();\n        git(root, ['read-tree', prepared.finalTree], undefined, env);\n        git(root, ['update-index', '--add', '--cacheinfo', '100644', extra, 'resource/extra'], undefined, env);\n        git(root, ['update-index', '--add', '--cacheinfo', '100644', unrelated, 'unrelated'], undefined, env);\n        copyFileSync(temporary, git(root, ['rev-parse', '--path-format=absolute', '--git-path', 'index']).trim());\n      }\n      throw new Error('Interrupted');\n    } }), /Interrupted/);\n    const committed = head(root);\n    assert.equal(accept(root, prepared.id).recovered, true);\n    assert.equal(head(root), committed);\n    descendantPreserved(root, prepared.finalTree);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the exact affected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If those entries have changed since the interruption, it stops so the newer staged edits can be preserved. Unrelated entries, including descendants outside the accepted change, remain staged. Recovery removes obsolete accepted entries before adding replacements and can resume whether the index update was still pending or had already completed."
+      }
+    }
+  ]
+}

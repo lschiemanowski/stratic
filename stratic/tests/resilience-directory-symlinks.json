@@ -1,0 +1,21 @@
+{
+  "id": "resilience-directory-symlinks",
+  "name": "Directory replacement snapshots",
+  "description": "Tracked directories replaced by existing or dangling symlinks snapshot correctly both staged and unstaged, preserving the index and rejecting attempts to read through the link.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Snapshots capture tracked directories replaced by symlinks as a single replacement', t => {\n  const root = fixture(t), directory = join(root, 'unrelated');\n  mkdirSync(join(directory, 'nested'), { recursive: true });\n  writeFileSync(join(directory, 'nested/old.txt'), 'old contents');\n  git(root, ['add', '-A']); git(root, ['commit', '-qm', 'Unrelated tracked directory']);\n  const base = head(root), outside = join(root, '..', 'outside');\n  mkdirSync(join(outside, 'nested'), { recursive: true });\n  writeFileSync(join(outside, 'nested/old.txt'), 'Do not read this target');\n  rmSync(directory, { recursive: true });\n  for (const target of [outside, 'missing-directory']) {\n    symlinkSync(target, directory);\n    for (const staged of [false, true]) {\n      if (staged) git(root, ['add', '-A', '--', 'unrelated']);\n      const index = git(root, ['ls-files', '--stage']);\n      assert.deepEqual(loadProject(root).issues, []);\n      assert.ok(files(root).includes('unrelated/nested/old.txt'));\n      const tree = workingSnapshot(root);\n      assert.match(git(root, ['ls-tree', tree, '--', 'unrelated']), /^120000 blob/);\n      assert.equal(git(root, ['show', `${tree}:unrelated`]), target);\n      assert.equal(git(root, ['ls-tree', '-r', tree, '--', 'unrelated/nested']), '');\n      assert.equal(snapshot(root, ['unrelated/nested/old.txt', 'unrelated']), tree);\n      assert.throws(() => snapshot(root, ['unrelated/nested/old.txt']), /Symbolic links/);\n      assert.throws(() => snapshot(root, ['unrelated', 'unrelated/../escape']), /Invalid repository path/);\n      assert.equal(git(root, ['ls-files', '--stage']), index);\n    }\n    rmSync(directory); git(root, ['read-tree', base]);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "preparation",
+      "passage": {
+        "quote": "Selection of a directory is expanded into its changed files before preparation proceeds. Existing review records cannot be changed or removed through a parent directory; the only review written by preparation is its own generated record. Selecting a parent covers its descendants, so a tracked directory replaced by a symlink is captured as one replacement. Selecting a descendant through that symlink alone remains invalid."
+      }
+    }
+  ]
+}

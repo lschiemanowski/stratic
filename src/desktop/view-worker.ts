@@ -4,6 +4,7 @@ import { loadProject } from '../project.ts';
 import { ready, results, reviewHistory } from '../review.ts';
 import type { CheckResult } from '../model.ts';
 import { comparison } from './comparison.ts';
+import { matchesReviewContent } from '../review-records.ts';
 
 function view(root: string, revision: string) {
   const project = loadProject(root, revision);
@@ -13,10 +14,7 @@ function view(root: string, revision: string) {
   const equivalents = new Set([tree]);
   // Compare actual content, excluding only each review's own newly-added record.
   for (const { path, review } of history) {
-    try {
-      if (typeof review.base !== 'string' || typeof review.contentTree !== 'string' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.base) || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.contentTree)) continue;
-      if (git(root, ['diff', '--name-only', review.contentTree, tree]).trim() === path) equivalents.add(review.contentTree);
-    } catch { /* An unavailable historical review is not current evidence. */ }
+    if (matchesReviewContent(root, tree, path, review)) equivalents.add(review.contentTree);
   }
   const checks = new Map<string, CheckResult>();
   for (const result of [...(revision === 'working' ? results(root) : []), ...history.flatMap(h => Array.isArray(h.review.results) ? h.review.results : [])]) {

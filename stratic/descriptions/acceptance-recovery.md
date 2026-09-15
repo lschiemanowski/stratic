@@ -2,7 +2,7 @@
 
 Acceptance can be interrupted after a commit has been recorded or the branch has moved but before the index and local handoff have been cleaned up. Recovery must distinguish that unfinished bookkeeping from an entirely new proposal, so retrying does not create a duplicate commit.
 
-Before moving the branch, Stratic saves the commit identity, branch, and the selected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If selected entries have changed since the interruption, it stops so those newer staged edits can be preserved.
+Before moving the branch, Stratic saves the commit identity, branch, and the exact affected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If those entries have changed since the interruption, it stops so the newer staged edits can be preserved. Unrelated entries, including descendants outside the accepted change, remain staged. Recovery removes obsolete accepted entries before adding replacements and can resume whether the index update was still pending or had already completed.
 
 Acceptance uses an index lock and records ownership information. A retry can remove a lock only when the recorded process is dead and the file still has the recorded identity. An unrelated or active lock is not treated as abandoned. This protects concurrent Git work while allowing a terminated Stratic process to recover.
 

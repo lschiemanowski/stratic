@@ -32,5 +32,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Resolves one stable description identity at the selected revision and returns its prose, metadata, parent, connections, tests, and issues.",
+    "Connections expose resolved ranges or passage problems without recursively loading destination prose.",
+    "Inspection neither moves the desktop selection nor records an investigation decision."
   ]
 }

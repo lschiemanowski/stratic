@@ -1,0 +1,42 @@
+{
+  "id": "desktop-resource-resilience",
+  "name": "Reader resource recovery",
+  "description": "Deleted and renamed source clears while prose refreshes; CLI navigation opens a cold historical revision with its committed image; malformed reviews and directory-to-symlink replacements leave descriptions readable.",
+  "code": [
+    {
+      "path": "scripts/reader-resilience-checks.ts",
+      "passage": {
+        "quote": "export async function checkReaderResilience(page: Page, root: string) {\n  console.log('Checking deleted and renamed source refresh.');\n  const active = page.locator('.active-description');\n  const sourcePath = join(root, 'src/syntax-fixture.ts'), originalSource = readFileSync(sourcePath, 'utf8');\n  const descriptionPath = join(root, 'stratic/descriptions/storage.md'), originalDescription = readFileSync(descriptionPath, 'utf8');\n  for (const action of ['delete', 'rename']) {\n    await requestUI(root, { action: 'open', description: 'storage', revision: 'working' });\n    await page.getByRole('button', { name: 'src/syntax-fixture.ts', exact: true }).click();\n    await page.getByRole('heading', { name: 'src/syntax-fixture.ts', exact: true }).waitFor();\n    if (action === 'delete') rmSync(sourcePath); else renameSync(sourcePath, sourcePath + '.moved');\n    await page.locator('.detail .problem').filter({ hasText: 'Source unavailable:' }).waitFor();\n    assert.equal((await page.locator('.detail > .source-code code').allTextContents()).join(''), '', 'The previous source body is cleared.');\n    const marker = `The description refreshes after source ${action}.`;\n    writeFileSync(descriptionPath, originalDescription + '\\n' + marker + '\\n');\n    await active.getByText(marker, { exact: true }).waitFor();\n    writeFileSync(sourcePath, originalSource);\n    if (action === 'rename') rmSync(sourcePath + '.moved');\n    await page.waitForFunction(() => !document.querySelector('.detail > .problem'));\n    assert.ok((await page.locator('.detail > .source-code').innerText()).includes('const'));\n    writeFileSync(descriptionPath, originalDescription);\n  }\n  // Commit the image fixture, then alter working bytes: history must read the old image.\n  console.log('Checking historical image identity.');\n  mkdirSync(join(root, 'unrelated-directory/nested'), { recursive: true });\n  writeFileSync(join(root, 'unrelated-directory/nested/old.txt'), 'Original tracked content');\n  git(root, ['add', '-A']); git(root, ['commit', '-qm', 'Historical image fixture']);\n  const historical = head(root);\n  const imagePath = join(root, 'stratic/assets/diagram.svg');\n  const oldImage = readFileSync(imagePath, 'utf8');\n  writeFileSync(imagePath, oldImage.replace('width=\"240\"', 'width=\"320\"'));\n  await requestUI(root, { action: 'open', description: 'rich', revision: historical });\n  await page.waitForFunction(() => document.querySelector<HTMLImageElement>('.active-description .description-image img')?.naturalWidth === 240);\n  const staleRequest = await page.evaluate(async () => {\n    const view = await window.stratic.view();\n    return { project: view.project!.root, revision: view.project!.revision, tree: view.tree, description: 'rich', url: '../assets/diagram.svg' };\n  });\n  await requestUI(root, { action: 'open', description: 'rich', revision: 'working' });\n  await page.waitForFunction(() => document.querySelector<HTMLImageElement>('.active-description .description-image img')?.naturalWidth === 320);\n  assert.equal(await page.evaluate(async request => { try { await window.stratic.image(request); return false; } catch { return true; } }, staleRequest), true);\n  symlinkSync('/missing-outside-target', join(root, 'unrelated-symlink'));\n  rmSync(join(root, 'unrelated-directory'), { recursive: true });\n  symlinkSync('/missing-outside-directory', join(root, 'unrelated-directory'));\n  const malformedPath = join(root, 'stratic/reviews/malformed.json');\n  mkdirSync(join(root, 'stratic/reviews'), { recursive: true }); writeFileSync(malformedPath, 'null');\n  await page.waitForFunction(async () => (await window.stratic.view()).project?.issues.some(i => i.path === 'stratic/reviews/malformed.json'));\n  assert.equal(await active.getByRole('heading', { name: 'Formatted description', exact: true }).count(), 1);\n  rmSync(malformedPath);\n}"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "source-reading",
+      "passage": {
+        "quote": "An open source file can disappear, be renamed, or become unreadable while the user is reading it. Refresh then clears the old source text and passage background and displays the read failure in that pane. Description and problem updates continue, and restoring a readable file at the same path restores its content on a subsequent refresh."
+      }
+    },
+    {
+      "description": "formatted-descriptions",
+      "passage": {
+        "quote": "Historical image requests identify the same resolved Git tree as the displayed description. The selected commit is resolved before checking that identity, and image bytes come from that tree rather than current working files. Requests left over from a different selected revision are rejected."
+      }
+    },
+    {
+      "description": "project-loading",
+      "passage": {
+        "quote": "Review files are also checked before they can supply a comparison baseline or test evidence. A record needs a matching file identity, valid content hashes and timestamps, examined decisions with reasons, and well-formed passing results tied to its content. Malformed JSON and invalid record shapes become project problems; they supply no evidence and do not hide otherwise readable descriptions. Examined descriptions may use either stable identities or the loader\u2019s draft identities when repairing committed malformed metadata. Review-file identities retain their stricter record-name rules. Result validation is shared with check recording and preparation, including support for nonempty runner test identities that need not be cataloged."
+      }
+    },
+    {
+      "description": "navigation",
+      "passage": {
+        "quote": "If an open source file disappears or becomes unreadable, refresh clears its previous text and shows a local source problem while continuing to update descriptions and project issues. A later readable version can recover in the same pane. Working snapshots retain symbolic links as Git entries without following them, so an unrelated symlink does not prevent project browsing. This includes a tracked directory replaced by a symlink: its former descendants are covered by the selected replacement rather than read through the link."
+      }
+    },
+    {
+      "description": "cli-ui-open"
+    }
+  ]
+}

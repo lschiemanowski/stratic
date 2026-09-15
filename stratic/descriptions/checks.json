@@ -3,7 +3,7 @@
   "parent": {
     "description": "changes",
     "passage": {
-      "quote": "Checks use the project’s existing tools. Their recorded results identify the exact content tested, the method, environment, and evidence. Appropriate manual checks can be recorded too. Results may exist before a review; preparation selects passing evidence for the proposal, rather than treating an earlier pass as proof about changed content."
+      "quote": "Checks use the project\u2019s existing tools. Their recorded results identify the exact content tested, the method, environment, and evidence. Appropriate manual checks can be recorded too. Results may exist before a review; preparation selects passing evidence for the proposal, rather than treating an earlier pass as proof about changed content."
     }
   },
   "realization": "implemented",
@@ -11,12 +11,12 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes."
+        "quote": "A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes. An individual result\u2019s test identity is a nonempty string and can retain a runner\u2019s name such as suite/test-case. It matches a catalog entry only by exact identity; this does not change the catalog\u2019s identity rules. Recording, preparation, and historical review loading apply the same result validator."
       },
       "to": {
         "path": "src/review.ts",
         "passage": {
-          "quote": "export function results(root: string): CheckResult[] {\n  const p = join(localDirectory(root), 'checks.json');\n  return existsSync(p) ? readJson<CheckResult[]>(p) : [];\n}\nexport function recordCheck(root: string, input: Omit<CheckResult, 'id' | 'recordedAt'>): CheckResult {\n  if (!input || !nonempty(input.method) || !nonempty(input.environment) || !nonempty(input.evidence) ||\n      !['pass', 'fail', 'inconclusive'].includes(input.outcome) || !Array.isArray(input.tests) ||\n      !input.tests.every(t => nonempty(t.id) && ['pass', 'fail', 'inconclusive'].includes(t.outcome))) throw new Error('A check needs method, environment, evidence, outcome, and explicit individual test outcomes (or []).');\n  if (new Set(input.tests.map(t => t.id)).size !== input.tests.length) throw new Error('A check may give each test one outcome.');\n  if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(input.tree) || git(root, ['cat-file', '-t', input.tree]).trim() !== 'tree') throw new Error('Check input must identify an existing Git tree.');\n  const result = { ...input, id: randomUUID(), recordedAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'checks.json'), [...results(root), result]);\n  return result;\n}"
+          "quote": "export function results(root: string): CheckResult[] {\n  const p = join(localDirectory(root), 'checks.json');\n  return existsSync(p) ? readJson<CheckResult[]>(p) : [];\n}\nexport function recordCheck(root: string, input: Omit<CheckResult, 'id' | 'recordedAt'>): CheckResult {\n  const result = { ...input, id: randomUUID(), recordedAt: new Date().toISOString() };\n  if (!validCheckResult(result)) throw new Error('A check needs a tree, method, environment, evidence, outcome, and unique nonempty test identities with outcomes (or []).');\n  if (git(root, ['cat-file', '-t', result.tree]).trim() !== 'tree') throw new Error('Check input must identify an existing Git tree.');\n  writeJson(join(localDirectory(root), 'checks.json'), [...results(root), result]);\n  return result;\n}"
         }
       }
     },
@@ -28,26 +28,26 @@
       "to": {
         "path": "src/review.ts",
         "passage": {
-          "quote": "  const checks = input.resultIds.map(id => {\n    const r = results(root).find(r => r.id === id);\n    if (!r) throw new Error(`Missing recorded result: ${id}`);\n    if (r.tree !== contentTree) throw new Error(`Result ${id} examined different content. Record checks for this exact snapshot.`);\n    if (r.outcome !== 'pass' || r.tests.some(t => t.outcome !== 'pass')) throw new Error(`Result ${id} is not a passing check.`);\n    return r;\n  });\n  if (!checks.length) throw new Error('Record at least one appropriate check, including a manual check when automated tests do not apply.');\n  const review: Review & { unmapped: Input['unmapped'] } = {\n    id, base, contentTree, reviewer: input.reviewer, summary: input.summary, examined: input.examined,\n    unresolved: [], results: checks, recordedAt: new Date().toISOString(), unmapped: input.unmapped ?? [],\n  };\n  writeJson(pathInside(root, reviewPath), review);\n  const finalTree = snapshot(root, [...paths, reviewPath], base);\n  if (head(root) !== base || snapshot(root, paths, base) !== contentTree) throw new Error('Files or HEAD changed during preparation. Prepare again.');\n  const state: Prepared = { id, base, contentTree, finalTree, paths, reviewPath, createdAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'ready.json'), state);\n  return { ...state, preparationMs: performance.now() - start };\n}"
+          "quote": "  const checks = input.resultIds.map(id => {\n    const r = results(root).find(r => r.id === id);\n    if (!r) throw new Error(`Missing recorded result: ${id}`);\n    if (!validCheckResult(r)) throw new Error(`Malformed recorded result: ${id}`);\n    if (r.tree !== contentTree) throw new Error(`Result ${id} examined different content. Record checks for this exact snapshot.`);\n    if (r.outcome !== 'pass' || r.tests.some(t => t.outcome !== 'pass')) throw new Error(`Result ${id} is not a passing check.`);\n    return r;\n  });\n  if (!checks.length) throw new Error('Record at least one appropriate check, including a manual check when automated tests do not apply.');\n  const review: Review & { unmapped: Input['unmapped'] } = {\n    id, base, contentTree, reviewer: input.reviewer, summary: input.summary, examined: input.examined,\n    unresolved: [], results: checks, recordedAt: new Date().toISOString(), unmapped: input.unmapped ?? [],\n  };\n  if (!validReview(review)) throw new Error('Malformed review record; repair the review or its results before readiness.');\n  writeJson(pathInside(root, reviewPath), review);\n  const finalTree = snapshot(root, [...paths, reviewPath], base);\n  if (head(root) !== base || snapshot(root, paths, base) !== contentTree) throw new Error('Files or HEAD changed during preparation. Prepare again.');\n  const state: Prepared = { id, base, contentTree, finalTree, paths, reviewPath, createdAt: new Date().toISOString() };\n  writeJson(join(localDirectory(root), 'ready.json'), state);\n  return { ...state, preparationMs: performance.now() - start };\n}"
         }
       }
     },
     {
       "kind": "implementation",
       "from": {
-        "quote": "The desktop compares result content identities with the viewed project and labels evidence as current or earlier. It recognizes an accepted review’s content tree when the only added file is that review itself. This accounts for the review containing its own check evidence without treating arbitrary later edits as tested."
+        "quote": "The desktop compares result content identities with the viewed project and labels evidence as current or earlier. It recognizes an accepted review\u2019s content tree when the only added file is that review itself. This accounts for the review containing its own check evidence without treating arbitrary later edits as tested."
       },
       "to": {
         "path": "src/desktop/view-worker.ts",
         "passage": {
-          "quote": "  const equivalents = new Set([tree]);\n  // Compare actual content, excluding only each review's own newly-added record.\n  for (const { path, review } of history) {\n    try {\n      if (typeof review.base !== 'string' || typeof review.contentTree !== 'string' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.base) || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.contentTree)) continue;\n      if (git(root, ['diff', '--name-only', review.contentTree, tree]).trim() === path) equivalents.add(review.contentTree);\n    } catch { /* An unavailable historical review is not current evidence. */ }\n  }\n  const checks = new Map<string, CheckResult>();\n  for (const result of [...(revision === 'working' ? results(root) : []), ...history.flatMap(h => Array.isArray(h.review.results) ? h.review.results : [])]) {\n    if (result && typeof result.id === 'string' && Array.isArray(result.tests)) checks.set(result.id, result);\n  }\n  const branches = git(root, ['log', '-12', '--format=%H%x09%s']).trim().split('\\n').map(line => { const [id, ...title] = line.split('\\t'); return { id, title: title.join('\\t') }; });\n  return { tree, project, comparison: comparison(root, project, pending, history, tree), ready: pending, history: branches,\n    dirty: !!git(root, ['status', '--porcelain']).trim(),\n    checks: [...checks.values()].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).map(r => ({ ...r, current: equivalents.has(r.tree) })) };\n}"
+          "quote": "  const equivalents = new Set([tree]);\n  // Compare actual content, excluding only each review's own newly-added record.\n  for (const { path, review } of history) {\n    if (matchesReviewContent(root, tree, path, review)) equivalents.add(review.contentTree);\n  }\n  const checks = new Map<string, CheckResult>();\n  for (const result of [...(revision === 'working' ? results(root) : []), ...history.flatMap(h => Array.isArray(h.review.results) ? h.review.results : [])]) {\n    if (result && typeof result.id === 'string' && Array.isArray(result.tests)) checks.set(result.id, result);\n  }\n  const branches = git(root, ['log', '-12', '--format=%H%x09%s']).trim().split('\\n').map(line => { const [id, ...title] = line.split('\\t'); return { id, title: title.join('\\t') }; });\n  return { tree, project, comparison: comparison(root, project, pending, history, tree), ready: pending, history: branches,\n    dirty: !!git(root, ['status', '--porcelain']).trim(),\n    checks: [...checks.values()].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).map(r => ({ ...r, current: equivalents.has(r.tree) })) };\n}"
         }
       }
     },
     {
       "kind": "implementation",
       "from": {
-        "quote": "A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes."
+        "quote": "A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes. An individual result\u2019s test identity is a nonempty string and can retain a runner\u2019s name such as suite/test-case. It matches a catalog entry only by exact identity; this does not change the catalog\u2019s identity rules. Recording, preparation, and historical review loading apply the same result validator."
       },
       "to": {
         "path": "src/model.ts",
@@ -55,6 +55,25 @@
           "quote": "export interface CheckResult {\n  id: string; tree: string; method: string; outcome: 'pass' | 'fail' | 'inconclusive';\n  recordedAt: string; environment: string; evidence: string;\n  tests: { id: string; outcome: 'pass' | 'fail' | 'inconclusive' }[];\n}\nexport interface ReviewInput {\n  reviewer: string; summary: string;\n  examined: { id: string; outcome: 'revised' | 'unchanged'; reason: string }[];\n  unresolved: string[]; resultIds: string[];\n}\nexport interface Review extends Omit<ReviewInput, 'resultIds'> {\n  id: string; base: string; contentTree: string; recordedAt: string; results: CheckResult[];\n}\nexport interface Ready { id: string; base: string; contentTree: string; finalTree: string; paths: string[]; reviewPath: string; createdAt: string }"
         }
       }
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "Accepted evidence remains usable after cloning or Git garbage collection. The reader removes only the review\u2019s own newly added record from the selected tree and checks that the reconstructed tree has the recorded content hash. It does not depend on the temporary tree object made during preparation still being present. Other changed files prevent a match."
+      },
+      "to": {
+        "path": "src/review-records.ts",
+        "passage": {
+          "quote": "const bindings = new Map<string, boolean>();\n/** The final tree differs from reviewed content only by its newly added review. */\nexport function matchesReviewContent(root: string, tree: string, path: string, review: Review): boolean {\n  try { if (!hash(tree)) tree = revision(root, tree); } catch { return false; }\n  const key = JSON.stringify([root, tree, path, review.base, review.contentTree]);\n  const cached = bindings.get(key);\n  if (cached !== undefined) return cached;\n  try {\n    const added = !git(root, ['ls-tree', review.base, '--', path]).trim() && !!git(root, ['ls-tree', tree, '--', path]).trim();\n    const matches = added && treeWithoutPath(root, tree, path) === review.contentTree;\n    if (bindings.size >= 256) bindings.delete(bindings.keys().next().value!);\n    bindings.set(key, matches);\n    return matches;\n  } catch { return false; }\n}"
+        }
+      }
     }
+  ],
+  "summary": [
+    "Each check records observed evidence for a particular Git tree, with an overall result and only those individual test outcomes established by execution.",
+    "Checks can be recorded before review. Preparation requires matching passing evidence and preserves it in the committed review.",
+    "The test catalog connects tests to claims and source; results record executions. Earlier results remain distinguishable from current evidence, and neither proves semantic accuracy.",
+    "Accepted evidence is recognized from committed content after cloning; reconstructing the recorded hash excludes only the review itself, never later edits.",
+    "Result identities preserve nonempty runner names, including names with slashes; all stages use the same result validation."
   ]
 }

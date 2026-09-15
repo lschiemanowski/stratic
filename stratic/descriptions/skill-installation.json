@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Installs the core skill and selected optional TDD supplement as repository-local files without choosing a workflow, rewriting project instructions, or committing changes.",
+    "Recorded content hashes distinguish unchanged older installations from local edits and deletions. Explicit updates check all selected files and stop on conflicts before writing.",
+    "Additional local files are preserved. Invalid records, symbolic links, and unexpected file types are rejected; ordinary filesystem writes do not provide a transaction against concurrent edits or disk failures."
   ]
 }

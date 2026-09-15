@@ -14,7 +14,7 @@
     {
       "description": "preparation",
       "passage": {
-        "quote": "The investigation names examined descriptions as revised or unchanged with reasons, accounts for the required impact and unmapped changed regions, and leaves no unresolved blocker. Preparation loads the selected content and checks those decisions against the before and after descriptions. It also requires valid structure and links, and at least one appropriate passing result for the exact content. These checks enforce consistency of the submitted review; they do not generate its semantic judgment."
+        "quote": "The investigation names examined descriptions as revised or unchanged with reasons, accounts for the required impact and unmapped changed regions, and leaves no unresolved blocker. Preparation loads the selected content and checks those decisions against the before and after descriptions. It also requires valid structure and links, and at least one appropriate passing result for the exact content. These checks enforce consistency of the submitted review; they do not generate its semantic judgment. Before writing the review or readiness, preparation validates the selected result records and the assembled review using the same rules as historical loading and acceptance. Damaged local results therefore fail at preparation rather than creating an unusable handoff."
       }
     },
     {

@@ -4,7 +4,7 @@ Acceptance finishes an already investigated and prepared change after the user a
 
 Acceptance requires the exact prepared review identity and a checked-out branch. It verifies the base and proposed content, rejects unfinished Git operations, and checks structural validity again. It does not rerun the project’s tests or authorize a push.
 
-Commit hooks inspect the prepared index and may amend the commit message. Hook failure or a content change stops acceptance before the branch moves. The commit uses the pinned tree, and only its affected index entries are reconciled; unrelated staged and working edits remain intact.
+Commit hooks inspect the prepared index and may amend the commit message. Hook failure or a content change stops acceptance before the branch moves. The commit uses the pinned tree. Index reconciliation changes only exact paths added, modified, or deleted by that tree, removing obsolete entries before adding replacements. Other staged entries remain intact, including descendants of an accepted path whose working copies have been deleted. If a replacement would conflict with an unrelated staged ancestor or descendant, acceptance stops before creating a commit and leaves the index untouched.
 
 A recorded commit and index state allow acceptance to resume after interruption without creating another commit. Recovery checks the branch and detects newer staging in the selected files. Only a lock known to belong to a dead accepting process is removed automatically.
 

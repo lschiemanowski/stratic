@@ -9,3 +9,5 @@ Highlight.js supplies syntax colors for registered languages chosen by filename.
 The renderer combines syntax colors with passage backgrounds without altering the source text. Tokens that span lines are split for display while original line endings and blank lines are preserved. Source strings that resemble HTML are inserted as text, not executable markup.
 
 For example, a file with CRLF line endings and a comment spanning several lines must keep those characters and line positions even while syntax colors are applied. Colors aid reading; the quoted passage and repository revision identify what is actually being inspected.
+
+An open source file can disappear, be renamed, or become unreadable while the user is reading it. Refresh then clears the old source text and passage background and displays the read failure in that pane. Description and problem updates continue, and restoring a readable file at the same path restores its content on a subsequent refresh.

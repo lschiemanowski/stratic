@@ -57,5 +57,6 @@ test('Repository reads cannot escape through paths or symbolic links', t => {
   assert.throws(() => readSource(root, '.git/config'), /Invalid repository path/);
   symlinkSync('/etc/passwd', join(root, 'src/outside'));
   assert.throws(() => readSource(root, 'src/outside'), /Symbolic links/);
-  assert.throws(() => snapshot(root, ['src/outside']), /Symbolic links/);
+  const tree = snapshot(root, ['src/outside']);
+  assert.throws(() => readSource(root, 'src/outside', tree), /Not a regular file/);
 });

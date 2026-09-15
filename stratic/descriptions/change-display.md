@@ -11,3 +11,5 @@ The comparator preserves matching paragraphs in order and classifies the remaini
 For unusually fragmented descriptions, the comparison falls back to marking the whole text changed rather than allocating an unbounded paragraph-comparison table. This loses fine detail but keeps the reader responsive and still indicates that the text differs.
 
 Summary bullets are compared separately against their earlier metadata at the same comparison base. Added or edited bullets are highlighted, and removed bullets can be expanded. Full-description changes and summary changes remain distinct: a prose edit does not mark an unchanged summary as edited.
+
+Recognizing an accepted change uses the files retained in Git: excluding the review’s own newly added record must reproduce its recorded content hash. Comparison therefore survives a normal clone without relying on a temporary preparation tree, and unrelated later edits do not qualify as the accepted change.

@@ -7,9 +7,15 @@ import { join, resolve } from 'node:path';
 import assert from 'node:assert/strict';
 import { createQueue, addRelease } from './queue-example.ts';
 import { checkQueue } from './queue-workflow.ts';
-import { requestUI } from '../src/ui-channel.ts';
+import { requestUI as sendUIRequest } from '../src/ui-channel.ts';
 import { recordCheck } from '../src/review.ts';
 import { repository, head, workingSnapshot } from '../src/git.ts';
+import { checkReaderResilience, reviewedClone } from './reader-resilience-checks.ts';
+
+async function requestUI(...args: Parameters<typeof sendUIRequest>) {
+  try { return await sendUIRequest(...args); }
+  catch (error) { throw new Error(`Desktop request failed: ${JSON.stringify(args[1])}`, { cause: error }); }
+}
 
 const directory = mkdtempSync(join(tmpdir(), 'stratic-desktop-'));
 const project = join(directory, 'queue'); createQueue(project); const root = repository(project), base = head(root);
@@ -538,6 +544,7 @@ try {
   await page.waitForFunction(before => { const image = document.querySelector<HTMLImageElement>('.active-description .description-image img'); return image?.complete && image.naturalWidth === 240 && image.src !== before; }, imageBefore);
   await active.evaluate(e => { e.scrollTop = 0; });
   await page.screenshot({ path: 'artifacts/desktop-markdown.png' });
+  await checkReaderResilience(page, root);
   assert.deepEqual(network, []);
   assert.deepEqual(errors, []);
   await app.close();
@@ -548,6 +555,15 @@ try {
     assert.equal(await restored.locator('.project-option').count(), 2);
     await restored.locator('.project-option').first().click();
     await restored.locator('.active-description').getByRole('heading', { name: 'Local work queue', exact: true }).waitFor();
+    const clone = reviewedClone(directory);
+    await reopened.evaluate(({ dialog }, path) => { (dialog as any).showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, clone.root);
+    if (!await restored.getByRole('button', { name: 'Open project…', exact: true }).isVisible()) await restored.getByRole('button', { name: 'Projects', exact: true }).click();
+    await restored.getByRole('button', { name: 'Open project…', exact: true }).click();
+    await restored.waitForFunction(path => document.querySelector('.project-option[aria-current="true"]')?.getAttribute('title') === path, clone.root);
+    const clonedView = await restored.evaluate(() => window.stratic.view());
+    assert.equal(clonedView.comparison?.label, 'Accepted changes');
+    assert.ok(clonedView.checks.some(c => c.tree === clone.contentTree && c.current));
+    assert.deepEqual(clonedView.project?.issues, []);
   } finally { await reopened.close(); }
 
   console.log(JSON.stringify({ passed: true, navigationMs, checked: ['formatted Markdown, equations, local image refresh, source-position links, and inert hostile content', 'optional summaries in both panes, safe bullets, change highlights, navigation persistence, and historical fallback', 'compact spatial overview, individual folds, depth slider, current-node reveal, 300 leaves, zoom/pan, selection return and broken drafts', 'global arrows from prose, toolbar and source, folded menu, hierarchy boundaries, and form-control exceptions', 'quiet title-bar controls, exceptional status, and project switching with remembered folders', 'paired descriptions, sibling/depth navigation, independent scroll, and source from either pane', 'folding and agent navigation synchronization', '300 leaves in a bounded menu', 'direct single-destination links and multiple-destination chooser', 'syntax colors, multiline tokens, exact source text, and plain-text fallback across the 200,000-character boundary', 'copyable identity', 'agent current/open', 'contextual tests, expanded source refresh, late response isolation, current-result precedence, and current/earlier/pass/fail/inconclusive/unrecorded evidence', 'historical content', 'broken draft browsing', 'inert repository HTML', 'sandboxed renderer API'], screenshot: resolve('artifacts/desktop.png') }, null, 2));

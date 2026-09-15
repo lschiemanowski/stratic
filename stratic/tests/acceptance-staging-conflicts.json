@@ -1,0 +1,21 @@
+{
+  "id": "acceptance-staging-conflicts",
+  "name": "Rejecting incompatible staging before commit",
+  "description": "Unrelated staged ancestors and descendants that conflict with accepted entries cause rejection without any new commit, changed branch, or index mutation.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Acceptance rejects unrelated staged path conflicts before creating a commit', t => {\n  for (const ancestor of [false, true]) {\n    const root = fixture(t);\n    if (ancestor) {\n      writeFileSync(join(root, 'resource'), 'staged ancestor');\n      git(root, ['add', 'resource']);\n      rmSync(join(root, 'resource'));\n      mkdirSync(join(root, 'resource'));\n      writeFileSync(join(root, 'resource/included'), 'accepted child');\n    } else {\n      replacement(root, 'directory', 'directory');\n      writeFileSync(join(root, 'resource/extra'), 'staged descendant');\n      git(root, ['add', 'resource/extra']);\n      rmSync(join(root, 'resource'), { recursive: true });\n      symlinkSync('missing-target', join(root, 'resource'));\n    }\n    const paths = ancestor ? ['resource/included'] : ['resource'];\n    const { input } = proposal(root, paths), prepared = prepare(root, paths, input);\n    const base = head(root), index = readFileSync(join(root, '.git/index'));\n    const commits = git(root, ['cat-file', '--batch-all-objects', '--batch-check=%(objecttype) %(objectname)']).split('\\n').filter(s => s.startsWith('commit '));\n    assert.throws(() => accept(root, prepared.id), /[Ss]taged.*conflict|conflict.*staged/);\n    assert.equal(head(root), base);\n    assert.deepEqual(readFileSync(join(root, '.git/index')), index);\n    assert.equal(ready(root)?.commit, undefined);\n    assert.deepEqual(git(root, ['cat-file', '--batch-all-objects', '--batch-check=%(objecttype) %(objectname)']).split('\\n').filter(s => s.startsWith('commit ')), commits);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "commit-safeguards",
+      "passage": {
+        "quote": "Before creating the commit, acceptance constructs a reconciled copy of the user\u2019s index. It removes and installs only exact paths changed between the recorded base and the accepted tree; selecting a parent does not authorize removing other staged descendants. For example, replacing a file with a directory can accept resource/included while preserving a separately staged resource/extra even if its working copy has been deleted. If an unrelated staged ancestor or descendant cannot coexist with an accepted replacement, acceptance rejects the conflict before creating any commit or changing the real index. After the branch update, the reconciled copy becomes the user\u2019s index. Working files remain intact. File selection is whole-file; selected files cannot carry a second, unreviewed version into acceptance."
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "desktop-portable-evidence",
+  "name": "Cloned review evidence",
+  "description": "A reader opened on a transport clone reconstructs accepted highlighting and marks its recorded checks current.",
+  "code": [
+    {
+      "path": "scripts/reader-resilience-checks.ts",
+      "passage": {
+        "quote": "export function reviewedClone(directory: string): { root: string; contentTree: string } {\n  const original = join(directory, 'reviewed-original'); createQueue(original); addRelease(original);\n  const proposal = prepare(original, selected(original), releaseReview(original)); accept(original, proposal.id);\n  const clone = join(directory, 'reviewed-clone'); git(original, ['clone', '--no-local', original, clone]);\n  assert.throws(() => git(clone, ['cat-file', '-t', proposal.contentTree]));\n  workingSnapshot(clone);\n  return { root: repository(clone), contentTree: proposal.contentTree };\n}"
+      }
+    },
+    {
+      "path": "scripts/desktop-smoke.ts",
+      "passage": {
+        "quote": "    const clone = reviewedClone(directory);\n    await reopened.evaluate(({ dialog }, path) => { (dialog as any).showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, clone.root);\n    if (!await restored.getByRole('button', { name: 'Open project\u2026', exact: true }).isVisible()) await restored.getByRole('button', { name: 'Projects', exact: true }).click();\n    await restored.getByRole('button', { name: 'Open project\u2026', exact: true }).click();\n    await restored.waitForFunction(path => document.querySelector('.project-option[aria-current=\"true\"]')?.getAttribute('title') === path, clone.root);\n    const clonedView = await restored.evaluate(() => window.stratic.view());\n    assert.equal(clonedView.comparison?.label, 'Accepted changes');\n    assert.ok(clonedView.checks.some(c => c.tree === clone.contentTree && c.current));\n    assert.deepEqual(clonedView.project?.issues, []);"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "checks",
+      "passage": {
+        "quote": "Accepted evidence remains usable after cloning or Git garbage collection. The reader removes only the review\u2019s own newly added record from the selected tree and checks that the reconstructed tree has the recorded content hash. It does not depend on the temporary tree object made during preparation still being present. Other changed files prevent a match."
+      }
+    },
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "Recognizing an accepted change uses the files retained in Git: excluding the review\u2019s own newly added record must reproduce its recorded content hash. Comparison therefore survives a normal clone without relying on a temporary preparation tree, and unrelated later edits do not qualify as the accepted change."
+      }
+    }
+  ]
+}

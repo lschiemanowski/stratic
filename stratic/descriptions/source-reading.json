@@ -23,7 +23,7 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "Highlight.js supplies syntax colors for registered languages chosen by filename. Unknown languages and files over 200,000 characters use plain text, avoiding unreliable language guessing and expensive highlighting of large input. This is a coloring limit, separate from the repository’s larger file-read limit. Cached token spans are reused only when both the path and source text still match."
+        "quote": "Highlight.js supplies syntax colors for registered languages chosen by filename. Unknown languages and files over 200,000 characters use plain text, avoiding unreliable language guessing and expensive highlighting of large input. This is a coloring limit, separate from the repository\u2019s larger file-read limit. Cached token spans are reused only when both the path and source text still match."
       },
       "to": {
         "path": "src/desktop/source-view.ts",
@@ -51,6 +51,24 @@
         "description": "passages"
       },
       "reason": "Source backgrounds must identify the same exact passage as the project links."
+    },
+    {
+      "kind": "implementation",
+      "from": {
+        "quote": "An open source file can disappear, be renamed, or become unreadable while the user is reading it. Refresh then clears the old source text and passage background and displays the read failure in that pane. Description and problem updates continue, and restoring a readable file at the same path restores its content on a subsequent refresh."
+      },
+      "to": {
+        "path": "src/desktop/renderer.ts",
+        "passage": {
+          "quote": "async function refresh(force = false) {\n  const ticket = ++sequence;\n  try {\n    const v = await window.stratic.view(); if (ticket !== sequence) return;\n    const next = JSON.stringify(v);\n    if (next === signature && !force) return;\n    const key = JSON.stringify(v.selection);\n    if (current && v.project?.root !== current.project?.root) expandedTests.clear();\n    if (key !== loadedKey) { clearDetail(); tab = 'description'; loadedKey = key; }\n    if (source) {\n      const openedSource = source;\n      try {\n        const body = await window.stratic.source(openedSource.path);\n        if (ticket !== sequence || source !== openedSource) return;\n        openedSource.body = body;\n        try { openedSource.range = resolvePassage(body, openedSource.passage); openedSource.problem = undefined; }\n        catch (e) { openedSource.range = undefined; openedSource.problem = (e as Error).message + ' Select the updated description passage to follow its current link.'; }\n      } catch (e) {\n        if (ticket !== sequence || source !== openedSource) return;\n        openedSource.body = ''; openedSource.range = undefined;\n        openedSource.problem = 'Source unavailable: ' + (e as Error).message;\n      }\n    }\n    current = v; signature = next; render();\n    if (v.selection.passage) document.querySelector('.active-description .selected')?.scrollIntoView({ block: 'center' });\n  } catch (e) { error(e); }\n}"
+        }
+      }
     }
+  ],
+  "summary": [
+    "An implementation link opens the whole source file beside its owning description, positioned at the quoted lines. Associated test code can expand below it; closing source restores paired reading.",
+    "Line numbers and passage backgrounds retain context. Missing or ambiguous quotes are reported rather than silently retargeted.",
+    "Known languages receive syntax colors; unknown languages and files above 200,000 characters use plain text. Exact source characters are preserved, HTML stays inert, and cached colors require matching path and content.",
+    "Deleted, renamed, or unreadable source clears its stale text without stopping project refresh and recovers if the file becomes readable again."
   ]
 }

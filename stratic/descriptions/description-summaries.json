@@ -3,7 +3,7 @@
   "parent": {
     "description": "descriptions",
     "passage": {
-      "quote": "A description may also have a short bullet summary that gives a faithful abbreviated account of the same responsibility. The full text remains the complete description; its summary is optional content maintained and reviewed alongside it. Summaries belong to the project’s versioned account and must preserve the conditions and limitations needed to understand the behavior being promised."
+      "quote": "A short bullet summary gives a faithful abbreviated account of the same responsibility. The full text remains the complete description. The agent creates a summary when creating a description and maintains it whenever the description or its metadata changes. Summaries belong to the project’s versioned account and preserve the conditions and limitations needed to understand the behavior being promised. Older content and drafts without summaries remain readable."
     }
   },
   "realization": "implemented",
@@ -35,19 +35,19 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "The full description supplies the complete account. Its summary preserves the qualifications that matter to understanding its promises, while leaving detailed explanations to the full text. A summary must not introduce a different promise or conceal an important limitation. The coding agent maintains it alongside the description, and a review of changed behavior includes checking that any existing summary still agrees."
+        "quote": "The full description supplies the complete account. Its summary preserves the qualifications that matter to understanding its promises, while leaving detailed explanations to the full text. A summary must not introduce a different promise or conceal an important limitation. Whenever the coding agent creates or changes a description or its metadata, it creates a missing summary and reviews existing bullets for accuracy. Changed promises, conditions, and limitations are reflected in both; accurate bullets need not be rewritten."
       },
       "to": {
         "path": "skills/stratic-v3/SKILL.md",
         "passage": {
-          "quote": "Descriptions may include an optional `summary` array in their JSON metadata, with one nonempty text string per bullet. When changing a description that has a summary, review and update those bullets in the same change so promises, conditions, and limitations stay consistent. Add summaries where useful; absence is valid. Summarize the program responsibility, not the list of topics or children, and keep implementation passage links in the full description."
+          "quote": "Whenever creating or changing a description or its metadata, create a nonempty `summary` array if missing and review any existing summary against the full description. Update the bullets in the same change when promises, conditions, or limitations change; retain accurate bullets when they still apply. Use concise, self-contained strings that summarize the responsibility’s behavior, not a list of topics, children, or code files. Keep implementation passage links in the full description. The file format permits absent summaries for older content and drafts, but that compatibility is not a reason to omit a summary from newly created or changed descriptions."
         }
       }
     }
   ],
   "summary": [
-    "Optional bullets condense a responsibility’s behavior, conditions, and boundaries without replacing its complete description.",
-    "Agents maintain and review summaries with the full account; the desktop does not generate them on demand.",
-    "Summaries are string arrays in the existing metadata, sharing description identity and Git history. Implementation links stay in the full text."
+    "Bullet summaries condense a responsibility’s behavior, conditions, and boundaries while the full description remains the complete account.",
+    "Agents create missing summaries whenever descriptions are created or changed and update existing bullets when their meaning changes. Older content and drafts remain readable without them.",
+    "Summaries share the description’s metadata, identity, and Git history. The desktop displays them; implementation links stay in the full text."
   ]
 }

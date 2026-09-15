@@ -79,9 +79,9 @@ ipcMain.handle('copy-id', event => { verify(event); if (!selection.description) 
 ipcMain.handle('source', (event, path) => { verify(event); if (typeof path !== 'string') throw new Error('Expected a source path.'); return readSource(root, path, selection.revision); });
 ipcMain.handle('image', async (event, request) => {
   verify(event);
-  if (!request || typeof request.description !== 'string' || typeof request.url !== 'string' || request.project !== root || request.revision !== selection.revision) throw new Error('Image request does not match the displayed project.');
+  if (!request || typeof request.description !== 'string' || typeof request.url !== 'string' || request.project !== root) throw new Error('Image request does not match the displayed project.');
   const at = selection, data = await viewData(root, at.revision);
-  if (selection.project !== at.project || request.tree !== data.tree) throw new Error('The displayed content changed; retry after refresh.');
+  if (selection !== at || request.revision !== data.project.revision || request.tree !== data.tree) throw new Error('The displayed content changed; retry after refresh.');
   return projectImage(data.project, request.description, request.url, data.tree);
 });
 ipcMain.handle('choose-project', async (event, path?: unknown) => {

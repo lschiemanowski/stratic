@@ -1,0 +1,21 @@
+{
+  "id": "resilience-cold-navigation",
+  "name": "Cold navigation response",
+  "description": "An authenticated open request that takes longer than three seconds completes through the real session socket; current-selection queries continue to work.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('UI navigation waits for cold loading beyond the short connection timeout', async t => {\n  const root = fixture(t);\n  const selection = { project: root, revision: 'working', description: 'queue' };\n  const stop = await serveUI(root, async request => {\n    if (request.action === 'open') await new Promise(resolve => setTimeout(resolve, 3500));\n    return selection;\n  });\n  t.after(stop);\n  assert.deepEqual(await requestUI(root, { action: 'current' }), selection);\n  assert.deepEqual(await requestUI(root, { action: 'open', description: 'queue' }), selection);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "cli-ui-open",
+      "passage": {
+        "quote": "The request travels through the worktree\u2019s local session connection. Desktop navigation validates the selection, resolves the description and passage, and pins historical navigation to a commit. Invalid targets and unavailable sessions produce errors instead of selecting substitute content. An authenticated navigation request allows up to 30 seconds for a cold project or historical revision to load. Connection setup, unauthenticated input, and current-selection queries retain their three-second idle limits. Both endpoints use the longer limit only for navigation."
+      }
+    }
+  ]
+}

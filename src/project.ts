@@ -4,6 +4,7 @@ import { basename, matchesGlob } from 'node:path';
 import type { Connection, Description, DescriptionTarget, Link, Metadata, Passage, Project, SourceTarget, TestRecord } from './model.ts';
 import { files, readSource, repository, revision } from './git.ts';
 import { isPassage, resolvePassage } from './passages.ts';
+import { reviewHistory } from './review-records.ts';
 
 const sourceCaches = new WeakMap<Project, Map<string, string>>();
 function projectSource(project: Project, path: string): string {
@@ -102,6 +103,7 @@ export function loadProject(path: string, ref = 'working'): Project {
       try { targetContent(project, target); } catch (e) { issue(`test:${t.id}`, (e as Error).message); }
     }
   }
+  reviewHistory(root, view, project.issues);
   return project;
 }
 export function getDescription(project: Project, id: string): Description {

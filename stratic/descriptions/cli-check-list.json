@@ -32,5 +32,9 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Returns the worktree’s independent check records, including unsuccessful outcomes and their original content identities; no records yields an empty array.",
+    "Retrieval neither executes checks nor declares the results current. Evidence copied into committed reviews has a separate lifetime."
   ]
 }

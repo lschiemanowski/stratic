@@ -11,7 +11,7 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "The request names a stable description identity, an optional revision, and an optional exact quote. Working content is the default revision. The response is the resulting selection rather than a screenshot or the destination’s complete prose."
+        "quote": "The request names a stable description identity, an optional revision, and an optional exact quote. Working content is the default revision. The response is the resulting selection rather than a screenshot or the destination\u2019s complete prose."
       },
       "to": {
         "path": "src/cli.ts",
@@ -23,7 +23,7 @@
     {
       "kind": "implementation",
       "from": {
-        "quote": "The request travels through the worktree’s local session connection. Desktop navigation validates the selection, resolves the description and passage, and pins historical navigation to a commit. Invalid targets and unavailable sessions produce errors instead of selecting substitute content."
+        "quote": "The request travels through the worktree\u2019s local session connection. Desktop navigation validates the selection, resolves the description and passage, and pins historical navigation to a commit. Invalid targets and unavailable sessions produce errors instead of selecting substitute content. An authenticated navigation request allows up to 30 seconds for a cold project or historical revision to load. Connection setup, unauthenticated input, and current-selection queries retain their three-second idle limits. Both endpoints use the longer limit only for navigation."
       },
       "to": {
         "path": "src/desktop/main.ts",
@@ -32,5 +32,11 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Directs the desktop to a stable description identity and optional exact passage at the requested revision.",
+    "Navigation validates the target and pins historical revisions to commits; invalid targets or unavailable sessions produce errors.",
+    "Only the reader\u2019s selection changes. Project content and acceptance authority are unaffected.",
+    "Authenticated navigation allows up to 30 seconds for cold loading; connection setup and current-selection queries retain short timeouts."
   ]
 }

@@ -44,5 +44,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Reading shows the active description with its immediate parent, using the same project revision for both.",
+    "Sibling navigation retains the parent; going deeper advances the pair. The panes scroll independently, and unusable parent chains fall back to one pane.",
+    "Implementation temporarily replaces the pair with its owning description beside source. Closing source restores that description with its parent, without adding a second project selection."
   ]
 }

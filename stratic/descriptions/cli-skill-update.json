@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Explicitly updates recorded skills that remain unchanged since installation; it does not add unselected workflows.",
+    "Local edits or deletions stop the update for manual inspection and merging. Other local files are preserved.",
+    "Returns written paths and states, leaving changes uncommitted. Invalid arguments, historical revisions, and absent installation records are rejected."
   ]
 }

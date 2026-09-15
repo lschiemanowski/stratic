@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Installs the repository-local core skill; selecting the optional tdd argument also installs its test-first supplement without choosing it as the workflow.",
+    "Arguments and paths are checked before installation. Existing different files and project instructions are preserved, and identical installation is repeatable.",
+    "Returns written paths and skill states as JSON. Only working files are supported; installation neither stages nor commits them."
   ]
 }

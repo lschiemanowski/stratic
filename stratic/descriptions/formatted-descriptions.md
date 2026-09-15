@@ -17,3 +17,5 @@ Images use ordinary Markdown image syntax. A relative path is resolved from the 
 ![Markdown source is parsed into structure and rendered as readable content.](../assets/description-rendering.svg)
 
 Images are supplied as image data through the main process and displayed only as images, including SVG. Raw HTML stays literal. Ordinary Markdown links retain their labels and destinations for inspection but do not open external pages; Stratic’s metadata links remain the mechanism for navigating descriptions and implementation. This preserves the reader’s authority boundary while allowing richer project content.
+
+Historical image requests identify the same resolved Git tree as the displayed description. The selected commit is resolved before checking that identity, and image bytes come from that tree rather than current working files. Requests left over from a different selected revision are rejected.

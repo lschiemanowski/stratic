@@ -1,0 +1,496 @@
+{
+  "id": "cb788db7-36b0-4d4a-9a7a-afe279dda18a",
+  "base": "39f33a94b33cbd0d59a740100cbbddf77b509a67",
+  "contentTree": "592a83f1a47032c19d3ed85a772bb76d7819911b",
+  "reviewer": "Codex",
+  "summary": "Keep reviews portable and browsing resilient; preserve unrelated staging through acceptance and recovery, validate evidence before readiness, and maintain description summaries.",
+  "examined": [
+    {
+      "id": "acceptance-recovery",
+      "outcome": "revised",
+      "reason": "Recovery compares only exact accepted index entries against the recorded before/after states and uses the same exact-path reconciliation. Regression tests exercise interruptions before publication and after publication, preserving excluded staged-only descendants without creating a second commit."
+    },
+    {
+      "id": "acceptance",
+      "outcome": "revised",
+      "reason": "Reconciliation changes exact accepted paths only, including file/directory/symlink replacements. Staged-only descendants remain intact; conflicts with unrelated staged ancestors or descendants are rejected before creating any commit. Updated the description and summary to state this boundary."
+    },
+    {
+      "id": "agent-skills",
+      "outcome": "revised",
+      "reason": "Its existing summary now explicitly includes summary maintenance as a shared core responsibility; optional workflow selection and local-installation promises are unchanged."
+    },
+    {
+      "id": "agent-tdd",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: TDD applies when selected by the user or project; installing the skill alone does not activate it, and a task-specific choice overrides the default. Refine a coherent behavior, then establish tests that fail for the intended missing behavior before implementing and refactoring. Preserve the failure evidence separately from final passing checks. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "agent-workflow",
+      "outcome": "revised",
+      "reason": "The full account and skill now require creating a missing summary on description creation or modification, checking existing bullets, and updating changed meanings. Added a summary of that workflow, including optional methods and separate acceptance authority."
+    },
+    {
+      "id": "agents",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: The CLI exposes project descriptions, source, structural validation, impact, and recorded check evidence. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "change-display",
+      "outcome": "revised",
+      "reason": "Accepted comparison verifies reconstructed committed content and no longer requires temporary preparation trees; paragraph and summary rendering rules remain unchanged. Added and reviewed summary: Changed paragraphs are highlighted as complete units; removed text can be expanded. Highlights indicate prose differences, not implementation or review approval. Comparison uses the prepared base, HEAD, or the matching accepted review’s base. The comparison and toggle persist across navigation. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "changes",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: A proposal records revised and unchanged responsibilities, reasons, and checks bound to the exact selected content. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "checks",
+      "outcome": "revised",
+      "reason": "A single validator now governs result recording, selection for readiness, and historical loading. Nonempty runner identities such as suite/test-case remain valid and match catalog entries only by exact identity. Evidence identity is reconstructed from retained Git entries, excluding only the newly added review. Fresh clones retain current results without transient tree objects. Added and reviewed summary: Each check records observed evidence for a particular Git tree, with an overall result and only those individual test outcomes established by execution. Checks can be recorded before review. Preparation requires matching passing evidence and preserves it in the committed review. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-accept",
+      "outcome": "revised",
+      "reason": "The CLI still requires the explicit prepared identity and delegates to acceptance. Its implementation passage now includes precommit index reconciliation and exact-path recovery; the existing summary remains accurate."
+    },
+    {
+      "id": "cli-check-list",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Returns the worktree’s independent check records, including unsuccessful outcomes and their original content identities; no records yields an empty array. Retrieval neither executes checks nor declares the results current. Evidence copied into committed reviews has a separate lifetime. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-check-record",
+      "outcome": "revised",
+      "reason": "The command retains its JSON contract and uses shared validation for complete check records, allowing nonempty runner names and rejecting malformed or duplicate outcomes. Added and reviewed summary: Imports an observed result for an existing content tree, validates its fields and unique test identities, and assigns a result ID and timestamp. Evidence can exist before a review. Individual outcomes must be supplied explicitly; an aggregate result does not imply them. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-discard",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: The matching review identity withdraws readiness while retaining project edits and independent check results. An unchanged generated review may be removed. If the recorded commit is already HEAD, acceptance must finish recovery instead of discarding it. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-help",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Describes the executable’s commands, arguments, and project-selection convention as plain text. Help is available before repository resolution, including outside a project; it does not inspect project readiness or change state. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-impact",
+      "outcome": "revised",
+      "reason": "Refreshed the impact link to portable baseline recognition; result shape and revised-branch expansion remain accurate. Added and reviewed summary: Compares selected working content with a base, using supplied review decisions to report affected descriptions, reasons, and unmapped regions. Both old and new relationships contribute. Revised decisions expand investigation; unchanged decisions stop it. An unreviewed baseline requires initial examination of all descriptions. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-list",
+      "outcome": "revised",
+      "reason": "Refreshed the loader link to include malformed-review issues; list still returns available descriptions and reported problems. Added and reviewed summary: Returns a compact hierarchy of description IDs, titles, parents, implementation status, and issues for working or historical content. Readable drafts remain discoverable. Full prose is omitted and can be retrieved through show; list does not repair invalid structure. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-prepare",
+      "outcome": "revised",
+      "reason": "The preparation implementation now validates its completed review using the reader acceptance rules before publishing readiness. Refreshed the preparation implementation link to the expanded-path protection; command parsing and evidence requirements remain accurate. Added and reviewed summary: Requires explicit file selection and a completed review input before invoking preparation. Valid structure, accounted-for impact, and matching passing evidence produce a pinned proposal, review record, and ready identity. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-ready",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Returns the saved prepared identity, base, content trees, selected paths, and review location, or null when none exists. Readiness is saved state, not fresh validation; later edits may invalidate it. Acceptance checks the live proposal and handles recorded recovery state. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-show",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Resolves one stable description identity at the selected revision and returns its prose, metadata, parent, connections, tests, and issues. Connections expose resolved ranges or passage problems without recursively loading destination prose. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-skill-install",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Installs the repository-local core skill; selecting the optional tdd argument also installs its test-first supplement without choosing it as the workflow. Arguments and paths are checked before installation. Existing different files and project instructions are preserved, and identical installation is repeatable. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-skill-status",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Compares local skill contents, installation records, and bundled guidance, reporting each skill’s path and state as JSON. Reading status creates no files. Absent skills are normal; invalid records, redirected paths, unexpected arguments, and historical requests are errors. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-skill-update",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Explicitly updates recorded skills that remain unchanged since installation; it does not add unselected workflows. Local edits or deletions stop the update for manual inspection and merging. Other local files are preserved. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-snapshot",
+      "outcome": "revised",
+      "reason": "The snapshot helper now removes redundant selected descendants while preserving invalid-path rejection, selected-file boundaries, index isolation, and exact tree identities. Snapshotting now preserves symlink entries without following targets; whole-file selection, temporary indexes, and reported content identity remain accurate. Added and reviewed summary: Captures selected whole working files, including deletions, over HEAD and returns their tree identity, base, and paths. A temporary index preserves the user’s staging area and branch. Review files are handled separately by preparation. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-source",
+      "outcome": "revised",
+      "reason": "CLI source inherits regular-file rejection and filesystem-independent historical reads; its arguments and JSON output remain accurate. Added and reviewed summary: Returns complete decoded source text from a repository-relative path at the working or selected historical revision. Repository boundaries, symbolic-link restrictions, file types, and size limits apply; unavailable resources produce errors. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-ui-current",
+      "outcome": "revised",
+      "reason": "Current-selection queries retain the short timeout and existing session protocol. Refreshed implementation links to the shared request code. Added and reviewed summary: Reads the active desktop’s semantic selection: project, revision, and any selected description and passage. Uses the worktree’s existing session connection; unavailable sessions or timeouts are errors rather than reasons to launch a desktop. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-ui-open",
+      "outcome": "revised",
+      "reason": "Documented the 30-second authenticated open-request limit at both endpoints. Three-second connection, unauthenticated-input, and current-selection limits remain in place. Added and reviewed summary: Directs the desktop to a stable description identity and optional exact passage at the requested revision. Navigation validates the target and pins historical revisions to commits; invalid targets or unavailable sessions produce errors. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-validate",
+      "outcome": "revised",
+      "reason": "Refreshed the loader link; validate now also exposes malformed-review problems through its existing invalid result and exit status. Added and reviewed summary: Returns structural and passage-link problems for working or historical project content; discovered issues produce a nonzero exit status. Invalid drafts remain inspectable while the loader checks identities, metadata, hierarchy, and exact targets. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "cli-version",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Identifies the executable as Stratic v3, version 0.1.0, implementing project format 1. Repository resolution still applies, but the response does not establish project validity, link accuracy, or readiness to accept a change. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "commit-safeguards",
+      "outcome": "revised",
+      "reason": "The reconciled user index is built privately before commit-tree. Both removals and final additions are filtered to exact changed paths; conflicting unrelated paths cause rejection with the original branch, index bytes and commit objects unchanged. Hooks still inspect the pinned proposal, and selected whole files retain the original acceptance semantics."
+    },
+    {
+      "id": "description-identity",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Stable description IDs are independent of titles and Markdown filenames, so ordinary renaming preserves incoming relationships. Each non-root description names a parent and the passage it elaborates. The hierarchy has one root, no cycles, and variable depth. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "description-summaries",
+      "outcome": "revised",
+      "reason": "Distinguishes required summary maintenance in the agent workflow from the still-optional field in stored older content and drafts. Updated its summary and exact prose/skill selectors."
+    },
+    {
+      "id": "descriptions",
+      "outcome": "revised",
+      "reason": "The full account and summary now describe agents creating and maintaining summaries, while preserving readable older content without them. Updated the incoming summary-responsibility anchor."
+    },
+    {
+      "id": "desktop",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: Paired panes show a parent and active child together; implementation links place the owning description beside source. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "following-passages",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Underlined claims connect to child descriptions, other responsibilities, or implementation from either visible reading pane. One valid destination opens directly; overlapping connections offer only the destinations covering the selected segment. Navigation constructs the destination’s actual parent-and-child pair. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "formatted-descriptions",
+      "outcome": "revised",
+      "reason": "Image requests compare resolved tree identities and recheck the captured selection after loading; historical bytes remain isolated from current edits. Added and reviewed summary: Descriptions render Markdown, tables, task lists, code, LaTeX equations, and project images while retaining source positions for passage links and change highlights. KaTeX runs with resource-loading and trusted HTML disabled. Invalid equations remain visible with their source and error. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "impact",
+      "outcome": "revised",
+      "reason": "Baseline review recognition uses the same reconstructed hash as comparison and evidence; unrelated changes still prevent a reviewed match and seed the existing bounded frontier. Added and reviewed summary: Changed descriptions and linked implementation or tests identify responsibilities to investigate, using relationships from both the old and proposed content. Revised responsibilities expand to parents and dependencies; an unchanged decision stops expansion with a concrete reason. An unreviewed baseline requires an initial full examination. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "navigation",
+      "outcome": "revised",
+      "reason": "Authenticated navigation now gets a 30-second response window at both endpoints for cold historical loading; working snapshots also tolerate tracked-directory symlink replacements. Refresh handles missing source locally and working snapshots preserve symlink entries without following targets; project caching and selection behavior remain intact."
+    },
+    {
+      "id": "paired-descriptions",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Reading shows the active description with its immediate parent, using the same project revision for both. Sibling navigation retains the parent; going deeper advances the pair. The panes scroll independently, and unusable parent chains fall back to one pane. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "passages",
+      "outcome": "revised",
+      "reason": "Lexical path checks are shared, working reads require regular non-symlink files, historical reads inspect Git entries independently of working symlinks, and snapshots retain symlink blobs. Added and reviewed summary: A selector matches an exact nonempty quote, optionally disambiguated by immediately adjacent prefix or suffix text. Exactly one occurrence must match. Insertions before unchanged text preserve the target; changed quotes become stale and repeated matches remain ambiguous. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "preparation",
+      "outcome": "revised",
+      "reason": "Preparation validates each selected stored result and the completed review before writing its record or readiness, preventing a handoff that acceptance would reject on record shape. Redundant descendants of a selected parent are removed before filesystem validation and Git staging, so a tracked directory replaced by a symlink is captured atomically without reading its target. Invalid raw paths and standalone descendants through a symlink remain rejected. Directory selections are expanded before protecting historical records; both changed and deleted review files are rejected. Temporary indexes still preserve staging and exact checked content. Added and reviewed summary: Preparation combines selected whole files, reasoned impact decisions, valid links, and passing evidence for the exact content into an uncommitted proposal. A temporary index preserves unrelated staging. The check tree and final tree differ by the new review containing the investigation and copied evidence. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "project-loading",
+      "outcome": "revised",
+      "reason": "Historical result validation is shared with recording and preparation. Malformed records stay excluded, while runner test names are preserved consistently. Review decisions accept both stable IDs and loader-generated draft paths, while review/check record IDs retain their strict format. Verified a full repair of committed malformed metadata through preparation and acceptance. Review shapes, nested results, identities, and matching hashes are validated before consumption; malformed reviews become issues and do not hide descriptions. Added and reviewed summary: Loads descriptions, metadata, tests, and connections together from working files or one Git revision, accumulating structural and passage problems. Broken metadata and duplicate identities remain readable as explicit drafts; missing partners or unreadable prose are reported rather than invented. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "project-model",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: Descriptions, links, tests, and reviews are versioned together as ordinary project files. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "reader-content",
+      "outcome": "revised",
+      "reason": "The image IPC check compares the request with the resolved project tree and retains sender, project, content, and selection checks. Added and reviewed summary: Repository prose, equations, images, and source are displayed as content; raw HTML stays literal and external destinations cannot navigate the app. The sandboxed renderer uses a small checked preload interface. Node integration, new windows, and permission requests are disabled or denied. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "reader-controls",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: The title bar carries location and compact controls; each reading pane has its own summary toggle where a summary exists. Routine implemented and clean states are left unlabelled. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "reader-evidence",
+      "outcome": "revised",
+      "reason": "Evidence remains contextual; refreshed source handling clears unavailable code while preserving continued project and test updates. Added and reviewed summary: Only tests directly associated with a description appear beneath it or its open implementation. Expanding a row shows linked test code and evidence without running the test. Expanded rows refresh after edits, show broken links instead of stale code, and ignore late responses after navigation. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "relationships",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Implementation status distinguishes implemented, partial, and unimplemented intent; remaining work is separate from review approval. Implementation links connect claims to source, dependencies name promises relied on, references add context, and parent relations express elaboration. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "skill-installation",
+      "outcome": "revised",
+      "reason": "Added and reviewed summary: Installs the core skill and selected optional TDD supplement as repository-local files without choosing a workflow, rewriting project instructions, or committing changes. Recorded content hashes distinguish unchanged older installations from local edits and deletions. Explicit updates check all selected files and stop on conflicts before writing. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "source-reading",
+      "outcome": "revised",
+      "reason": "Unavailable open source clears text and highlights, shows a local problem, and can recover while description updates continue. Added and reviewed summary: An implementation link opens the whole source file beside its owning description, positioned at the quoted lines. Associated test code can expand below it; closing source restores paired reading. Line numbers and passage backgrounds retain context. Missing or ambiguous quotes are reported rather than silently retargeted. The full description and implementation contract are unchanged."
+    },
+    {
+      "id": "stratic",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: Stratic keeps a hierarchical account of a program’s responsibilities connected to implementation and tests. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    },
+    {
+      "id": "tree-overview",
+      "outcome": "unchanged",
+      "reason": "The existing summary and full account remain accurate: The hierarchy places main branches side by side and stacks their descendants vertically, with the active description highlighted. Adding summaries to related descriptions does not change this responsibility’s implementation or boundaries."
+    }
+  ],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "592a83f1a47032c19d3ed85a772bb76d7819911b",
+      "method": "node --test --test-reporter=tap test/*.test.ts; npm run typecheck; node src/cli.ts validate; node src/cli.ts skill status; git diff --check",
+      "environment": "macOS arm64, Node v24.16.0; unit tests outside sandbox for local sockets; disposable Git fixtures",
+      "outcome": "pass",
+      "evidence": "All 48 unit tests passed with no skips. New regressions reproduced staged-only descendant loss before the fix and now pass for acceptance and recovery before/after index publication. Conflicting ancestors and descendants are rejected with identical index bytes, unchanged HEAD and no new commit objects. Typecheck, structural validation, skill status and whitespace checks passed. Snapshot unchanged before/after. Desktop suite was not rerun for this acceptance-only follow-up; it passed in the preceding round.",
+      "tests": [
+        {
+          "id": "markdown-positions",
+          "outcome": "pass"
+        },
+        {
+          "id": "explicit-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-descendant-recovery",
+          "outcome": "pass"
+        },
+        {
+          "id": "unexpected-arguments",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-historical-files",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-regular-files",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-staging-conflicts",
+          "outcome": "pass"
+        },
+        {
+          "id": "exact-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-mutation-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "interruption",
+          "outcome": "pass"
+        },
+        {
+          "id": "drift-rejection",
+          "outcome": "pass"
+        },
+        {
+          "id": "bounded-diff",
+          "outcome": "pass"
+        },
+        {
+          "id": "selectors",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-replacement-recovery",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-workflow",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-installation",
+          "outcome": "pass"
+        },
+        {
+          "id": "worktree-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "impact-baseline",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-directory-symlinks",
+          "outcome": "pass"
+        },
+        {
+          "id": "summary-metadata",
+          "outcome": "pass"
+        },
+        {
+          "id": "terminated-acceptance",
+          "outcome": "pass"
+        },
+        {
+          "id": "independent-checks",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-layout",
+          "outcome": "pass"
+        },
+        {
+          "id": "tree-folds",
+          "outcome": "pass"
+        },
+        {
+          "id": "review-completeness",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-cold-navigation",
+          "outcome": "pass"
+        },
+        {
+          "id": "cli-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "project-images",
+          "outcome": "pass"
+        },
+        {
+          "id": "paragraph-changes",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-malformed-reviews",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-review-directories",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-runner-identities",
+          "outcome": "pass"
+        },
+        {
+          "id": "source-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-portable-review",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-failure",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-draft-repair",
+          "outcome": "pass"
+        },
+        {
+          "id": "stable-identity",
+          "outcome": "pass"
+        },
+        {
+          "id": "preparation-invalid-results",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-updates",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-resource-replacements",
+          "outcome": "pass"
+        },
+        {
+          "id": "acceptance-staged-descendants",
+          "outcome": "pass"
+        },
+        {
+          "id": "graph-history",
+          "outcome": "pass"
+        },
+        {
+          "id": "skill-boundaries",
+          "outcome": "pass"
+        },
+        {
+          "id": "withdraw-readiness",
+          "outcome": "pass"
+        },
+        {
+          "id": "draft-reading",
+          "outcome": "pass"
+        },
+        {
+          "id": "hook-message",
+          "outcome": "pass"
+        },
+        {
+          "id": "resilience-snapshot-symlinks",
+          "outcome": "pass"
+        }
+      ],
+      "id": "7c6ab21c-895c-43fa-af03-ac33fedd7bc1",
+      "recordedAt": "2026-09-15T09:48:02.445Z"
+    }
+  ],
+  "recordedAt": "2026-09-15T09:48:48.521Z",
+  "unmapped": [
+    {
+      "path": "scripts/reader-resilience-checks.ts",
+      "reason": "Imports and shared fixture setup support the linked desktop regressions. Inspected temporary repository creation, real UI calls, source restoration, image revision assertions, symlink/malformed-record setup, and transport clone preparation."
+    },
+    {
+      "path": "src/impact.ts",
+      "reason": "The new import selects shared review validation and reconstructed content binding; the removed parser loop is replaced by that linked implementation. Frontier expansion and unmapped-region logic remain unchanged."
+    },
+    {
+      "path": "src/project.ts",
+      "reason": "The new import supplies validated review history; the linked loader appends record issues to the existing project issue list without altering other loading contracts."
+    },
+    {
+      "path": "src/review-records.ts",
+      "reason": "Imports connect ordinary Git reads and isolated tree reconstruction to the linked record validators and content-binding function; no new external authority is introduced."
+    },
+    {
+      "path": "src/review.ts",
+      "reason": "Imports connect the shared result and review validators to recording and preparation. The linked reconciliation function removes affected old index entries before installing final tree leaves; the history re-export remains delegated to validated loading."
+    },
+    {
+      "path": "src/ui-channel.ts",
+      "reason": "The shared timeout helper gives authenticated navigation 30 seconds and retains three seconds for connection setup and current-selection reads. Both client and server call it; it adds no new session authority or protocol messages."
+    },
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "reason": "Reviewed fixture helpers for disposable repositories, staged-only descendants with deleted working copies, exact index and commit-tree assertions, resource replacements, and interruption simulation. Individual behavioral tests are linked to acceptance, safeguards, recovery, checks and preparation; setup/imports remain shared test scaffolding."
+    },
+    {
+      "path": "test/resilience.test.ts",
+      "reason": "Shared imports and fixture helpers support the six linked executable regression blocks; no independent product behavior lives in these uncovered setup lines."
+    }
+  ]
+}

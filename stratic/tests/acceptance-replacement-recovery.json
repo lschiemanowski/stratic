@@ -1,0 +1,21 @@
+{
+  "id": "acceptance-replacement-recovery",
+  "name": "Recovering accepted replacements",
+  "description": "Interruption after the directory replacement commit can recover index reconciliation without a second commit.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Recovery finishes directory replacement index reconciliation without another commit', t => {\n  const root = fixture(t); replacement(root, 'directory', 'symlink');\n  const { input } = proposal(root, ['resource']);\n  const prepared = prepare(root, ['resource'], input);\n  assert.throws(() => accept(root, prepared.id, { afterCommit: () => { throw new Error('Interrupted after commit'); } }), /Interrupted/);\n  const commit = head(root);\n  const recovered = accept(root, prepared.id);\n  assert.equal(recovered.recovered, true); assert.equal(head(root), commit);\n  completed(root, prepared.finalTree);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance-recovery",
+      "passage": {
+        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the exact affected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If those entries have changed since the interruption, it stops so the newer staged edits can be preserved. Unrelated entries, including descendants outside the accepted change, remain staged. Recovery removes obsolete accepted entries before adding replacements and can resume whether the index update was still pending or had already completed."
+      }
+    }
+  ]
+}

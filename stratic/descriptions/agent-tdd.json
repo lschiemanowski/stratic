@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "TDD applies when selected by the user or project; installing the skill alone does not activate it, and a task-specific choice overrides the default.",
+    "Refine a coherent behavior, then establish tests that fail for the intended missing behavior before implementing and refactoring. Preserve the failure evidence separately from final passing checks.",
+    "Choose further checks for the affected responsibilities and link tests to the claims they check. The core workflow still governs descriptions, summaries, review, and separately authorized acceptance."
   ]
 }

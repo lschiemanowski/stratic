@@ -28,9 +28,14 @@
       "to": {
         "path": "src/ui-channel.ts",
         "passage": {
-          "quote": "export async function requestUI(root: string, request: UIRequest): Promise<Selection> {\n  const info = readJson<{ socketPath: string; token: string }>(join(localDirectory(root), 'ui.json'));\n  return new Promise((resolve, reject) => {\n    const socket = createConnection(info.socketPath);\n    socket.setTimeout(3000, () => { socket.destroy(); reject(new Error('Desktop did not respond. Open this project in Stratic.')); });\n    let data = '';\n    socket.on('connect', () => socket.write(JSON.stringify({ token: info.token, request }) + '\\n'));\n    socket.on('error', reject);\n    let handled = false;\n    socket.on('data', async chunk => {\n      if (handled) return; data += chunk.toString(); if (data.length > 65536) { socket.destroy(); reject(new Error('UI response too large.')); } });\n    socket.on('end', () => {\n      try { const response = JSON.parse(data); if (!response.ok) throw new Error(response.error); resolve(response.value); }\n      catch (e) { reject(e); }\n    });\n  });\n}"
+          "quote": "export async function requestUI(root: string, request: UIRequest): Promise<Selection> {\n  const info = readJson<{ socketPath: string; token: string }>(join(localDirectory(root), 'ui.json'));\n  return new Promise((resolve, reject) => {\n    const socket = createConnection(info.socketPath);\n    socket.setTimeout(3000, () => { socket.destroy(); reject(new Error('Desktop did not respond in time. Check that this project is open in Stratic.')); });\n    let data = '';\n    socket.on('connect', () => {\n      socket.setTimeout(responseTimeout(request));\n      socket.write(JSON.stringify({ token: info.token, request }) + '\\n');\n    });\n    socket.on('error', reject);\n    let handled = false;\n    socket.on('data', async chunk => {\n      if (handled) return; data += chunk.toString(); if (data.length > 65536) { socket.destroy(); reject(new Error('UI response too large.')); } });\n    socket.on('end', () => {\n      try { const response = JSON.parse(data); if (!response.ok) throw new Error(response.error); resolve(response.value); }\n      catch (e) { reject(e); }\n    });\n  });\n}"
         }
       }
     }
+  ],
+  "summary": [
+    "Reads the active desktop\u2019s semantic selection: project, revision, and any selected description and passage.",
+    "Uses the worktree\u2019s existing session connection; unavailable sessions or timeouts are errors rather than reasons to launch a desktop.",
+    "Reading focus does not navigate, edit content, or grant review authority. Description prose is retrieved separately."
   ]
 }

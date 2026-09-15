@@ -14,7 +14,7 @@
     {
       "description": "acceptance-recovery",
       "passage": {
-        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the selected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If selected entries have changed since the interruption, it stops so those newer staged edits can be preserved."
+        "quote": "Before moving the branch, Stratic saves the commit identity, branch, and the exact affected index entries expected before and after reconciliation. When the recorded commit is already HEAD, resuming with the same review identity checks the branch and those entries, finishes index reconciliation, and clears readiness. If those entries have changed since the interruption, it stops so the newer staged edits can be preserved. Unrelated entries, including descendants outside the accepted change, remain staged. Recovery removes obsolete accepted entries before adding replacements and can resume whether the index update was still pending or had already completed."
       }
     },
     {

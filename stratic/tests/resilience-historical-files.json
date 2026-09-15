@@ -1,0 +1,21 @@
+{
+  "id": "resilience-historical-files",
+  "name": "Historical file isolation",
+  "description": "A committed regular file remains readable after its working file or parent becomes a symlink, while unsafe paths remain rejected.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Historical reads validate Git entries independently of working symlinks', t => {\n  const root = fixture(t), base = head(root), expected = readSource(root, 'src/queue.ts', base);\n  renameSync(join(root, 'src/queue.ts'), join(root, 'src/moved.ts'));\n  symlinkSync('moved.ts', join(root, 'src/queue.ts'));\n  assert.equal(readSource(root, 'src/queue.ts', base), expected);\n  assert.throws(() => readSource(root, 'src/queue.ts'), /Symbolic links/);\n  renameSync(join(root, 'src'), join(root, 'moved-src'));\n  symlinkSync('moved-src', join(root, 'src'));\n  assert.equal(readSource(root, 'src/queue.ts', base), expected);\n  assert.throws(() => readSource(root, '../outside', base), /Invalid repository path/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "passages",
+      "passage": {
+        "quote": "Repository reads constrain where those targets can point: paths must stay inside the project and displayed resources must be regular files within the size limit. Working reads reject symbolic links, directories, and special files such as named pipes before reading their contents. Historical reads validate the selected Git entry independently of the current filesystem, so replacing a working file or directory with a symlink does not hide its earlier regular-file version. A link cannot escape those boundaries merely because its quote is valid."
+      }
+    }
+  ]
+}

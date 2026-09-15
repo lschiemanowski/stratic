@@ -1,0 +1,21 @@
+{
+  "id": "preparation-invalid-results",
+  "name": "Rejecting malformed check records",
+  "description": "Invalid test outcomes cannot be recorded, and damaged local results are rejected before creating a ready review.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Malformed results cannot be recorded or generate readiness', t => {\n  const root = fixture(t); writeFileSync(join(root, 'resource'), 'new content');\n  const { input, result } = proposal(root, ['resource']);\n  const original = results(root);\n  for (const tests of [[{ id: '', outcome: 'pass' }], [{ id: '   ', outcome: 'pass' }], [null], [{ id: 'same', outcome: 'pass' }, { id: 'same', outcome: 'pass' }]]) {\n    assert.throws(() => recordCheck(root, { ...result, tests } as any));\n    assert.deepEqual(results(root), original);\n  }\n  // Local check storage may be damaged after recording: validate again before readiness.\n  writeJson(join(localDirectory(root), 'checks.json'), [{ ...result, recordedAt: null }]);\n  assert.throws(() => prepare(root, ['resource'], input), /Malformed|Invalid/);\n  assert.equal(ready(root), null);\n  assert.equal(reviewHistory(root).length, 0);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "preparation",
+      "passage": {
+        "quote": "The investigation names examined descriptions as revised or unchanged with reasons, accounts for the required impact and unmapped changed regions, and leaves no unresolved blocker. Preparation loads the selected content and checks those decisions against the before and after descriptions. It also requires valid structure and links, and at least one appropriate passing result for the exact content. These checks enforce consistency of the submitted review; they do not generate its semantic judgment. Before writing the review or readiness, preparation validates the selected result records and the assembled review using the same rules as historical loading and acceptance. Damaged local results therefore fail at preparation rather than creating an unusable handoff."
+      }
+    }
+  ]
+}

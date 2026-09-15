@@ -1,0 +1,21 @@
+{
+  "id": "acceptance-staged-descendants",
+  "name": "Preserving excluded staged descendants",
+  "description": "A file-to-directory proposal leaves an excluded staged-only descendant and its content intact.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Acceptance preserves staged-only descendants excluded from a file-to-directory proposal', t => {\n  const root = fixture(t), prepared = stagedDescendant(root);\n  accept(root, prepared.id);\n  descendantPreserved(root, prepared.finalTree);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "commit-safeguards",
+      "passage": {
+        "quote": "Before creating the commit, acceptance constructs a reconciled copy of the user\u2019s index. It removes and installs only exact paths changed between the recorded base and the accepted tree; selecting a parent does not authorize removing other staged descendants. For example, replacing a file with a directory can accept resource/included while preserving a separately staged resource/extra even if its working copy has been deleted. If an unrelated staged ancestor or descendant cannot coexist with an accepted replacement, acceptance rejects the conflict before creating any commit or changing the real index. After the branch update, the reconciled copy becomes the user\u2019s index. Working files remain intact. File selection is whole-file; selected files cannot carry a second, unreviewed version into acceptance."
+      }
+    }
+  ]
+}

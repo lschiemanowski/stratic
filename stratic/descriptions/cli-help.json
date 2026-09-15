@@ -20,5 +20,9 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Describes the executable’s commands, arguments, and project-selection convention as plain text.",
+    "Help is available before repository resolution, including outside a project; it does not inspect project readiness or change state."
   ]
 }

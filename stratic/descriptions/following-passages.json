@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Underlined claims connect to child descriptions, other responsibilities, or implementation from either visible reading pane.",
+    "One valid destination opens directly; overlapping connections offer only the destinations covering the selected segment. Navigation constructs the destination’s actual parent-and-child pair.",
+    "Formatting preserves source positions for links. Broken anchors remain inspectable, and failed targets never silently substitute another responsibility."
   ]
 }

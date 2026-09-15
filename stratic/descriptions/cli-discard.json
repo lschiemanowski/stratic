@@ -32,5 +32,9 @@
         }
       }
     }
+  ],
+  "summary": [
+    "The matching review identity withdraws readiness while retaining project edits and independent check results.",
+    "An unchanged generated review may be removed. If the recorded commit is already HEAD, acceptance must finish recovery instead of discarding it."
   ]
 }

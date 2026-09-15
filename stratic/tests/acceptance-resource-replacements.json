@@ -1,0 +1,21 @@
+{
+  "id": "acceptance-resource-replacements",
+  "name": "Accepting resource replacements",
+  "description": "Directory, symlink and regular-file transitions complete through acceptance, leave no readiness pending, and preserve unrelated staged and working changes.",
+  "code": [
+    {
+      "path": "test/acceptance-boundaries.test.ts",
+      "passage": {
+        "quote": "test('Acceptance reconciles directory, symlink and regular-file replacements while preserving unrelated staging', t => {\n  for (const [from, to] of [['directory', 'symlink'], ['symlink', 'directory'], ['directory', 'file'], ['file', 'directory']] as const) {\n    const root = fixture(t); replacement(root, from, to);\n    const { input } = proposal(root, ['resource']);\n    const prepared = prepare(root, ['resource'], input);\n    accept(root, prepared.id);\n    completed(root, prepared.finalTree);\n  }\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "acceptance",
+      "passage": {
+        "quote": "Commit hooks inspect the prepared index and may amend the commit message. Hook failure or a content change stops acceptance before the branch moves. The commit uses the pinned tree. Index reconciliation changes only exact paths added, modified, or deleted by that tree, removing obsolete entries before adding replacements. Other staged entries remain intact, including descendants of an accepted path whose working copies have been deleted. If a replacement would conflict with an unrelated staged ancestor or descendant, acceptance stops before creating a commit and leaves the index untouched."
+      }
+    }
+  ]
+}

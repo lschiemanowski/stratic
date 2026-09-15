@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Stable description IDs are independent of titles and Markdown filenames, so ordinary renaming preserves incoming relationships.",
+    "Each non-root description names a parent and the passage it elaborates. The hierarchy has one root, no cycles, and variable depth.",
+    "Stable identity does not protect edited passage text: changed anchors need updated selectors, and duplicate IDs are reported as problems."
   ]
 }

@@ -1,6 +1,7 @@
 import { git } from '../git.ts';
 import { loadProject } from '../project.ts';
 import type { Project, Ready, Review } from '../model.ts';
+import { matchesReviewContent } from '../review-records.ts';
 export interface Comparison {
   base: string; label: string; before: Record<string, string>;
   summariesBefore: Record<string, string[]>;
@@ -14,8 +15,7 @@ export function comparison(root: string, project: Project, pending: Ready | null
   else if (project.revision === 'working' && changed) base = git(root, ['rev-parse', 'HEAD']).trim();
   else {
     for (const { path, review } of [...history].sort((a, b) => String(b.review.recordedAt).localeCompare(String(a.review.recordedAt)))) {
-      if (!/^[a-f0-9]{40,64}$/.test(review.base) || !/^[a-f0-9]{40,64}$/.test(review.contentTree)) continue;
-      if (git(root, ['diff', '--name-only', review.contentTree, tree]).trim() === path) { base = review.base; label = 'Accepted changes'; break; }
+      if (matchesReviewContent(root, tree, path, review)) { base = review.base; label = 'Accepted changes'; break; }
     }
   }
   if (!base) return null;

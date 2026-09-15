@@ -2,7 +2,7 @@
 
 Checks provide evidence about a particular project snapshot. Stratic keeps that evidence close to the descriptions it concerns while using the project’s existing test and analysis tools. There is no separate Stratic test runner that decides what every change must execute.
 
-A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes.
+A result records the examined Git tree, the method used, the environment, the observed evidence, and an overall pass, fail, or inconclusive outcome. It may name individual test identities and outcomes when the execution establishes them. Each test appears at most once in that record; an empty individual list is appropriate for a typecheck or manual review without cataloged test outcomes. An individual result’s test identity is a nonempty string and can retain a runner’s name such as suite/test-case. It matches a catalog entry only by exact identity; this does not change the catalog’s identity rules. Recording, preparation, and historical review loading apply the same result validator.
 
 Results can be recorded before a review exists. Preparation selects passing records whose tree exactly matches the proposed content and copies them into the review. This preserves the evidence with the accepted change instead of depending on local check storage remaining available forever.
 
@@ -11,3 +11,5 @@ The test catalog is separate from execution results. A catalog entry says which 
 The desktop compares result content identities with the viewed project and labels evidence as current or earlier. It recognizes an accepted review’s content tree when the only added file is that review itself. This accounts for the review containing its own check evidence without treating arbitrary later edits as tested.
 
 A passing test remains distinct from a judgment about the descriptions’ accuracy. An earlier result may still inform the agent, but exact matching means it cannot simply be relabeled as a pass for changed content. The agent decides which checks are appropriate, runs or performs them, and records the actual observation.
+
+Accepted evidence remains usable after cloning or Git garbage collection. The reader removes only the review’s own newly added record from the selected tree and checks that the reconstructed tree has the recorded content hash. It does not depend on the temporary tree object made during preparation still being present. Other changed files prevent a match.

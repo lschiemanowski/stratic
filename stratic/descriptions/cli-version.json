@@ -20,5 +20,9 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Identifies the executable as Stratic v3, version 0.1.0, implementing project format 1.",
+    "Repository resolution still applies, but the response does not establish project validity, link accuracy, or readiness to accept a change."
   ]
 }

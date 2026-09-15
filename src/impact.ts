@@ -2,22 +2,14 @@ import { changedPaths, files, git, readSource } from './git.ts';
 import { inScope, loadProject } from './project.ts';
 import type { Project, ReviewInput } from './model.ts';
 import { resolvePassage } from './passages.ts';
+import { reviewHistory, matchesReviewContent } from './review-records.ts';
 
 export function impact(root: string, base: string, tree: string, decisions: ReviewInput['examined'] = []) {
   const before = loadProject(root, base), after = loadProject(root, tree);
   const paths = changedPaths(root, base, tree);
   const required = new Map<string, Set<string>>();
   const add = (id: string, reason: string) => { if (!required.has(id)) required.set(id, new Set()); required.get(id)!.add(reason); };
-  let reviewedBase = false;
-  for (const path of files(root, base).filter(p => p.startsWith('stratic/reviews/') && p.endsWith('.json'))) {
-    try {
-      const review = JSON.parse(readSource(root, path, base));
-      if (typeof review.contentTree === 'string' && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(review.contentTree)) {
-        const difference = changedPaths(root, review.contentTree, base);
-        if (difference.length === 1 && difference[0] === path) reviewedBase = true;
-      }
-    } catch { /* No usable review binding for this baseline. */ }
-  }
+  const reviewedBase = reviewHistory(root, base).some(({ path, review }) => matchesReviewContent(root, base, path, review));
   if (!reviewedBase) for (const p of [before, after]) for (const d of p.descriptions) {
     add(d.id, 'The baseline has no review for this exact content; establish its accuracy before relying on bounded impact.');
   }

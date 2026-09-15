@@ -9,7 +9,7 @@
   "realization": "implemented",
   "links": [],
   "summary": [
-    "The core skill guides description maintenance, investigation, evidence and separately authorized acceptance.",
+    "The core skill guides description and summary maintenance, investigation, evidence and separately authorized acceptance.",
     "Repository-local skills travel with the project; explicit updates preserve local edits and project instructions.",
     "Optional workflows such as TDD apply when selected by the user or project. Installation alone does not select them."
   ]

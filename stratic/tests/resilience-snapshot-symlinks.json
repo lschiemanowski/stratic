@@ -1,0 +1,27 @@
+{
+  "id": "resilience-snapshot-symlinks",
+  "name": "Symlink snapshots",
+  "description": "Snapshots retain symlink targets as Git entries without following them or changing the staging area; display reads remain restricted.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Snapshots preserve unrelated symlink entries without following their targets', t => {\n  const root = fixture(t), index = git(root, ['ls-files', '--stage']);\n  symlinkSync('missing-target', join(root, 'broken-link'));\n  symlinkSync('src', join(root, 'directory-link'));\n  symlinkSync('/outside-the-project', join(root, 'external-link'));\n  const tree = workingSnapshot(root);\n  for (const name of ['broken-link', 'directory-link', 'external-link']) assert.match(git(root, ['ls-tree', tree, '--', name]), /^120000 blob/);\n  assert.equal(git(root, ['show', `${tree}:external-link`]), '/outside-the-project');\n  assert.equal(git(root, ['ls-files', '--stage']), index);\n  assert.deepEqual(loadProject(root).issues, []);\n  assert.throws(() => snapshot(root, ['directory-link/queue.ts']), /Symbolic links/);\n  assert.throws(() => readSource(root, 'broken-link'), /Symbolic links/);\n  assert.throws(() => readSource(root, 'external-link', tree), /Not a regular file/);\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "navigation",
+      "passage": {
+        "quote": "If an open source file disappears or becomes unreadable, refresh clears its previous text and shows a local source problem while continuing to update descriptions and project issues. A later readable version can recover in the same pane. Working snapshots retain symbolic links as Git entries without following them, so an unrelated symlink does not prevent project browsing. This includes a tracked directory replaced by a symlink: its former descendants are covered by the selected replacement rather than read through the link."
+      }
+    },
+    {
+      "description": "passages",
+      "passage": {
+        "quote": "Repository reads constrain where those targets can point: paths must stay inside the project and displayed resources must be regular files within the size limit. Working reads reject symbolic links, directories, and special files such as named pipes before reading their contents. Historical reads validate the selected Git entry independently of the current filesystem, so replacing a working file or directory with a symlink does not hide its earlier regular-file version. A link cannot escape those boundaries merely because its quote is valid."
+      }
+    }
+  ]
+}

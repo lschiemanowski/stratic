@@ -8,6 +8,7 @@ import type { Passage } from './model.ts';
 
 export interface Selection { project: string; revision: string; description?: string; passage?: Passage }
 export type UIRequest = { action: 'current' } | { action: 'open'; description: string; revision?: string; passage?: Passage };
+const responseTimeout = (request: UIRequest) => request?.action === 'open' ? 30_000 : 3000;
 export async function serveUI(root: string, handler: (request: UIRequest) => Selection | Promise<Selection>) {
   const socketPath = join(tmpdir(), `stratic-${randomUUID().slice(0, 12)}.sock`), token = randomUUID();
   const infoPath = join(localDirectory(root), 'ui.json');
@@ -24,6 +25,7 @@ export async function serveUI(root: string, handler: (request: UIRequest) => Sel
       try {
         const message = JSON.parse(data.slice(0, data.indexOf('\n')));
         if (message.token !== token) throw new Error('Invalid UI session.');
+        socket.setTimeout(responseTimeout(message.request));
         socket.end(JSON.stringify({ ok: true, value: await handler(message.request) }) + '\n');
       } catch (e) { socket.end(JSON.stringify({ ok: false, error: (e as Error).message }) + '\n'); }
     });
@@ -39,9 +41,12 @@ export async function requestUI(root: string, request: UIRequest): Promise<Selec
   const info = readJson<{ socketPath: string; token: string }>(join(localDirectory(root), 'ui.json'));
   return new Promise((resolve, reject) => {
     const socket = createConnection(info.socketPath);
-    socket.setTimeout(3000, () => { socket.destroy(); reject(new Error('Desktop did not respond. Open this project in Stratic.')); });
+    socket.setTimeout(3000, () => { socket.destroy(); reject(new Error('Desktop did not respond in time. Check that this project is open in Stratic.')); });
     let data = '';
-    socket.on('connect', () => socket.write(JSON.stringify({ token: info.token, request }) + '\n'));
+    socket.on('connect', () => {
+      socket.setTimeout(responseTimeout(request));
+      socket.write(JSON.stringify({ token: info.token, request }) + '\n');
+    });
     socket.on('error', reject);
     let handled = false;
     socket.on('data', async chunk => {

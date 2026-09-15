@@ -1,0 +1,33 @@
+{
+  "id": "resilience-portable-review",
+  "name": "Accepted review portability",
+  "description": "A transport clone retains accepted comparisons and bounded impact without temporary preparation objects.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Accepted reviews retain comparison and bounded impact after a transport clone', t => {\n  const root = fixture(t), proposal = preparedRelease(root);\n  accept(root, proposal.id);\n  const clone = join(root, '..', 'clone');\n  git(root, ['clone', '--no-local', root, clone]);\n  assert.throws(() => git(clone, ['cat-file', '-t', proposal.contentTree]), /not a valid|could not get|bad object/);\n  const tree = revision(clone, 'HEAD');\n  const index = git(clone, ['ls-files', '--stage']);\n  const compare = comparison(clone, loadProject(clone, 'HEAD'), null, reviewHistory(clone, 'HEAD'), tree);\n  assert.equal(compare?.base, proposal.base);\n  assert.equal(compare?.label, 'Accepted changes');\n  assert.ok(compare?.before.commands);\n  assert.equal(git(clone, ['ls-files', '--stage']), index);\n  git(clone, ['prune', '--expire', 'now']);\n  assert.throws(() => git(clone, ['cat-file', '-t', proposal.contentTree]));\n  writeFileSync(join(clone, 'src/queue.ts'), readFileSync(join(clone, 'src/queue.ts'), 'utf8') + '\\n');\n  const changed = workingSnapshot(clone);\n  const bounded = impact(clone, head(clone), changed);\n  assert.equal(bounded.reviewedBase, true);\n  assert.deepEqual(bounded.frontier.map(f => f.id), ['lease-transitions']);\n  assert.equal(comparison(clone, loadProject(clone, changed), null, reviewHistory(clone, changed), changed), null, 'Later source changes do not match accepted content.');\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "checks",
+      "passage": {
+        "quote": "Accepted evidence remains usable after cloning or Git garbage collection. The reader removes only the review\u2019s own newly added record from the selected tree and checks that the reconstructed tree has the recorded content hash. It does not depend on the temporary tree object made during preparation still being present. Other changed files prevent a match."
+      }
+    },
+    {
+      "description": "impact",
+      "passage": {
+        "quote": "A reviewed baseline is recognized from its retained files: removing the newly added review record must reconstruct the exact content hash recorded in that review. This keeps bounded impact available after a normal clone, even when the temporary pre-review tree was not transferred. A malformed record or a different reconstructed hash cannot establish a reviewed baseline."
+      }
+    },
+    {
+      "description": "change-display",
+      "passage": {
+        "quote": "Recognizing an accepted change uses the files retained in Git: excluding the review\u2019s own newly added record must reproduce its recorded content hash. Comparison therefore survives a normal clone without relying on a temporary preparation tree, and unrelated later edits do not qualify as the accepted change."
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "resilience-draft-repair",
+  "name": "Reviewing repaired draft descriptions",
+  "description": "A committed malformed description receives a draft identity; restoring its metadata can be prepared, validated and accepted with that draft in the investigation.",
+  "code": [
+    {
+      "path": "test/resilience.test.ts",
+      "passage": {
+        "quote": "test('Repairing committed malformed metadata can review its draft identity and accept', t => {\n  const root = fixture(t), path = join(root, 'stratic/descriptions/storage.json');\n  const original = readFileSync(path, 'utf8');\n  writeFileSync(path, '{'); git(root, ['add', '-A']); git(root, ['commit', '-qm', 'Committed malformed metadata']);\n  const base = head(root);\n  const draft = loadProject(root).descriptions.find(d => d.path.endsWith('/storage.md'))!.id;\n  assert.equal(draft, 'draft:stratic/descriptions/storage.md');\n  writeFileSync(path, original);\n  const tree = snapshot(root, ['stratic/descriptions/storage.json']);\n  const frontier = impact(root, base, tree);\n  assert.ok(frontier.frontier.some(f => f.id === draft));\n  const result = recordCheck(root, { tree, method: 'Validate repaired fixture', outcome: 'pass', environment: 'Isolated test repository', evidence: 'Restored original metadata; loader reports zero issues.', tests: [] });\n  assert.deepEqual(loadProject(root).issues, []);\n  const proposal = prepare(root, ['stratic/descriptions/storage.json'], {\n    reviewer: 'regression', summary: 'Repair committed metadata', unresolved: [], resultIds: [result.id],\n    examined: frontier.frontier.map(f => ({ id: f.id, outcome: f.id === draft || f.id === 'storage' ? 'revised' : 'unchanged', reason: 'Restored the original stable identity and links; surrounding responsibilities remain accurate.' })),\n  });\n  assert.equal(reviewHistory(root).length, 1);\n  const accepted = accept(root, proposal.id);\n  assert.equal(head(root), accepted.commit);\n  assert.deepEqual(loadProject(root).issues, []);\n  assert.ok(reviewHistory(root)[0].review.examined.some(d => d.id === draft));\n});"
+      }
+    }
+  ],
+  "verifies": [
+    {
+      "description": "project-loading",
+      "passage": {
+        "quote": "Review files are also checked before they can supply a comparison baseline or test evidence. A record needs a matching file identity, valid content hashes and timestamps, examined decisions with reasons, and well-formed passing results tied to its content. Malformed JSON and invalid record shapes become project problems; they supply no evidence and do not hide otherwise readable descriptions. Examined descriptions may use either stable identities or the loader\u2019s draft identities when repairing committed malformed metadata. Review-file identities retain their stricter record-name rules. Result validation is shared with check recording and preparation, including support for nonempty runner test identities that need not be cataloged."
+      }
+    }
+  ]
+}

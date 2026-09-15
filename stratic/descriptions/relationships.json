@@ -20,5 +20,10 @@
         }
       }
     }
+  ],
+  "summary": [
+    "Implementation status distinguishes implemented, partial, and unimplemented intent; remaining work is separate from review approval.",
+    "Implementation links connect claims to source, dependencies name promises relied on, references add context, and parent relations express elaboration.",
+    "Validation checks relationship shapes and required reasons. Whether a dependency is real or an implementation claim is truthful remains a matter for investigation."
   ]
 }

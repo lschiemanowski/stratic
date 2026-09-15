@@ -370,11 +370,17 @@ async function refresh(force = false) {
     if (key !== loadedKey) { clearDetail(); tab = 'description'; loadedKey = key; }
     if (source) {
       const openedSource = source;
-      const body = await window.stratic.source(openedSource.path);
-      if (ticket !== sequence || source !== openedSource) return;
-      openedSource.body = body;
-      try { openedSource.range = resolvePassage(body, openedSource.passage); openedSource.problem = undefined; }
-      catch (e) { openedSource.range = undefined; openedSource.problem = (e as Error).message + ' Select the updated description passage to follow its current link.'; }
+      try {
+        const body = await window.stratic.source(openedSource.path);
+        if (ticket !== sequence || source !== openedSource) return;
+        openedSource.body = body;
+        try { openedSource.range = resolvePassage(body, openedSource.passage); openedSource.problem = undefined; }
+        catch (e) { openedSource.range = undefined; openedSource.problem = (e as Error).message + ' Select the updated description passage to follow its current link.'; }
+      } catch (e) {
+        if (ticket !== sequence || source !== openedSource) return;
+        openedSource.body = ''; openedSource.range = undefined;
+        openedSource.problem = 'Source unavailable: ' + (e as Error).message;
+      }
     }
     current = v; signature = next; render();
     if (v.selection.passage) document.querySelector('.active-description .selected')?.scrollIntoView({ block: 'center' });
