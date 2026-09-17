@@ -1,0 +1,23 @@
+{
+  "id": "5db74a4d-4061-4f60-9daa-5ceb467a0aca",
+  "base": "6b4d46bbfb417869056e7b1619193ed8cd928abf",
+  "contentTree": "88ddbbf26fe32dee268b3d45f50c49f7ff105188",
+  "reviewer": "Codex",
+  "summary": "Add README sections and show the tree overview beside the reader screenshot",
+  "examined": [],
+  "unresolved": [],
+  "results": [
+    {
+      "tree": "88ddbbf26fe32dee268b3d45f50c49f7ff105188",
+      "method": "Compare README text after removing added headings and replacing screenshot markup with the original; inspect image order, relative paths and widths; compare copied PNG bytes; node src/cli.ts validate; node src/cli.ts impact; git diff --check",
+      "outcome": "pass",
+      "environment": "Documentation-only checkout change",
+      "evidence": "All prior README prose and command text is unchanged. Added Stratic title and sections for Installation, Explore an example, Work with a coding agent, and Open the reader. HTML row puts the new tree screenshot left and existing reader screenshot right, each at 49 percent width with full-size links and alt text. Both PNG files resolve; new image is identical to the supplied 3420x2003 attachment. Structural validation and whitespace checks pass, impact has no frontier or unmapped paths, and before/after snapshots match. Browser rendering and runtime tests were not run.",
+      "tests": [],
+      "id": "b8bf0f42-f599-4e92-ab06-83dc5e7021b0",
+      "recordedAt": "2026-09-17T06:17:34.643Z"
+    }
+  ],
+  "recordedAt": "2026-09-17T06:17:51.790Z",
+  "unmapped": []
+}
