@@ -40,7 +40,7 @@ Follow linked passages to read more detail or inspect the code and tests alongsi
 an explanation. Use the arrow keys to move through the descriptions.
 
 
-To work with Stratic on a new project, give your coding agent this prompt:
+To work with `stratic` on a new project, give your coding agent this prompt:
 
 ```text
 Set up Stratic in the current working directory for our work together.
