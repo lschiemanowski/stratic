@@ -43,10 +43,10 @@ an explanation. Use the arrow keys to move through the descriptions.
 To work with `stratic` on a new project, give your coding agent this prompt:
 
 ```text
-Set up Stratic in the current working directory for our work together.
+Set up stratic in the current working directory for our work together.
 Initialize Git if needed. Run `stratic skill install`, then read
-.agents/skills/stratic/SKILL.md and Stratic's bundled
-docs/data-model.md. Initialize Stratic's project files with an unimplemented
+.agents/skills/stratic/SKILL.md and stratic's bundled
+docs/data-model.md. Initialize stratic's project files with an unimplemented
 placeholder root description, and make an initial commit of the setup files.
 Do not design or implement the program, or ask about its requirements yet.
 Confirm that setup is ready, then wait for me to start that discussion.
@@ -55,8 +55,8 @@ Confirm that setup is ready, then wait for me to start that discussion.
 To work in an existing codebase, you can use this prompt:
 
 ```text
-Set up Stratic in the current working directory. Run `stratic skill install`,
-then read .agents/skills/stratic/SKILL.md and Stratic's bundled docs/data-model.md.
+Set up stratic in the current working directory. Run `stratic skill install`,
+then read .agents/skills/stratic/SKILL.md and stratic's bundled docs/data-model.md.
 Inspect the code and tests, then create a small hierarchy explaining the program's
 purpose and responsibilities, with bullet summaries and links to relevant code
 and tests. Flag uncertain intent for discussion. Preserve the existing behavior
